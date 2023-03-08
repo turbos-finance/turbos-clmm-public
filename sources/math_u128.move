@@ -103,6 +103,41 @@ module turbos_clmm::math_u128 {
         }
     }
 
+    public fun leading_zeros(a: u128): u8 {
+        if (a == 0) {
+            return 128
+        };
+
+        let a1 = a & 0xFFFFFFFFFFFFFFFF;
+        let a2 = a >> 64;
+
+        if (a2 == 0) {
+            let bit = 64;
+
+            while (bit >= 1) {
+                let b = (a1 >> (bit - 1)) & 1;
+                if (b != 0) {
+                    break
+                };
+
+                bit = bit - 1;
+            };
+
+            return (64 - bit) + 64
+        } else {
+            let bit = 128;
+            while (bit >= 1) {
+                let b = (a >> (bit - 1)) & 1;
+                if (b != 0) {
+                    break
+                };
+                bit = bit - 1;
+            };
+
+            return 128 - bit
+        }
+    }
+
     #[test]
     fun test_overflowing_add() {
         let (m, o) = overflowing_add(10, 10);
@@ -163,4 +198,15 @@ module turbos_clmm::math_u128 {
         let (r, o) = overflowing_mul(MAX_U128, 10);
         assert!(r == 0xfffffffffffffffffffffffffffffff6 && o == true, 0);
     }
+
+    #[test]
+    fun test_leading_zeros() {
+        let one = leading_zeros(1u128);
+        let zero = leading_zeros(0u128);
+        let max = leading_zeros(MAX_U128);
+        assert!(one == 127, 0);
+        assert!(zero == 128, 0);
+        assert!(max == 0, 0);
+    }
+
 }

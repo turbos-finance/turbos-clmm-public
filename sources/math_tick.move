@@ -4,6 +4,7 @@
 module turbos_clmm::math_tick {
     use turbos_clmm::i32;
     use turbos_clmm::i128;
+    use turbos_clmm::math_u128;
     use turbos_clmm::full_math_u128;
 
     const MAX_U64: u64 = 0xffffffffffffffff;
@@ -16,7 +17,7 @@ module turbos_clmm::math_tick {
     const LOG_B_P_ERR_MARGIN_UPPER_X64: u128 = 15793534762490258745; // 2^-precision / log_2_b + 0.01
 
     public fun tick_index_from_sqrt_price(sqrt_price_x64: u128): i32::I32 {
-        let msb: u8 = 128 - leading_zeros_u128(sqrt_price_x64) - 1;
+        let msb: u8 = 128 - math_u128::leading_zeros(sqrt_price_x64) - 1;
         let log2p_integer_x32: i128::I128 = i128::shl(i128::sub(i128::from((msb as u128)), i128::from(64)), 32u8);
 
         let bit: i128::I128 = i128::from(0x8000_0000_0000_0000);
@@ -55,41 +56,6 @@ module turbos_clmm::math_tick {
         };
 
         result_tick
-    }
-
-    fun leading_zeros_u128(a: u128): u8 {
-        if (a == 0) {
-            return 128
-        };
-
-        let a1 = a & 0xFFFFFFFFFFFFFFFF;
-        let a2 = a >> 64;
-
-        if (a2 == 0) {
-            let bit = 64;
-
-            while (bit >= 1) {
-                let b = (a1 >> (bit - 1)) & 1;
-                if (b != 0) {
-                    break
-                };
-
-                bit = bit - 1;
-            };
-
-            return (64 - bit) + 64
-        } else {
-            let bit = 128;
-            while (bit >= 1) {
-                let b = (a >> (bit - 1)) & 1;
-                if (b != 0) {
-                    break
-                };
-                bit = bit - 1;
-            };
-
-            return 128 - bit
-        }
     }
 
     public fun sqrt_price_from_tick_index(tick: i32::I32) : u128 {
@@ -234,16 +200,6 @@ module turbos_clmm::math_tick {
         };
 
         ratio
-    }
-
-    #[test]
-    fun test_leading_zeros_u128() {
-        let r0 = leading_zeros_u128(1u128);
-        let r1 = leading_zeros_u128(0u128);
-        let r2 = leading_zeros_u128(123456789u128);
-        assert!(r0 == 127, 0);
-        assert!(r1 == 128, 0);
-        assert!(r2 == 101, 0);
     }
 
     #[test]
