@@ -18,6 +18,14 @@ module turbos_clmm::i32 {
         }
     }
 
+    public fun from_u32_neg(v: u32, is_neg: bool): I32 {
+        if (is_neg) {
+            neg_from(v)
+        } else {
+            from(v)
+        }
+    }
+
     public fun from_u32(v: u32): I32 {
         I32 {
             bits: v
