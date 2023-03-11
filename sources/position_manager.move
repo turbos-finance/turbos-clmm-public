@@ -61,8 +61,8 @@ module turbos_clmm::position_manager {
 		});
     }
 
-    public entry fun mint<CoinTypeA, CoinTypeB>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public entry fun mint<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
@@ -117,7 +117,7 @@ module turbos_clmm::position_manager {
 		dof::add<address, Position>(&mut positions.id, nft_address, position_m);
     }
 
-    public entry fun burn<CoinTypeA, CoinTypeB>(
+    public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
         positions: &mut Positions,
         nft: TurbosPositionNFT,
         ctx: &mut TxContext
@@ -128,8 +128,8 @@ module turbos_clmm::position_manager {
         burn_nft(nft, ctx);
     }
 
-    fun add_liquidity<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    fun add_liquidity<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>,
         coin_b: Coin<CoinTypeB>,
         fee: u32,
@@ -166,8 +166,8 @@ module turbos_clmm::position_manager {
         (liquidity_delta, amount_a, amount_b)
     }
 
-    public entry fun increase_liquidity<CoinTypeA, CoinTypeB>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public entry fun increase_liquidity<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
@@ -214,8 +214,8 @@ module turbos_clmm::position_manager {
         position.liquidity = position.liquidity + liquidity_delta;
     }
 
-    public entry fun decrease_liquidity<CoinTypeA, CoinTypeB>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public entry fun decrease_liquidity<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
 		nft: &mut TurbosPositionNFT,
 		liquidity: u128,
@@ -253,8 +253,8 @@ module turbos_clmm::position_manager {
         position.liquidity = position.liquidity - liquidity;
     }
 
-    public entry fun collect<CoinTypeA, CoinTypeB>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public entry fun collect<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
 		nft: &mut TurbosPositionNFT,
         amount_a_max: u64,
@@ -329,7 +329,7 @@ module turbos_clmm::position_manager {
 		object::delete(id)
 	}
 
-	fun merge_coin<CoinType>(
+	public fun merge_coin<CoinType>(
         coins: vector<Coin<CoinType>>, 
     ): Coin<CoinType> {
         let self = vector::pop_back(&mut coins);

@@ -28,10 +28,16 @@ module turbos_clmm::pool {
     const EInvildMintAmount: u64 = 4;
     const EInvildTick: u64 = 5;
     const EForPokesZeroPosition: u64 = 6;
+	const ESwapAmountSpecifiedZero: u64 = 7;
+	const EPoolLocked: u64 = 7;
+	const ESwapLessThanMinSqrtPrice: u64 = 8;
+	const ESwapGatherThanMaxSqrtPrice: u64 = 9;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
+	const MIN_SQRT_PRICE: u128 = 4295048016;
+	const MAX_SQRT_PRICE: u128 = 79226673515401279992447579055;
 
     struct Position has key, store {
         id: UID,
@@ -42,7 +48,7 @@ module turbos_clmm::pool {
         tokens_owed_b: u64,
     }
 
-    struct Pool<phantom CoinTypeA, phantom CoinTypeB> has key, store {
+    struct Pool<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
         id: UID,
         coin_a: Balance<CoinTypeA>,
         coin_b: Balance<CoinTypeB>,
@@ -65,12 +71,12 @@ module turbos_clmm::pool {
         //some init
     }
 
-    public fun deploy_pool<CoinTypeA, CoinTypeB>(
+    public fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
         fee: u32,
         tick_spacing: u32,
         sqrt_price: u128,
         ctx: &mut TxContext
-    ) :Pool<CoinTypeA, CoinTypeB> {
+    ) :Pool<CoinTypeA, CoinTypeB, FeeType> {
         let tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
         let max_liquidity_per_tick = tick::max_liquidity_per_tick(tick_spacing);
 
@@ -94,8 +100,8 @@ module turbos_clmm::pool {
         }
     }
 
-    public fun mint<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun mint<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>,
         coin_b: Coin<CoinTypeB>,
         owner: address,
@@ -139,8 +145,8 @@ module turbos_clmm::pool {
         (amount_a_u64, amount_b_u64)
     }
 
-    public fun burn<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun burn<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -167,8 +173,29 @@ module turbos_clmm::pool {
         (amount_a_u64, amount_b_u64)
     }
 
-    public fun collect<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun swap<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
+        a_for_b: bool,
+        amount_specified: I128,
+        sqrt_price_limit: u128,
+        ctx: &mut TxContext
+    ): u64 {
+        assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
+        assert!(pool.unlocked, EPoolLocked);
+        if (a_for_b) {
+            assert!(sqrt_price_limit < pool.sqrt_price && sqrt_price_limit > MIN_SQRT_PRICE, ESwapLessThanMinSqrtPrice);
+        } else {
+            assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
+        };
+
+        pool.unlocked = false;
+
+        128
+    }
+
+    public fun collect<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -201,8 +228,8 @@ module turbos_clmm::pool {
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
     /// @return amount_b the amount of token1 owed to the pool, negative if the pool should pay the recipient
-    public fun  modify_position<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun  modify_position<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -258,8 +285,8 @@ module turbos_clmm::pool {
         (amount_a, amount_b)
     }
 
-    public fun update_position<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun update_position<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -335,8 +362,8 @@ module turbos_clmm::pool {
         assert!(i32::lte(tick_upper_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
     }
 
-    public fun update_tick<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun update_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         tick_current_index: I32,
         liquidity_delta: I128,
@@ -346,24 +373,24 @@ module turbos_clmm::pool {
         false
     }
 
-    public fun clear_tick<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun clear_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         ctx: &mut TxContext,
     ): bool {
         false
     }
 
-    public fun flip_tick<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         ctx: &mut TxContext,
     ) {
 
     }
 
-    public fun get_fee_growth_inside<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun get_fee_growth_inside<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_lower_index: I32,
         tick_upper_index: I32,
         tick_current_index: I32,
@@ -372,8 +399,8 @@ module turbos_clmm::pool {
         (1,1)
     }
 
-    public fun update_position_metadata<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun update_position_metadata<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         position_key: String,
         liquidity_delta: I128,
         fee_growth_inside_a: u128,
@@ -405,8 +432,8 @@ module turbos_clmm::pool {
         }
     }
 
-    public fun get_position<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -414,8 +441,8 @@ module turbos_clmm::pool {
         get_position_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
     }
 
-    public fun get_position_mut<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position_mut<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -423,15 +450,15 @@ module turbos_clmm::pool {
         get_position_mut_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
     }
 
-    public fun get_position_by_key<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position_by_key<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): &Position {
         dof::borrow<String, Position>(&pool.id, key)
     }
 
-    public fun get_position_mut_by_key<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position_mut_by_key<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): &mut Position {
         dof::borrow_mut<String, Position>(&mut pool.id, key)
@@ -451,36 +478,36 @@ module turbos_clmm::pool {
         )
     }
 
-    public fun get_pool_fee<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_pool_fee<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
     ): u32 {
         pool.fee
     }
 
-    public fun get_pool_sqrt_price<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_pool_sqrt_price<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
     ): u128 {
         pool.sqrt_price
     }
 
-    public fun get_position_fee_growth_inside_a<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position_fee_growth_inside_a<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): u128 {
         let position = get_position_by_key(pool, key);
         position.fee_growth_inside_a
     }
 
-    public fun get_position_fee_growth_inside_b<CoinTypeA, CoinTypeB>(
-        pool: &Pool<CoinTypeA, CoinTypeB>,
+    public fun get_position_fee_growth_inside_b<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): u128 {
         let position = get_position_by_key(pool, key);
         position.fee_growth_inside_b
     }
 
-    public fun transfer_in<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun transfer_in<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>, 
         coin_b: Coin<CoinTypeB>, 
     ) {
@@ -488,8 +515,8 @@ module turbos_clmm::pool {
         balance::join(&mut pool.coin_b, coin::into_balance(coin_b));
     }
 
-    public fun transfer_out<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>,
+    public fun transfer_out<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         amount_a: u64, 
         amount_b: u64, 
         recipient: address,
@@ -507,8 +534,8 @@ module turbos_clmm::pool {
         };
     }
 
-    fun split_and_transfer<CoinTypeA, CoinTypeB>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB>, 
+    fun split_and_transfer<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         coin_a: Coin<CoinTypeA>, 
 		amount_a: u64,
 		coin_b: Coin<CoinTypeB>, 
