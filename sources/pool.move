@@ -12,6 +12,7 @@ module turbos_clmm::pool {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
+	use sui::dynamic_field as df;
     use turbos_clmm::tick::{Self, Tick};
     use sui::balance::{Self, Supply, Balance};
     use turbos_clmm::pool_factory;
@@ -20,6 +21,7 @@ module turbos_clmm::pool {
 	use turbos_clmm::math_liquidity;
 	use turbos_clmm::math_sqrt_price;
     use turbos_clmm::full_math_u128;
+	use turbos_clmm::math_bit;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -52,8 +54,8 @@ module turbos_clmm::pool {
         id: UID,
         coin_a: Balance<CoinTypeA>,
         coin_b: Balance<CoinTypeB>,
-        protocol_fees_coin_a: Balance<CoinTypeA>,
-        protocol_fees_coin_b: Balance<CoinTypeB>,
+        protocol_fees_a: u64,
+        protocol_fees_b: u64,
         sqrt_price: u128,
         tick_current_index: I32,
         tick_spacing: u32,
@@ -65,6 +67,7 @@ module turbos_clmm::pool {
         fee_growth_global_b: u128,
         liquidity: u128,
         user_position: VecMap<address, vector<ID>>,
+		tick_map: VecMap<I32, u256>,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -84,8 +87,8 @@ module turbos_clmm::pool {
             id: object::new(ctx), 
             coin_a: balance::zero<CoinTypeA>(),
             coin_b: balance::zero<CoinTypeB>(),
-            protocol_fees_coin_a: balance::zero<CoinTypeA>(),
-            protocol_fees_coin_b: balance::zero<CoinTypeB>(),
+            protocol_fees_a: 0,
+            protocol_fees_b: 0,
             sqrt_price: sqrt_price,
             tick_current_index: tick_current_index,
             tick_spacing: tick_spacing,
@@ -96,7 +99,8 @@ module turbos_clmm::pool {
             fee_growth_global_a: 0,
             fee_growth_global_b: 0,
             liquidity: 0,
-            user_position: vec_map::empty()
+            user_position: vec_map::empty(),
+			tick_map: vec_map::empty()
         }
     }
 
@@ -180,7 +184,7 @@ module turbos_clmm::pool {
         amount_specified: I128,
         sqrt_price_limit: u128,
         ctx: &mut TxContext
-    ): u64 {
+    ): (I128, I128) {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
         if (a_for_b) {
@@ -191,7 +195,289 @@ module turbos_clmm::pool {
 
         pool.unlocked = false;
 
-        128
+		//cache
+        let liquidity_start = pool.liquidity;
+		let fee_protocol = if (a_for_b) pool.fee_protocol % 16 else pool.fee_protocol >> 4;
+
+		let exact_input = i128::gt(amount_specified, i128::zero());
+
+		//state
+		let amount_specified_remaining = amount_specified;
+		let amount_calculated = i128::zero();
+		let sqrt_price = pool.sqrt_price;
+		let tick_current_index = pool.tick_current_index;
+		let fee_growth_global = if (a_for_b) pool.fee_growth_global_a else pool.fee_growth_global_b;
+		let protocol_fee = 0;
+		let liquidity = pool.liquidity;
+
+		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=0) {
+			let step_initialized = false;
+			let step_sqrt_price_start = sqrt_price;
+			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
+				pool,
+				tick_current_index,
+				a_for_b
+			);
+
+			if (i32::lt(step_tick_next_index, i32::neg_from(MAX_TICK_INDEX))) {
+				step_tick_next_index = i32::neg_from(MAX_TICK_INDEX);
+			} else if (i32::gt(step_tick_next_index, i32::from(MAX_TICK_INDEX))) {
+				step_tick_next_index = i32::from(MAX_TICK_INDEX);
+			};
+
+			let step_sqrt_price_next = math_tick::sqrt_price_from_tick_index(step_tick_next_index);
+			// compute values to swap to the target tick, price limit, or point where input/output amount is exhausted
+			let step_amount_in;
+			let step_amount_out;
+			let step_fee_amount;
+			let limit = if (a_for_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
+            let (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = compute_swap_step(
+                sqrt_price,
+                if (limit) sqrt_price_limit else step_sqrt_price_next,
+                liquidity,
+                amount_specified_remaining,
+                pool.fee
+            );
+
+			if (exact_input) {
+				amount_specified_remaining = i128::sub(amount_specified_remaining, i128::from(step_amount_in + step_fee_amount));
+				amount_calculated = i128::sub(amount_calculated, i128::from(step_amount_out));
+			} else {
+				amount_specified_remaining = i128::add(amount_specified_remaining, i128::from(step_amount_out));
+				amount_calculated = i128::add(amount_calculated, i128::from(step_amount_in + step_fee_amount));
+			};
+
+			if (fee_protocol > 0) {
+				let delta = step_fee_amount / (fee_protocol as u128);
+                step_fee_amount = step_fee_amount - delta;
+                protocol_fee = protocol_fee + delta;
+			};
+
+			if (sqrt_price == step_sqrt_price_next) {
+				if (step_initialized) {
+					let (fee_growth_global_a, fee_growth_global_b) = (pool.fee_growth_global_a, pool.fee_growth_global_b);
+					let liquidity_net = cross_tick(
+						pool,
+                        step_tick_next_index,
+                        if(a_for_b) fee_growth_global else fee_growth_global_a,
+                        if(a_for_b) fee_growth_global_b else fee_growth_global,
+						ctx
+                    );
+                    // if we're moving leftward, we interpret liquidityNet as the opposite sign
+                    // safe because liquidityNet cannot be type(int128).min
+                    if (a_for_b) {
+						liquidity_net = i128::neg(liquidity_net);
+					};
+
+                    liquidity = math_liquidity::add_delta(liquidity, liquidity_net);
+				};
+				tick_current_index = if (a_for_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
+			} else if (sqrt_price != step_sqrt_price_start) {
+				tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
+			};
+		};
+
+		pool.sqrt_price = sqrt_price;
+		if (!i32::eq(tick_current_index, pool.tick_current_index)) {
+			pool.tick_current_index = tick_current_index;
+		};
+
+		if (liquidity_start != liquidity) pool.liquidity = liquidity;
+
+		if (a_for_b) {
+			pool.fee_growth_global_a = fee_growth_global;
+			if (protocol_fee > 0) {
+				pool.protocol_fees_a = pool.protocol_fees_a + (protocol_fee as u64);
+			};
+		} else {
+			pool.fee_growth_global_b = fee_growth_global;
+			if (protocol_fee > 0) {
+				pool.protocol_fees_b = pool.protocol_fees_b + (protocol_fee as u64);
+			};
+		};
+
+		let (amount_a, amount_b) = if (a_for_b == exact_input) {
+            (i128::sub(amount_specified, amount_specified_remaining), amount_calculated)
+		} else {
+			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
+		};
+
+		// transfer
+
+		pool.unlocked = true;
+
+		(amount_a, amount_b)
+    }
+
+	public fun compute_swap_step(
+        sqrt_price_current: u128,
+        sqrt_price_target: u128,
+        liquidity: u128,
+        amount_remaining: I128,
+        fee_pips: u32
+    ): (u128, u128, u128, u128)
+    {
+        let a_for_b = sqrt_price_current >= sqrt_price_target;
+        let exact_in = i128::gte(amount_remaining, i128::zero());
+		let sqrt_pric_next: u128;
+		let amount_in: u128 = 0;
+		let amount_out: u128 = 0;
+		let amount_fee_amount: u128;
+		let fee_amount: u128;
+
+        if (exact_in) {
+            let amount_remaining_less_fee = full_math_u128::mul_div_floor(
+				i128::as_u128(amount_remaining), 
+				((1000000 - fee_pips) as u128), 
+				1000000
+			);
+            amount_in = if (a_for_b) {
+				math_sqrt_price::get_amount_a_delta_(sqrt_price_target, sqrt_price_current, liquidity, true)
+			} else {
+				math_sqrt_price::get_amount_b_delta_(sqrt_price_current, sqrt_price_target, liquidity, true)
+			};
+            if (amount_remaining_less_fee >= amount_in) {
+				sqrt_pric_next = sqrt_price_target;
+			} else {
+                sqrt_pric_next = math_sqrt_price::get_next_sqrt_price_from_input(
+                    sqrt_price_current,
+                    liquidity,
+                    amount_remaining_less_fee,
+                    a_for_b
+                );
+			};
+        } else {
+            amount_out = if (a_for_b) {
+                math_sqrt_price::get_amount_b_delta_(sqrt_price_target, sqrt_price_current, liquidity, false)
+			} else {
+				math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_price_target, liquidity, false)
+			};
+			if (i128::as_u128(amount_remaining) >= amount_out) {
+				sqrt_pric_next = sqrt_price_target;
+			} else {
+                sqrt_pric_next = math_sqrt_price::get_next_sqrt_price_from_output(
+                    sqrt_price_current,
+                    liquidity,
+                    i128::as_u128(amount_remaining),
+                    a_for_b
+                );
+			};
+        };
+
+        let max = sqrt_price_target == sqrt_pric_next;
+
+        // get the input/output amounts
+        if (a_for_b) {
+            amount_in = if (max && exact_in)
+                amount_in
+                else math_sqrt_price::get_amount_a_delta_(sqrt_pric_next, sqrt_price_current, liquidity, true);
+            amount_out = if (max && !exact_in)
+                amount_out
+                else math_sqrt_price::get_amount_b_delta_(sqrt_pric_next, sqrt_price_current, liquidity, false);
+        } else {
+            amount_in = if (max && exact_in)
+                amount_in
+                else math_sqrt_price::get_amount_b_delta_(sqrt_price_current, sqrt_pric_next, liquidity, true);
+            amount_out = if (max && !exact_in)
+                amount_out
+                else math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_pric_next, liquidity, false);
+        };
+
+        // cap the output amount to not exceed the remaining output amount
+        if (!exact_in && amount_out > i128::as_u128(amount_remaining)) {
+            amount_out = i128::as_u128(amount_remaining);
+        };
+
+        if (exact_in && sqrt_pric_next != sqrt_price_target) {
+            // we didn't reach the target, so take the remainder of the maximum input as fee
+            fee_amount = i128::as_u128(amount_remaining) - amount_in;
+        } else {
+            fee_amount = full_math_u128::mul_div_round(amount_in, (fee_pips as u128), ((1000000 - fee_pips)as u128));
+        };
+
+		(sqrt_pric_next, amount_in, amount_out, fee_amount)
+    }
+
+	public fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		tick_current_index: I32,
+		lte: bool
+	): (I32, bool) {
+		let compressed = i32::div(tick_current_index, i32::from(pool.tick_spacing));
+		let next: I32;
+		let initialized: bool;
+		if (lte) {
+            let (word_pos, bit_pos) = position_tick(compressed);
+			let word = get_or_init_tick_word(pool, word_pos);
+            // all the 1s at or to the right of the current bit_pos
+            let mask = (1u8 << bit_pos) - 1u8 + (1u8 << bit_pos);
+            let masked = word & (mask as u256);
+
+            // if there are no initialized ticks to the right of or at the current tick, return rightmost in the word
+            initialized = masked != 0;
+            // overflow/underflow is possible, but prevented externally by limiting both tickSpacing and tick
+            next = if (initialized) {
+				i32::mul(
+                	i32::sub(compressed, i32::from((bit_pos - math_bit::most_significant_bit(masked) as u32))), 
+					i32::from(pool.tick_spacing)
+				)
+			} else { 
+				i32::mul(
+					i32::sub(compressed, i32::from((bit_pos as u32))),
+					i32::from(pool.tick_spacing)
+				)
+			};
+        } else {
+            // start from the word of the next tick, since the current tick state doesn't matter
+            let (word_pos, bit_pos) = position_tick(i32::add(compressed, i32::from(1)));
+			let word = get_or_init_tick_word(pool, word_pos);
+            // all the 1s at or to the left of the bit_pos
+			// like ~((1 << bit_pos) - 1)
+            let mask = ((1u8 << bit_pos) - 1u8) ^ 0xFFu8;
+            let masked = word & (mask as u256);
+
+            // if there are no initialized ticks to the left of the current tick, return leftmost in the word
+            initialized = masked != 0;
+            // overflow/underflow is possible, but prevented externally by limiting both tickSpacing and tick
+			next = if (initialized) {
+				i32::mul(
+                	i32::add(
+						i32::add(compressed, i32::from(1u32)),
+						i32::from(((math_bit::least_significant_bit(masked) - bit_pos) as u32))
+					), 
+					i32::from(pool.tick_spacing)
+				)
+			} else { 
+				i32::mul(
+					i32::add(
+						i32::add(compressed, i32::from(1u32)),
+						i32::from(((255 - bit_pos) as u32))
+					),
+					i32::from(pool.tick_spacing)
+				)
+			};
+        };
+
+		(next, initialized)
+	}
+
+	public fun position_tick(tick: I32): (I32, u8) {
+        let word_pos = i32::shr(tick, 8);
+        let bit_pos = (i32::as_u32(i32::mod(tick, i32::from(256))) as u8);
+
+		(word_pos, bit_pos)
+    }
+
+	public fun get_or_init_tick_word<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		word_pos: I32
+	): u256 {
+		if (!vec_map::contains(&pool.tick_map, &word_pos)) {
+			vec_map::insert(&mut pool.tick_map, word_pos, 0u256);
+			0u256
+		} else {
+			*vec_map::get(& pool.tick_map, &word_pos)
+		}
     }
 
     public fun collect<CoinTypeA, CoinTypeB, FeeType>(
@@ -371,6 +657,17 @@ module turbos_clmm::pool {
         ctx: &mut TxContext,
     ): bool {
         false
+    }
+
+	public fun cross_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32,
+        fee_growth_global_a: u128,
+		fee_growth_global_b: u128,
+        ctx: &mut TxContext,
+    ): I128 {
+		
+        i128::zero()
     }
 
     public fun clear_tick<CoinTypeA, CoinTypeB, FeeType>(
@@ -566,50 +863,4 @@ module turbos_clmm::pool {
             );
         };
     }
-
-    // public fun mint(
-    //     owner: address,
-    //     tick_lower_index: I32,
-    //     tick_upper_index: I32,
-    //     amount: u128,
-    // ){
-       
-    // }
-
-    // public fun burn(
-    //     owner: address,
-    //     tick_lower_index: I32,
-    //     tick_upper_index: I32,
-    //     amount: u128,
-    // ){
-    // }
-
-    // public fun swap(
-    //     owner: address,
-    //     a_for_b: bool,
-    //     amount_specified: u128,
-    //     sqrt_price_limit: u128,
-    // ){
-        
-    // }
-
-    // public fun collect(
-    //     owner: address,
-    //     tick_lower_index: I32,
-    //     tick_upper_index: I32,
-    //     amount_a_requested: u128,
-    //     amount_b_requested: u128,
-    // ){
-        
-    // }
-
-    // public fun update_position(
-    //     owner: address,
-    //     tick_lower_index: I32,
-    //     tick_upper_index: I32,
-    //     tick_current_index: I32,
-    //     liquidity_delta: I128,
-    // ) {
-    // }
-    
 }

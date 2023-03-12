@@ -57,7 +57,7 @@ module turbos_clmm::pool_factory {
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
 		let tick_spacing = vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
 
-		let pool = pool::deploy_pool<CoinTypeA,CoinTypeB,FeeType>(
+		let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
             fee,
             *tick_spacing,
             sqrt_price,
