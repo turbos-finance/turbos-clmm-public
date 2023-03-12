@@ -4,8 +4,8 @@
 module turbos_clmm::fee500bps {
 
 	use sui::transfer;
-	use sui::tx_context::{Self, TxContext};
-	use turbos_clmm::fee::{Self, Fee};
+	use sui::tx_context::{TxContext};
+	use turbos_clmm::fee::{Self};
 
 	struct FEE500BPS has drop {}
 	
@@ -18,4 +18,10 @@ module turbos_clmm::fee500bps {
 
 		transfer::freeze_object(fee);
     }
+
+	#[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init(FEE500BPS{}, ctx);
+    }
+
 }

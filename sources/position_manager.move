@@ -3,24 +3,19 @@
 
 module turbos_clmm::position_manager {
 	use std::vector;
-    use sui::vec_map::{Self, VecMap};
     use sui::transfer;
-    use std::string::{Self, String, utf8};
-    use turbos_clmm::i32::{Self, I32};
-    use turbos_clmm::i128::{Self, I128};
-    use sui::table::{Self, Table};
-    use turbos_clmm::string_tools;
-    use sui::object::{Self, UID, ID};
+    use std::string::{String, utf8};
+    use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
-    use turbos_clmm::pool::{Self, Pool};
 	use sui::transfer::transfer;
-	use sui::coin::{Self, Coin};
-	use sui::balance::{Self, Balance, Supply};
+	use sui::coin::{Coin};
 	use sui::pay;
+    use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::full_math_u128;
     use turbos_clmm::math_liquidity;
     use turbos_clmm::math_tick;
+    use turbos_clmm::pool::{Self, Pool};
     
     const Q64: u128 = 0x10000000000000000;
     
@@ -66,7 +61,6 @@ module turbos_clmm::position_manager {
 		positions: &mut Positions,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
-		fee: u32,
 		tick_lower_index: u32,
 		tick_lower_index_is_neg: bool,
         tick_upper_index: u32,
@@ -76,7 +70,7 @@ module turbos_clmm::position_manager {
         amount_a_min: u64,
         amount_b_min: u64,
         recipient: address,
-        deadline: u128,
+        _deadline: u128,
 		ctx: &mut TxContext
     ) {
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
@@ -89,7 +83,6 @@ module turbos_clmm::position_manager {
 			pool,
 			merge_coin<CoinTypeA>(coins_a),
 			merge_coin<CoinTypeB>(coins_b),
-			fee,
 			owner,
 			tick_lower_index_i32,
 			tick_upper_index_i32,
@@ -120,19 +113,18 @@ module turbos_clmm::position_manager {
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
         positions: &mut Positions,
         nft: TurbosPositionNFT,
-        ctx: &mut TxContext
+        _ctx: &mut TxContext
     ) {
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_a == 0, EPositionNotCleared);
-        burn_nft(nft, ctx);
+        burn_nft(nft);
     }
 
     fun add_liquidity<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>,
         coin_b: Coin<CoinTypeB>,
-        fee: u32,
         recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -176,7 +168,7 @@ module turbos_clmm::position_manager {
         amount_b_desired: u128,
         amount_a_min: u64,
         amount_b_min: u64,
-        deadline: u128,
+        _deadline: u128,
 		ctx: &mut TxContext
     ) {
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
@@ -184,13 +176,11 @@ module turbos_clmm::position_manager {
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
-        let fee = pool::get_pool_fee(pool);
 
 		let (liquidity_delta, amount_a, amount_b) = add_liquidity(
 			pool,
 			merge_coin<CoinTypeA>(coins_a),
 			merge_coin<CoinTypeB>(coins_b),
-			fee,
 			owner,
 			position.tick_lower_index,
 			position.tick_upper_index,
@@ -221,7 +211,7 @@ module turbos_clmm::position_manager {
 		liquidity: u128,
         amount_a_min: u64,
         amount_b_min: u64,
-        deadline: u128,
+        _deadline: u128,
 		ctx: &mut TxContext
     ) {
         let nft_address = object::id_address(nft);
@@ -260,7 +250,7 @@ module turbos_clmm::position_manager {
         amount_a_max: u64,
         amount_b_max: u64,
         recipient: address,
-        deadline: u128,
+        _deadline: u128,
 		ctx: &mut TxContext
     ) {
         let nft_address = object::id_address(nft);
@@ -294,7 +284,7 @@ module turbos_clmm::position_manager {
             if (amount_b_max > tokens_owed_b) tokens_owed_b else amount_b_max
         );
 
-        let (amount_a, amount_b) = pool::collect(
+        pool::collect(
             pool,
             recipient,
             position.tick_lower_index,
@@ -324,7 +314,7 @@ module turbos_clmm::position_manager {
 		nft_address
 	}
 
-	fun burn_nft(nft: TurbosPositionNFT, ctx: &mut TxContext) {
+	fun burn_nft(nft: TurbosPositionNFT) {
 		let TurbosPositionNFT { id, img_url: _} = nft;
 		object::delete(id)
 	}

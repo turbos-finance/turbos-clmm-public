@@ -2,21 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::pool {
-	use turbos_clmm::math_tick;
     use sui::transfer;
     use std::string::{Self, String};
-	use turbos_clmm::i32::{Self, I32};
-	use turbos_clmm::i128::{Self, I128};
-	use sui::table::{Self, Table};
-    use turbos_clmm::string_tools;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
 	use sui::dynamic_field as df;
-    use sui::balance::{Self, Supply, Balance};
-    use turbos_clmm::pool_factory;
+    use sui::balance::{Self, Balance};
     use sui::vec_map::{Self, VecMap};
     use sui::coin::{Self, Coin};
+	use turbos_clmm::math_tick;
+    use turbos_clmm::string_tools;
+	use turbos_clmm::i32::{Self, I32};
+	use turbos_clmm::i128::{Self, I128};
 	use turbos_clmm::math_liquidity;
 	use turbos_clmm::math_sqrt_price;
     use turbos_clmm::full_math_u128;
@@ -80,7 +78,7 @@ module turbos_clmm::pool {
 		tick_map: VecMap<I32, u256>,
     }
 
-    fun init(ctx: &mut TxContext) {
+    fun init(_ctx: &mut TxContext) {
         //some init
     }
 
@@ -154,7 +152,7 @@ module turbos_clmm::pool {
         let balance_b_current = balance::value(&pool.coin_b);
 
         assert!(balance_a_before + amount_a_u64 <= balance_a_current, EInvildMintAmount);
-        assert!(balance_b_current + amount_b_u64 <= balance_b_current, EInvildMintAmount);
+        assert!(balance_b_before + amount_b_u64 <= balance_b_current, EInvildMintAmount);
 
         (amount_a_u64, amount_b_u64)
     }
@@ -189,7 +187,7 @@ module turbos_clmm::pool {
 
     public fun swap<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-        recipient: address,
+        _recipient: address,
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
@@ -221,7 +219,6 @@ module turbos_clmm::pool {
 		let liquidity = pool.liquidity;
 
 		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=0) {
-			let step_initialized = false;
 			let step_sqrt_price_start = sqrt_price;
 			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
 				pool,
@@ -241,7 +238,7 @@ module turbos_clmm::pool {
 			let step_amount_out;
 			let step_fee_amount;
 			let limit = if (a_for_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
-            let (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = compute_swap_step(
+            (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = compute_swap_step(
                 sqrt_price,
                 if (limit) sqrt_price_limit else step_sqrt_price_next,
                 liquidity,
@@ -261,6 +258,10 @@ module turbos_clmm::pool {
 				let delta = step_fee_amount / (fee_protocol as u128);
                 step_fee_amount = step_fee_amount - delta;
                 protocol_fee = protocol_fee + delta;
+			};
+
+			if (liquidity > 0) {
+				fee_growth_global = fee_growth_global + full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
 			};
 
 			if (sqrt_price == step_sqrt_price_next) {
@@ -332,7 +333,6 @@ module turbos_clmm::pool {
 		let sqrt_pric_next: u128;
 		let amount_in: u128 = 0;
 		let amount_out: u128 = 0;
-		let amount_fee_amount: u128;
 		let fee_amount: u128;
 
         if (exact_in) {
@@ -602,7 +602,6 @@ module turbos_clmm::pool {
         liquidity_delta: I128,
         ctx: &mut TxContext,
     ) {
-        let position = get_position(pool, owner, tick_lower_index, tick_upper_index);
         let tick_current_index = pool.tick_current_index;
 
         // if we need to update the ticks, do it
@@ -730,7 +729,7 @@ module turbos_clmm::pool {
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         index: I32
     ): &Tick {
-        ///let key = get_tick_index_string(index);
+        //let key = get_tick_index_string(index);
         assert!(df::exists_(&pool.id, index), TickNotFound);
         let tick = df::borrow<I32, Tick>(&pool.id, index);
 
@@ -777,7 +776,7 @@ module turbos_clmm::pool {
     public fun clear_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
-        ctx: &mut TxContext,
+        _ctx: &mut TxContext,
     ) {
         let tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
 		tick.liquidity_gross = 0;
@@ -790,7 +789,7 @@ module turbos_clmm::pool {
     public fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
-        ctx: &mut TxContext,
+        _ctx: &mut TxContext,
     ) {
 		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
 		assert!(i32::eq(next, i32::zero()), EInvildTickIndex); // ensure that the tick is spaced
@@ -805,7 +804,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         tick_current_index: I32,
-        ctx: &mut TxContext,
+        _ctx: &mut TxContext,
     ): (u128, u128) {
 		let tick_lower = get_tick(pool, tick_lower_index);
 		let tick_upper = get_tick(pool, tick_upper_index);
@@ -843,7 +842,7 @@ module turbos_clmm::pool {
         liquidity_delta: I128,
         fee_growth_inside_a: u128,
         fee_growth_inside_b: u128,
-        ctx: &mut TxContext,
+        _ctx: &mut TxContext,
     ) {
         let position = get_position_mut_by_key(pool, position_key);
 
@@ -982,7 +981,7 @@ module turbos_clmm::pool {
     ) {
         let left_a = coin::split(&mut coin_a, amount_a, ctx);
 
-        let left_b = coin::split(&mut coin_b, amount_a, ctx);
+        let left_b = coin::split(&mut coin_b, amount_b, ctx);
 
 		transfer_in(pool, left_a, left_b);
 

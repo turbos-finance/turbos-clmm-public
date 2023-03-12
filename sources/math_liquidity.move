@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::math_liquidity {
-    use turbos_clmm::math_u128;
     use turbos_clmm::full_math_u128;
     use turbos_clmm::i128::{Self, I128};
 

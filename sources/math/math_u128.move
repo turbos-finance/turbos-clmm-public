@@ -138,6 +138,22 @@ module turbos_clmm::math_u128 {
         }
     }
 
+    /// Return the value of a base raised to a power
+    public fun pow(base: u128, exponent: u8): u128 {
+        let res = 1;
+        while (exponent >= 1) {
+            if (exponent % 2 == 0) {
+                base = base * base;
+                exponent = exponent / 2;
+            } else {
+                res = res * base;
+                exponent = exponent - 1;
+            }
+        };
+
+        res
+    }
+
     #[test]
     fun test_overflowing_add() {
         let (m, o) = overflowing_add(10, 10);

@@ -4,8 +4,7 @@
 module turbos_clmm::fee {
 
 	use sui::object::{Self, UID};
-	use sui::transfer;
-	use sui::tx_context::{Self, TxContext};
+	use sui::tx_context::{TxContext};
 
 	const EBadWitness: u64 = 0;
 	
@@ -14,7 +13,7 @@ module turbos_clmm::fee {
         fee: u32
     }
 
-	fun init(ctx: &mut TxContext) {
+	fun init(_ctx: &mut TxContext) {
     }
 
 	public fun create_fee<T: drop>(
