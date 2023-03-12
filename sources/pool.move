@@ -13,7 +13,6 @@ module turbos_clmm::pool {
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
 	use sui::dynamic_field as df;
-    use turbos_clmm::tick::{Self, Tick};
     use sui::balance::{Self, Supply, Balance};
     use turbos_clmm::pool_factory;
     use sui::vec_map::{Self, VecMap};
@@ -31,15 +30,26 @@ module turbos_clmm::pool {
     const EInvildTick: u64 = 5;
     const EForPokesZeroPosition: u64 = 6;
 	const ESwapAmountSpecifiedZero: u64 = 7;
-	const EPoolLocked: u64 = 7;
-	const ESwapLessThanMinSqrtPrice: u64 = 8;
-	const ESwapGatherThanMaxSqrtPrice: u64 = 9;
+	const EPoolLocked: u64 = 8;
+	const ESwapLessThanMinSqrtPrice: u64 = 9;
+	const ESwapGatherThanMaxSqrtPrice: u64 = 10;
+	const EPoolOverflow: u64 = 11;
+	const EInvildTickIndex: u64 = 12;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
 	const MIN_SQRT_PRICE: u128 = 4295048016;
 	const MAX_SQRT_PRICE: u128 = 79226673515401279992447579055;
+
+	struct Tick has key, store {
+		id: UID,
+        liquidity_gross: u128,
+        liquidity_net: I128,
+        fee_growth_outside_a: u128,
+		fee_growth_outside_b: u128,
+        initialized: bool,
+    }
 
     struct Position has key, store {
         id: UID,
@@ -81,7 +91,7 @@ module turbos_clmm::pool {
         ctx: &mut TxContext
     ) :Pool<CoinTypeA, CoinTypeB, FeeType> {
         let tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
-        let max_liquidity_per_tick = tick::max_liquidity_per_tick(tick_spacing);
+        let max_liquidity_per_tick = math_tick::max_liquidity_per_tick(tick_spacing);
 
         Pool {
             id: object::new(ctx), 
@@ -263,8 +273,8 @@ module turbos_clmm::pool {
                         if(a_for_b) fee_growth_global_b else fee_growth_global,
 						ctx
                     );
-                    // if we're moving leftward, we interpret liquidityNet as the opposite sign
-                    // safe because liquidityNet cannot be type(int128).min
+                    // if we're moving leftward, we interpret liquidity_net as the opposite sign
+                    // safe because liquidity_net cannot be type(int128).min
                     if (a_for_b) {
 						liquidity_net = i128::neg(liquidity_net);
 					};
@@ -408,7 +418,8 @@ module turbos_clmm::pool {
 		let initialized: bool;
 		if (lte) {
             let (word_pos, bit_pos) = position_tick(compressed);
-			let word = get_or_init_tick_word(pool, word_pos);
+			try_init_tick_word(pool, word_pos);
+			let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the right of the current bit_pos
             let mask = (1u8 << bit_pos) - 1u8 + (1u8 << bit_pos);
             let masked = word & (mask as u256);
@@ -430,7 +441,8 @@ module turbos_clmm::pool {
         } else {
             // start from the word of the next tick, since the current tick state doesn't matter
             let (word_pos, bit_pos) = position_tick(i32::add(compressed, i32::from(1)));
-			let word = get_or_init_tick_word(pool, word_pos);
+			try_init_tick_word(pool, word_pos);
+			let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the left of the bit_pos
 			// like ~((1 << bit_pos) - 1)
             let mask = ((1u8 << bit_pos) - 1u8) ^ 0xFFu8;
@@ -468,16 +480,27 @@ module turbos_clmm::pool {
 		(word_pos, bit_pos)
     }
 
-	public fun get_or_init_tick_word<CoinTypeA, CoinTypeB, FeeType>(
+	public fun try_init_tick_word<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
-	): u256 {
+	) {
 		if (!vec_map::contains(&pool.tick_map, &word_pos)) {
 			vec_map::insert(&mut pool.tick_map, word_pos, 0u256);
-			0u256
-		} else {
-			*vec_map::get(& pool.tick_map, &word_pos)
-		}
+		};
+    }
+
+	public fun get_tick_word<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+		word_pos: I32
+	): u256 {
+		*vec_map::get(& pool.tick_map, &word_pos)
+    }
+
+	public fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		word_pos: I32
+	): &mut u256 {
+		vec_map::get_mut(&mut pool.tick_map, &word_pos)
     }
 
     public fun collect<CoinTypeA, CoinTypeB, FeeType>(
@@ -648,7 +671,7 @@ module turbos_clmm::pool {
         assert!(i32::lte(tick_upper_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
     }
 
-    public fun update_tick<CoinTypeA, CoinTypeB, FeeType>(
+     public fun update_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         tick_current_index: I32,
@@ -656,7 +679,79 @@ module turbos_clmm::pool {
         is_upper: bool,
         ctx: &mut TxContext,
     ): bool {
-        false
+        let tick;
+		let fee_growth_global_a = pool.fee_growth_global_a;
+		let fee_growth_global_b = pool.fee_growth_global_b;
+		let max_liquidity_per_tick = pool.max_liquidity_per_tick;
+		if (!df::exists_(&pool.id, tick_index)) {
+			tick = init_tick(pool, tick_index, ctx);
+		} else {
+			tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+		};
+
+        let liquidity_gross_before = tick.liquidity_gross;
+        let liquidity_gross_after = math_liquidity::add_delta(liquidity_gross_before, liquidity_delta);
+
+        assert!(liquidity_gross_after <= max_liquidity_per_tick, EPoolOverflow);
+
+        let flipped = (liquidity_gross_after == 0) != (liquidity_gross_before == 0);
+
+        if (liquidity_gross_before == 0) {
+            // by convention, we assume that all growth before a tick was initialized happened _below_ the tick
+            if (i32::lte(tick_index, tick_current_index)) {
+                tick.fee_growth_outside_a = fee_growth_global_a;
+                tick.fee_growth_outside_b = fee_growth_global_b;
+            };
+            tick.initialized = true;
+        };
+
+        tick.liquidity_gross = liquidity_gross_after;
+
+        // when the lower (upper) tick is crossed left to right (right to left), liquidity must be added (removed)
+        tick.liquidity_net = if (is_upper) {
+			i128::sub(tick.liquidity_net, liquidity_delta)
+		} else {
+			i128::add(tick.liquidity_net, liquidity_delta)
+		};
+
+		flipped
+    }
+
+    public fun get_tick_index_string(index: I32): String {
+        let str = string_tools::u64_to_string((i32::as_u32(index) as u64));
+        if (i32::is_neg(index)) {
+            string::append(&mut string::utf8(b"-"), str)
+        };
+
+        str
+    }
+
+	public fun get_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        index: I32
+    ): &Tick {
+        ///let key = get_tick_index_string(index);
+        assert!(df::exists_(&pool.id, index), TickNotFound);
+        let tick = df::borrow<I32, Tick>(&pool.id, index);
+
+        tick
+	}
+
+	public fun init_tick<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        index: I32,
+		ctx: &mut TxContext,
+	): &mut Tick {
+        df::add(&mut pool.id, index, Tick {
+			id: object::new(ctx),
+			liquidity_gross: 0,
+        	liquidity_net: i128::zero(),
+        	fee_growth_outside_a: 0,
+			fee_growth_outside_b: 0,
+        	initialized: false,
+		});
+
+		df::borrow_mut<I32, Tick>(&mut pool.id, index)
     }
 
 	public fun cross_tick<CoinTypeA, CoinTypeB, FeeType>(
@@ -666,16 +761,30 @@ module turbos_clmm::pool {
 		fee_growth_global_b: u128,
         ctx: &mut TxContext,
     ): I128 {
-		
-        i128::zero()
+		let tick;
+		if (!df::exists_(&pool.id, tick_index)) {
+			tick = init_tick(pool, tick_index, ctx);
+		} else {
+			tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+		};
+
+		tick.fee_growth_outside_a = fee_growth_global_a - tick.fee_growth_outside_a;
+        tick.fee_growth_outside_b = fee_growth_global_b - tick.fee_growth_outside_b;
+
+        tick.liquidity_net
     }
 
     public fun clear_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         ctx: &mut TxContext,
-    ): bool {
-        false
+    ) {
+        let tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+		tick.liquidity_gross = 0;
+		tick.liquidity_net = i128::zero();
+		tick.fee_growth_outside_a = 0;
+		tick.fee_growth_outside_b = 0;
+		tick.initialized = false;
     }
 
     public fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
@@ -683,7 +792,12 @@ module turbos_clmm::pool {
         tick_index: I32,
         ctx: &mut TxContext,
     ) {
-
+		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
+		assert!(i32::eq(next, i32::zero()), EInvildTickIndex); // ensure that the tick is spaced
+        let (word_pos, bit_pos) = position_tick(next);
+        let mask = 1u256 << bit_pos;
+		let word = get_tick_word_mut(pool, word_pos);
+        *word = *word^mask;
     }
 
     public fun get_fee_growth_inside<CoinTypeA, CoinTypeB, FeeType>(
@@ -693,7 +807,34 @@ module turbos_clmm::pool {
         tick_current_index: I32,
         ctx: &mut TxContext,
     ): (u128, u128) {
-        (1,1)
+		let tick_lower = get_tick(pool, tick_lower_index);
+		let tick_upper = get_tick(pool, tick_upper_index);
+        // calculate fee growth below
+        let fee_growth_below_a;
+        let fee_growth_below_b;
+        if (i32::gte(tick_current_index, tick_lower_index)) {
+            fee_growth_below_a = tick_lower.fee_growth_outside_a;
+            fee_growth_below_b = tick_lower.fee_growth_outside_b;
+        } else {
+            fee_growth_below_a = pool.fee_growth_global_a - tick_lower.fee_growth_outside_a;
+            fee_growth_below_b = pool.fee_growth_global_b - tick_lower.fee_growth_outside_b;
+        };
+
+        // calculate fee growth above
+        let fee_growth_above_a;
+        let fee_growth_above_b;
+        if (i32::lt(tick_current_index, tick_upper_index)) {
+            fee_growth_above_a = tick_upper.fee_growth_outside_a;
+            fee_growth_above_b = tick_upper.fee_growth_outside_b;
+        } else {
+            fee_growth_above_a = pool.fee_growth_global_a - tick_upper.fee_growth_outside_a;
+            fee_growth_above_b = pool.fee_growth_global_b - tick_upper.fee_growth_outside_b;
+        };
+
+        let fee_growth_inside_a = pool.fee_growth_global_a - fee_growth_below_a - fee_growth_above_a;
+        let fee_growth_inside_b = pool.fee_growth_global_b - fee_growth_below_b - fee_growth_above_b;
+
+		(fee_growth_inside_a, fee_growth_inside_b)
     }
 
     public fun update_position_metadata<CoinTypeA, CoinTypeB, FeeType>(

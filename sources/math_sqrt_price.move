@@ -205,7 +205,7 @@ module turbos_clmm::math_sqrt_price {
             if (product == sqrt_price) {
                 let denominator = numerator1 + product;
                 if (denominator >= numerator1) {
-                    return full_math_u128::mul_div_round(numerator1, sqrt_price, denominator);
+                    return full_math_u128::mul_div_round(numerator1, sqrt_price, denominator)
                 };
             };
 

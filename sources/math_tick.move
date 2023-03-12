@@ -8,6 +8,7 @@ module turbos_clmm::math_tick {
     use turbos_clmm::full_math_u128;
 
     const MAX_U64: u64 = 0xffffffffffffffff;
+    const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
     const MAX_TICK_INDEX: u32 = 443636;
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -15,6 +16,13 @@ module turbos_clmm::math_tick {
     const LOG_B_2_X32: u128 = 59543866431248;
     const LOG_B_P_ERR_MARGIN_LOWER_X64: u128 = 184467440737095516; // 0.01
     const LOG_B_P_ERR_MARGIN_UPPER_X64: u128 = 15793534762490258745; // 2^-precision / log_2_b + 0.01
+
+    public fun max_liquidity_per_tick(tick_spacing: u32): u128 {
+		let num_ticks = MAX_TICK_INDEX * 2 / tick_spacing + 1;
+		let liquidity = MAX_U128 / (num_ticks as u128);
+
+        liquidity
+    }
 
     public fun tick_index_from_sqrt_price(sqrt_price_x64: u128): i32::I32 {
         let msb: u8 = 128 - math_u128::leading_zeros(sqrt_price_x64) - 1;
