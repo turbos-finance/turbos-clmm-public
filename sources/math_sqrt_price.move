@@ -84,7 +84,7 @@ module turbos_clmm::math_sqrt_price {
                 get_amount_a_delta_(
                     sqrt_price_a,
                     sqrt_price_b,
-                    i128::as_u128(liquidity),
+                    i128::abs_u128(liquidity),
                     false
                 )
             )
@@ -93,7 +93,7 @@ module turbos_clmm::math_sqrt_price {
                 get_amount_a_delta_(
                     sqrt_price_a,
                     sqrt_price_b,
-                    i128::as_u128(liquidity),
+                    i128::abs_u128(liquidity),
                     true
                 )
             )
@@ -115,7 +115,7 @@ module turbos_clmm::math_sqrt_price {
                 get_amount_b_delta_(
                     sqrt_price_a,
                     sqrt_price_b,
-                    i128::as_u128(liquidity),
+                    i128::abs_u128(liquidity),
                     false
                 )
             )
@@ -124,7 +124,7 @@ module turbos_clmm::math_sqrt_price {
                 get_amount_b_delta_(
                     sqrt_price_a,
                     sqrt_price_b,
-                    i128::as_u128(liquidity),
+                    i128::abs_u128(liquidity),
                     true
                 )
             )

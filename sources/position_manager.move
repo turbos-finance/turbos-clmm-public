@@ -50,6 +50,10 @@ module turbos_clmm::position_manager {
     }
 
 	fun init(ctx: &mut TxContext) {
+		init_(ctx);
+    }
+
+    fun init_(ctx: &mut TxContext) {
 		transfer::share_object(Positions {
 			id: object::new(ctx),
 			nft_minted: 0,
@@ -326,5 +330,10 @@ module turbos_clmm::position_manager {
         pay::join_vec(&mut self, coins);
         
 		self
+    }
+
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init_(ctx);
     }
 }

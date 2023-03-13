@@ -10,18 +10,10 @@ module turbos_clmm::pool_factory_tests {
     use turbos_token::btc::{Self, BTC};
 	use turbos_token::usdc::{Self, USDC};
     use turbos_token::eth::{Self, ETH};
-    use sui::coin::{Self, Coin, TreasuryCap};
-    use std::vector;
+    use sui::coin::{Self, TreasuryCap};
     use turbos_clmm::fee500bps::{Self, FEE500BPS};
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::tools_tests;
-    // use std::debug;
-
-    fun coin_to_vec<T>(coin: Coin<T>): vector<Coin<T>> {
-        let self = vector::empty<Coin<T>>();
-        vector::push_back(&mut self, coin);
-        self
-    }
 
 	public fun init_pools(
 		admin: address,
@@ -109,6 +101,8 @@ module turbos_clmm::pool_factory_tests {
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 	}
+
+   
 
     #[test]
     public fun test_deploy_pool() {

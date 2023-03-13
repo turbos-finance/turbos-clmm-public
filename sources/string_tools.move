@@ -3,7 +3,6 @@
 
 module turbos_clmm::string_tools {
     use std::vector;
-    use std::hash;
     use std::bcs;
     use std::string::{Self, String};
     use sui::math;
@@ -19,17 +18,16 @@ module turbos_clmm::string_tools {
         tick_upper_index_is_neg: bool, 
     ): String {
         let address_str = address_to_hexstring(&owner);
-        let tick_lower_index_str = u64_to_hexstring((tick_lower_index as u64));
-        let tick_lower_index_is_neg_str = if(tick_lower_index_is_neg) u64_to_hexstring(0) else u64_to_hexstring(1);
-        let tick_upper_index_str = u64_to_hexstring((tick_upper_index as u64));
-        let tick_upper_index_is_neg_str = if(tick_upper_index_is_neg) u64_to_hexstring(0) else u64_to_hexstring(1);
+        let tick_lower_index_str = u64_to_string((tick_lower_index as u64));
+        let tick_lower_index_is_neg_str = if(tick_lower_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
+        let tick_upper_index_str = u64_to_string((tick_upper_index as u64));
+        let tick_upper_index_is_neg_str = if(tick_upper_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
         string::append(&mut address_str, tick_lower_index_is_neg_str);
         string::append(&mut address_str, tick_lower_index_str);
         string::append(&mut address_str, tick_upper_index_is_neg_str);
         string::append(&mut address_str, tick_upper_index_str);
 
-        let hash = hash::sha2_256(*string::bytes(&address_str));
-        bytes_to_hexstring(&hash)
+        address_str
     }
 
     public fun address_to_hexstring(addr: &address): String {

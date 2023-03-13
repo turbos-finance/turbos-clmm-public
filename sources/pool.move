@@ -124,6 +124,14 @@ module turbos_clmm::pool {
     ): (u64, u64) {
         assert!(liquidity_delta > 0, EInvildAmount);
 
+		try_init_position(
+			pool,
+			owner,
+            tick_lower_index,
+            tick_upper_index,
+			ctx
+		);
+
         let (amount_a, amount_b) = modify_position(
             pool,
             owner,
@@ -337,7 +345,7 @@ module turbos_clmm::pool {
 
         if (exact_in) {
             let amount_remaining_less_fee = full_math_u128::mul_div_floor(
-				i128::as_u128(amount_remaining), 
+				i128::abs_u128(amount_remaining), 
 				((1000000 - fee_pips) as u128), 
 				1000000
 			);
@@ -362,13 +370,13 @@ module turbos_clmm::pool {
 			} else {
 				math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_price_target, liquidity, false)
 			};
-			if (i128::as_u128(amount_remaining) >= amount_out) {
+			if (i128::abs_u128(amount_remaining) >= amount_out) {
 				sqrt_pric_next = sqrt_price_target;
 			} else {
                 sqrt_pric_next = math_sqrt_price::get_next_sqrt_price_from_output(
                     sqrt_price_current,
                     liquidity,
-                    i128::as_u128(amount_remaining),
+                    i128::abs_u128(amount_remaining),
                     a_for_b
                 );
 			};
@@ -394,13 +402,13 @@ module turbos_clmm::pool {
         };
 
         // cap the output amount to not exceed the remaining output amount
-        if (!exact_in && amount_out > i128::as_u128(amount_remaining)) {
-            amount_out = i128::as_u128(amount_remaining);
+        if (!exact_in && amount_out > i128::abs_u128(amount_remaining)) {
+            amount_out = i128::abs_u128(amount_remaining);
         };
 
         if (exact_in && sqrt_pric_next != sqrt_price_target) {
             // we didn't reach the target, so take the remainder of the maximum input as fee
-            fee_amount = i128::as_u128(amount_remaining) - amount_in;
+            fee_amount = i128::abs_u128(amount_remaining) - amount_in;
         } else {
             fee_amount = full_math_u128::mul_div_round(amount_in, (fee_pips as u128), ((1000000 - fee_pips)as u128));
         };
@@ -475,7 +483,7 @@ module turbos_clmm::pool {
 
 	public fun position_tick(tick: I32): (I32, u8) {
         let word_pos = i32::shr(tick, 8);
-        let bit_pos = (i32::as_u32(i32::mod(tick, i32::from(256))) as u8);
+        let bit_pos = (i32::abs_u32(i32::mod(tick, i32::from(256))) as u8);
 
 		(word_pos, bit_pos)
     }
@@ -594,6 +602,26 @@ module turbos_clmm::pool {
         (amount_a, amount_b)
     }
 
+	public fun try_init_position<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+		ctx: &mut TxContext
+	) {
+		let key = get_position_key(owner, tick_lower_index, tick_upper_index);
+		if (!dof::exists_(&pool.id, key)) {
+			dof::add(&mut pool.id, key, Position {
+				id: object::new(ctx),
+        		liquidity: 0,
+        		fee_growth_inside_a: 0,
+        		fee_growth_inside_b: 0,
+        		tokens_owed_a: 0,
+        		tokens_owed_b: 0,
+			});
+		};
+    }
+
     public fun update_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
@@ -665,7 +693,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32
     ) {
-        assert!(i32::lt(tick_lower_index, tick_lower_index), EInvildTick);
+        assert!(i32::lt(tick_lower_index, tick_upper_index), EInvildTick);
         assert!(i32::gte(tick_lower_index, i32::neg_from(MAX_TICK_INDEX)), EInvildTick);
         assert!(i32::lte(tick_upper_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
     }
@@ -717,7 +745,7 @@ module turbos_clmm::pool {
     }
 
     public fun get_tick_index_string(index: I32): String {
-        let str = string_tools::u64_to_string((i32::as_u32(index) as u64));
+        let str = string_tools::u64_to_string((i32::abs_u32(index) as u64));
         if (i32::is_neg(index)) {
             string::append(&mut string::utf8(b"-"), str)
         };
@@ -791,10 +819,12 @@ module turbos_clmm::pool {
         tick_index: I32,
         _ctx: &mut TxContext,
     ) {
-		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
-		assert!(i32::eq(next, i32::zero()), EInvildTickIndex); // ensure that the tick is spaced
+		// ensure that the tick is spaced
+		assert!(i32::eq(i32::mod(tick_index, i32::from(pool.tick_spacing)), i32::zero()), EInvildTickIndex);
+		let next = i32::mod(tick_index, i32::from(pool.tick_spacing));
         let (word_pos, bit_pos) = position_tick(next);
         let mask = 1u256 << bit_pos;
+		try_init_tick_word(pool, word_pos);
 		let word = get_tick_word_mut(pool, word_pos);
         *word = *word^mask;
     }
@@ -908,9 +938,9 @@ module turbos_clmm::pool {
     ): String {
         string_tools::get_position_key(
             owner, 
-            i32::as_u32(tick_lower_index),
+            i32::abs_u32(tick_lower_index),
             i32::is_neg(tick_lower_index),
-            i32::as_u32(tick_upper_index),
+            i32::abs_u32(tick_upper_index),
             i32::is_neg(tick_upper_index)
         )
     }

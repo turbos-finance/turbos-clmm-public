@@ -8,6 +8,8 @@ module turbos_clmm::tools_tests {
     use std::vector;
 	use turbos_clmm::math_u128;
 
+	const MAX_TICK_INDEX: u32 = 443636;
+
 	public fun encode_price_sqrt(reserve1: u64, reserve0: u64): u128 {
 		math::sqrt_u128(((reserve1 / reserve0) as u128)) * math_u128::pow(2, 64)
 	}
