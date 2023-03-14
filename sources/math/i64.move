@@ -481,7 +481,6 @@ module turbos_clmm::i64 {
 
     #[test]
     fun test_mod() {
-        //use aptos_std::debug;
         let i = mod(neg_from(2), from(5));
         assert!(cmp(i, neg_from(2)) == EQ, 0);
 

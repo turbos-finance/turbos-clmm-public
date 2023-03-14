@@ -13,7 +13,6 @@ module turbos_clmm::pool_factory_tests {
     use sui::coin::{Self, TreasuryCap};
     use turbos_clmm::fee500bps::{Self, FEE500BPS};
     use turbos_clmm::fee::{Fee};
-    use turbos_clmm::tools_tests;
 
 	public fun init_pools(
 		admin: address,
@@ -40,9 +39,28 @@ module turbos_clmm::pool_factory_tests {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let sqrt_price = tools_tests::encode_price_sqrt(1, 1);
-            //std::debug::print(&sqrt_price);
+            //price=100 1btc = 100usdc
+            let sqrt_price = 184467440737095516160u128;
             pool_factory::deploy_pool<BTC, USDC, FEE500BPS>(
+                &mut pool_config,
+                &fee_type,
+                sqrt_price,
+                test_scenario::ctx(scenario),
+            );
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+            test_scenario::return_immutable(fee_type);
+        };
+
+        // init USDCBTC pool
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            //price=0.01 1usdc = 0.01BTC
+            let sqrt_price = 1844674407370955161;
+            pool_factory::deploy_pool<USDC, BTC, FEE500BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,

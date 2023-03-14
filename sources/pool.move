@@ -1033,4 +1033,25 @@ module turbos_clmm::pool {
             );
         };
     }
+
+	#[test_only]
+    public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+	): (u64, u64, u64, u64, u128, I32, u32, u128, u32, u32, u128, u128, u128) {
+        (
+			balance::value<CoinTypeA>(&pool.coin_a),
+			balance::value<CoinTypeB>(&pool.coin_b),
+			pool.protocol_fees_a,
+			pool.protocol_fees_b,
+			pool.sqrt_price,
+			pool.tick_current_index,
+			pool.tick_spacing,
+			pool.max_liquidity_per_tick,
+			pool.fee,
+			pool.fee_protocol,
+			pool.fee_growth_global_a,
+			pool.fee_growth_global_b,
+			pool.liquidity
+		)
+    }
 }

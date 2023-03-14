@@ -311,4 +311,30 @@ module turbos_clmm::math_tick {
         let r = sqrt_price_from_tick_index(min_tick);
         assert!(r == MIN_SQRT_PRICE_X64, 0);
     }
+
+    #[test]
+    fun test_get_min_tick_10() {
+        let min_tick = get_min_tick(10);
+        let max_tick = get_max_tick(10);
+        assert!(i32::eq(min_tick, i32::neg_from(443630)), 0);
+        assert!(i32::eq(max_tick, i32::from(443630)), 0);
+    }
+
+    #[test]
+    fun test_get_min_tick_300() {
+        let min_tick = get_min_tick(200);
+        let max_tick = get_max_tick(200);
+        std::debug::print(&i32::abs_u32(min_tick));
+        assert!(i32::eq(min_tick, i32::neg_from(443600)), 0);
+        assert!(i32::eq(max_tick, i32::from(443600)), 0);
+    }
+
+    #[test]
+    fun test_get_min_tick_max() {
+        let min_tick = get_min_tick(16383);
+        let max_tick = get_max_tick(16383);
+        std::debug::print(&i32::abs_u32(min_tick));
+        assert!(i32::eq(min_tick, i32::neg_from(442341)), 0);
+        assert!(i32::eq(max_tick, i32::from(442341)), 0);
+    }
 }

@@ -8,7 +8,10 @@ module turbos_clmm::math_liquidity {
     const EAddDelta: u64 = 0;
 
     const Q64: u128 = 0x10000000000000000;
+    const RESOLUTION: u8 = 64;
 
+    /// Computes the maximum amount of liquidity received for a given amount of token_a, token_b, the current
+    /// pool prices and the prices at the tick boundaries
     public fun get_liquidity_for_amounts(
         sqrt_price: u128,
         sqrt_price_a: u128,
@@ -33,6 +36,7 @@ module turbos_clmm::math_liquidity {
         liquidity
     }
 
+    /// Calculates amount_a * (sqrt(upper) * sqrt(lower)) / (sqrt(upper) - sqrt(lower))
     public fun  get_liquidity_for_amount_a(
         sqrt_price_a: u128,
         sqrt_price_b: u128,
@@ -44,6 +48,7 @@ module turbos_clmm::math_liquidity {
         full_math_u128::mul_div_floor(amount_a, intermediate, sqrt_price_b - sqrt_price_a)
     }
 
+    /// Calculates amount_b / (sqrt(upper) - sqrt(lower)).
     public fun  get_liquidity_for_amount_b(
         sqrt_price_a: u128,
         sqrt_price_b: u128,
@@ -65,5 +70,55 @@ module turbos_clmm::math_liquidity {
         };
 
         z
+    }
+
+    public fun get_amount_for_liquidity(
+        sqrt_price: u128,
+        sqrt_price_a: u128,
+        sqrt_price_b: u128,
+        liquidity: u128
+    ): (u128, u128) {
+        if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
+        let amount_a = 0;
+        let amount_b = 0;
+
+        if (sqrt_price <= sqrt_price_a) {
+            amount_a = get_amount_a_for_liquidity(sqrt_price_a, sqrt_price_b, liquidity);
+        } else if (sqrt_price < sqrt_price_b) {
+            amount_a = get_amount_a_for_liquidity(sqrt_price, sqrt_price_b, liquidity);
+            amount_b = get_amount_b_for_liquidity(sqrt_price_a, sqrt_price, liquidity);
+        } else {
+            amount_b = get_amount_b_for_liquidity(sqrt_price_a, sqrt_price_b, liquidity);
+        };
+        
+        (amount_a, amount_b)
+    }
+
+    public fun get_amount_a_for_liquidity(
+        sqrt_price_a: u128,
+        sqrt_price_b: u128,
+        liquidity: u128
+    ): u128 {
+        if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
+
+        full_math_u128::mul_div_floor(
+            liquidity << RESOLUTION,
+            sqrt_price_b - sqrt_price_a,
+            sqrt_price_b
+        ) / sqrt_price_a
+    }
+
+    public fun get_amount_b_for_liquidity(
+        sqrt_price_a: u128,
+        sqrt_price_b: u128,
+        liquidity: u128
+    ): u128 {
+        if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
+
+        full_math_u128::mul_div_floor(
+            liquidity,
+            sqrt_price_b - sqrt_price_a,
+            Q64
+        )
     }
 }
