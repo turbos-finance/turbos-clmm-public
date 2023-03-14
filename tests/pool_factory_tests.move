@@ -3,7 +3,6 @@
 
 #[test_only]
 module turbos_clmm::pool_factory_tests {
-	use sui::math;
 	use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
     use sui::test_scenario::{Self, Scenario};
 	use sui::transfer;
@@ -39,8 +38,8 @@ module turbos_clmm::pool_factory_tests {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            //price=100 1btc = 100usdc
-            let sqrt_price = 184467440737095516160u128;
+            //price=1 1btc = 100usdc
+            let sqrt_price = 18446744073709551616;
             pool_factory::deploy_pool<BTC, USDC, FEE500BPS>(
                 &mut pool_config,
                 &fee_type,
@@ -92,9 +91,8 @@ module turbos_clmm::pool_factory_tests {
         // mint btc to player
         test_scenario::next_tx(scenario, admin);
         {
-            let one_btc = 1 * math::pow(10, 9);
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<BTC>>(scenario);
-            let coins = coin::mint(&mut treasury_cap, one_btc, test_scenario::ctx(scenario));
+            let coins = coin::mint(&mut treasury_cap, 10000, test_scenario::ctx(scenario));
             transfer::transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
@@ -102,9 +100,8 @@ module turbos_clmm::pool_factory_tests {
 		// mint usdc to player
         test_scenario::next_tx(scenario, admin);
         {
-            let one_k_usdc = 1000 * math::pow(10, 9);
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<USDC>>(scenario);
-            let coins = coin::mint(&mut treasury_cap, one_k_usdc, test_scenario::ctx(scenario));
+            let coins = coin::mint(&mut treasury_cap, 10000, test_scenario::ctx(scenario));
             transfer::transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
@@ -112,9 +109,8 @@ module turbos_clmm::pool_factory_tests {
         // mint eth to player
         test_scenario::next_tx(scenario, admin);
         {
-            let one_k_eth = 1000 * math::pow(10, 9);
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<ETH>>(scenario);
-            let coins = coin::mint(&mut treasury_cap, one_k_eth, test_scenario::ctx(scenario));
+            let coins = coin::mint(&mut treasury_cap, 10000, test_scenario::ctx(scenario));
             transfer::transfer(coins, copy player2);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };

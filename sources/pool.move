@@ -51,9 +51,12 @@ module turbos_clmm::pool {
 
     struct Position has key, store {
         id: UID,
+		// the amount of liquidity owned by this position
         liquidity: u128,
+		// fee growth per unit of liquidity as of the last update to liquidity or fees owed
         fee_growth_inside_a: u128,
         fee_growth_inside_b: u128,
+		// the fees owed to the position owner in token0/token1
         tokens_owed_a: u64,
         tokens_owed_b: u64,
     }
@@ -545,7 +548,7 @@ module turbos_clmm::pool {
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
     /// @return amount_b the amount of token1 owed to the pool, negative if the pool should pay the recipient
-    public fun  modify_position<CoinTypeA, CoinTypeB, FeeType>(
+    public fun modify_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
@@ -1052,6 +1055,23 @@ module turbos_clmm::pool {
 			pool.fee_growth_global_a,
 			pool.fee_growth_global_b,
 			pool.liquidity
+		)
+    }
+
+	#[test_only]
+	public fun get_position_info<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+    ): (u128, u128, u128, u64, u64) {
+        let position = get_position(pool, owner, tick_lower_index, tick_upper_index);
+		(
+			position.liquidity,
+			position.fee_growth_inside_a,
+			position.fee_growth_inside_b,
+			position.tokens_owed_a,
+			position.tokens_owed_b
 		)
     }
 }
