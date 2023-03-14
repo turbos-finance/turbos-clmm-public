@@ -3,9 +3,10 @@
 
 module turbos_clmm::position_manager {
 	use std::vector;
+    use sui::vec_map::{Self, VecMap};
     use sui::transfer;
     use std::string::{String, utf8};
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
 	use sui::transfer::transfer;
@@ -40,8 +41,8 @@ module turbos_clmm::position_manager {
 
 	struct Positions has key, store {
         id: UID,
-		nft_minted: u64
-        //user_position: VecMap<address, vector<ID>>,
+		nft_minted: u64,
+        user_position: VecMap<address, vector<ID>>,
     }
 
 	struct TurbosPositionNFT<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
@@ -57,6 +58,7 @@ module turbos_clmm::position_manager {
 		transfer::share_object(Positions {
 			id: object::new(ctx),
 			nft_minted: 0,
+            user_position: vec_map::empty(),
 		});
     }
 
@@ -100,8 +102,10 @@ module turbos_clmm::position_manager {
 		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(positions, recipient, ctx);
 		let position_key = pool::get_position_key(owner, tick_lower_index_i32, tick_upper_index_i32);
 		//create position
+        let position_id = object::new(ctx);
+        let position_inner_id = object::uid_to_inner(&position_id);
 		let position_m = Position {
-			id: object::new(ctx),
+			id: position_id,
 			tick_lower_index: tick_lower_index_i32,
         	tick_upper_index: tick_upper_index_i32,
         	liquidity: liquidity_delta,
@@ -110,8 +114,8 @@ module turbos_clmm::position_manager {
         	tokens_owed_a: 0,
         	tokens_owed_b: 0,
 		};
-
 		dof::add<address, Position>(&mut positions.id, nft_address, position_m);
+        insert_user_position(positions, position_inner_id, nft_address);
     }
 
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
@@ -122,6 +126,7 @@ module turbos_clmm::position_manager {
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_a == 0, EPositionNotCleared);
+        delete_user_position(positions, object::uid_to_inner(&position.id), nft_address);
         burn_nft(nft);
     }
 
@@ -324,6 +329,35 @@ module turbos_clmm::position_manager {
 		let TurbosPositionNFT { id, img_url: _} = nft;
 		object::delete(id)
 	}
+
+    fun insert_user_position(
+        positions: &mut Positions, 
+        position_id: ID, 
+        nft_address: address
+    ) {
+        if (!vec_map::contains(&positions.user_position, &nft_address)) {
+            let user_position = vector::empty<ID>();
+            vector::push_back(&mut user_position, position_id);
+            vec_map::insert(&mut positions.user_position, nft_address, user_position);
+        } else {
+            let user_position = vec_map::get_mut(&mut positions.user_position, &nft_address);
+            vector::push_back(user_position, position_id);
+        }
+    }
+
+    fun delete_user_position(
+        positions: &mut Positions, 
+        position_id: ID, 
+        nft_address: address
+    ) {
+        if (vec_map::contains(&positions.user_position, &nft_address)) {
+            let user_position = vec_map::get_mut(&mut positions.user_position, &nft_address);
+            let (is_exists, index) = vector::index_of(user_position, &position_id);
+            if (is_exists) {
+                vector::remove(user_position, index);
+            };
+        }
+    }
 
 	public fun merge_coin<CoinType>(
         coins: vector<Coin<CoinType>>, 
