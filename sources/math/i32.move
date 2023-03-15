@@ -152,6 +152,15 @@ module turbos_clmm::i32 {
         }
     }
 
+    public fun mod_euclidean(v: I32, n: I32): I32 {
+        let r = mod(v, n);
+        if (sign(r) == 1) {
+            add(r, n)
+        } else {
+            r
+        }
+    }
+
     public fun as_u32(v: I32): u32 {
         v.bits
     }
@@ -489,6 +498,18 @@ module turbos_clmm::i32 {
         assert!(cmp(i, from(2)) == EQ, 0);
 
         i = mod(from(2), neg_from(5));
+        assert!(cmp(i, from(2)) == EQ, 0);
+    }
+
+    #[test]
+    fun test_mod_euclidean() {
+        let i = mod_euclidean(neg_from(257), from(256));
+        assert!(cmp(i, from(255)) == EQ, 0);
+
+        i = mod_euclidean(neg_from(100), from(10));
+        assert!(cmp(i, from(0)) == EQ, 0);
+
+        i = mod_euclidean(from(2), from(5));
         assert!(cmp(i, from(2)) == EQ, 0);
     }
 }

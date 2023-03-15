@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::pool {
+	use std::vector;
+	use sui::pay;
     use sui::transfer;
     use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
@@ -196,9 +198,8 @@ module turbos_clmm::pool {
         (amount_a_u64, amount_b_u64)
     }
 
-    public fun swap<CoinTypeA, CoinTypeB, FeeType>(
+	public fun swap<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-        _recipient: address,
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
@@ -211,8 +212,6 @@ module turbos_clmm::pool {
         } else {
             assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
         };
-
-        pool.unlocked = false;
 
 		//cache
         let liquidity_start = pool.liquidity;
@@ -229,7 +228,7 @@ module turbos_clmm::pool {
 		let protocol_fee = 0;
 		let liquidity = pool.liquidity;
 
-		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=0) {
+		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=sqrt_price_limit) {
 			let step_sqrt_price_start = sqrt_price;
 			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
 				pool,
@@ -324,10 +323,6 @@ module turbos_clmm::pool {
 			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
 		};
 
-		// transfer
-
-		pool.unlocked = true;
-
 		(amount_a, amount_b)
     }
 
@@ -336,7 +331,7 @@ module turbos_clmm::pool {
         sqrt_price_target: u128,
         liquidity: u128,
         amount_remaining: I128,
-        fee_pips: u32
+        fee_bips: u32
     ): (u128, u128, u128, u128)
     {
         let a_for_b = sqrt_price_current >= sqrt_price_target;
@@ -349,7 +344,7 @@ module turbos_clmm::pool {
         if (exact_in) {
             let amount_remaining_less_fee = full_math_u128::mul_div_floor(
 				i128::abs_u128(amount_remaining), 
-				((1000000 - fee_pips) as u128), 
+				((1000000 - fee_bips) as u128), 
 				1000000
 			);
             amount_in = if (a_for_b) {
@@ -413,7 +408,7 @@ module turbos_clmm::pool {
             // we didn't reach the target, so take the remainder of the maximum input as fee
             fee_amount = i128::abs_u128(amount_remaining) - amount_in;
         } else {
-            fee_amount = full_math_u128::mul_div_round(amount_in, (fee_pips as u128), ((1000000 - fee_pips)as u128));
+            fee_amount = full_math_u128::mul_div_round(amount_in, (fee_bips as u128), ((1000000 - fee_bips)as u128));
         };
 
 		(sqrt_pric_next, amount_in, amount_out, fee_amount)
@@ -425,6 +420,14 @@ module turbos_clmm::pool {
 		lte: bool
 	): (I32, bool) {
 		let compressed = i32::div(tick_current_index, i32::from(pool.tick_spacing));
+
+		// round towards negative infinity
+		if (
+			i32::lt(tick_current_index, i32::zero()) && 
+			!i32::eq(i32::mod_euclidean(tick_current_index, i32::from(pool.tick_spacing)), i32::zero())
+		) {
+ 			compressed = i32::sub(compressed, i32::from(1));
+		};
 		let next: I32;
 		let initialized: bool;
 		if (lte) {
@@ -432,8 +435,8 @@ module turbos_clmm::pool {
 			try_init_tick_word(pool, word_pos);
 			let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the right of the current bit_pos
-            let mask = (1u8 << bit_pos) - 1u8 + (1u8 << bit_pos);
-            let masked = word & (mask as u256);
+            let mask: u256 = (1 << bit_pos) - 1 + (1 << bit_pos);
+            let masked: u256 = word & mask;
 
             // if there are no initialized ticks to the right of or at the current tick, return rightmost in the word
             initialized = masked != 0;
@@ -456,8 +459,8 @@ module turbos_clmm::pool {
 			let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the left of the bit_pos
 			// like ~((1 << bit_pos) - 1)
-            let mask = ((1u8 << bit_pos) - 1u8) ^ 0xFFu8;
-            let masked = word & (mask as u256);
+            let mask: u256 = ((1 << bit_pos) - 1) ^ 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+            let masked = word & mask;
 
             // if there are no initialized ticks to the left of the current tick, return leftmost in the word
             initialized = masked != 0;
@@ -465,15 +468,15 @@ module turbos_clmm::pool {
 			next = if (initialized) {
 				i32::mul(
                 	i32::add(
-						i32::add(compressed, i32::from(1u32)),
-						i32::from(((math_bit::least_significant_bit(masked) - bit_pos) as u32))
+						i32::add(compressed, i32::from(1)),
+						i32::sub(i32::from((math_bit::least_significant_bit(masked) as u32)), i32::from((bit_pos as u32)))
 					), 
 					i32::from(pool.tick_spacing)
 				)
 			} else { 
 				i32::mul(
 					i32::add(
-						i32::add(compressed, i32::from(1u32)),
+						i32::add(compressed, i32::from(1)),
 						i32::from(((255 - bit_pos) as u32))
 					),
 					i32::from(pool.tick_spacing)
@@ -485,8 +488,10 @@ module turbos_clmm::pool {
 	}
 
 	public fun position_tick(tick: I32): (I32, u8) {
-        let word_pos = i32::shr(tick, 8);
-        let bit_pos = (i32::abs_u32(i32::mod(tick, i32::from(256))) as u8);
+        //let word_pos = i32::div(tick, i32::from(256));
+		let word_pos = i32::shr(tick, 8);
+        let bit_pos = (i32::abs_u32(i32::mod_euclidean(tick, i32::from(256))) as u8);
+		//let bit_pos = ((i32::abs_u32(tick) % 256) as u8);
 
 		(word_pos, bit_pos)
     }
@@ -823,10 +828,10 @@ module turbos_clmm::pool {
         _ctx: &mut TxContext,
     ) {
 		// ensure that the tick is spaced
-		assert!(i32::eq(i32::mod(tick_index, i32::from(pool.tick_spacing)), i32::zero()), EInvildTickIndex);
-		let next = i32::mod(tick_index, i32::from(pool.tick_spacing));
+		assert!(i32::eq(i32::mod_euclidean(tick_index, i32::from(pool.tick_spacing)), i32::zero()), EInvildTickIndex);
+		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
         let (word_pos, bit_pos) = position_tick(next);
-        let mask = 1u256 << bit_pos;
+        let mask: u256 = 1u256 << bit_pos;
 		try_init_tick_word(pool, word_pos);
 		let word = get_tick_word_mut(pool, word_pos);
         *word = *word^mask;
@@ -976,6 +981,15 @@ module turbos_clmm::pool {
         position.fee_growth_inside_b
     }
 
+	public fun merge_coin<CoinType>(
+        coins: vector<Coin<CoinType>>, 
+    ): Coin<CoinType> {
+        let self = vector::pop_back(&mut coins);
+        pay::join_vec(&mut self, coins);
+        
+		self
+    }
+
     public fun transfer_in<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>, 
@@ -1037,6 +1051,67 @@ module turbos_clmm::pool {
         };
     }
 
+	public fun swap_coin_a_b<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
+        coin_a: Coin<CoinTypeA>, 
+		amount_a: u64,
+		amount_b: u64, 
+		recipient: address,
+        ctx: &mut TxContext
+    ) {
+		//transfer a in pool_a
+        let left = coin::split(&mut coin_a, amount_a, ctx);
+		balance::join(&mut pool.coin_a, coin::into_balance(left));
+
+		//transfer b from pool_a to recipient
+		let amount_out_balance = balance::split(&mut pool.coin_b, amount_b);
+        let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
+        transfer::transfer(amount_out_coin, recipient);
+
+		if (coin::value(&coin_a) == 0) {
+            coin::destroy_zero(coin_a);
+        } else {
+            transfer::transfer(
+                coin_a,
+                tx_context::sender(ctx)
+            );
+        };
+    }
+
+	public entry fun swap_coin_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeB, CoinTypeB, CoinTypeC>,
+		coin_a: Coin<CoinTypeA>, 
+		amount_a: u64,
+		amount_b: u64,
+		amount_c: u64,
+        recipient: address,
+		ctx: &mut TxContext
+    ) {
+		//transfer a in pool_a
+        let left = coin::split(&mut coin_a, amount_a, ctx);
+		balance::join(&mut pool_a.coin_a, coin::into_balance(left));
+
+		//transer b from pool_a to pool_b
+		let amount_b_balance = balance::split(&mut pool_a.coin_b, amount_b);
+		let amount_b_coin = coin::from_balance(amount_b_balance, ctx);
+		balance::join(&mut pool_b.coin_a, coin::into_balance(amount_b_coin));
+
+		//transfer c from pool_b to recipient
+		let amount_c_balance = balance::split(&mut pool_b.coin_b, amount_c);
+        let amount_c_coin = coin::from_balance(amount_c_balance, ctx);
+        transfer::transfer(amount_c_coin, recipient);
+
+		if (coin::value(&coin_a) == 0) {
+            coin::destroy_zero(coin_a);
+        } else {
+            transfer::transfer(
+                coin_a,
+                tx_context::sender(ctx)
+            );
+        };
+	}
+
 	#[test_only]
     public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
@@ -1074,4 +1149,16 @@ module turbos_clmm::pool {
 			position.tokens_owed_b
 		)
     }
+
+	public fun tick_is_initialized<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		tick_index: I32
+	): bool {
+		let (next_index, initialized) = next_initialized_tick_within_one_word(
+			pool,
+			tick_index,
+			true
+		);
+		if (i32::eq(next_index, tick_index)) initialized else false
+	}
 }

@@ -11,7 +11,6 @@ module turbos_clmm::position_manager {
     use sui::dynamic_object_field as dof;
 	use sui::transfer::transfer;
 	use sui::coin::{Coin};
-	use sui::pay;
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::full_math_u128;
     use turbos_clmm::math_liquidity;
@@ -87,8 +86,8 @@ module turbos_clmm::position_manager {
 
 		let (liquidity_delta, amount_a, amount_b) = add_liquidity(
 			pool,
-			merge_coin<CoinTypeA>(coins_a),
-			merge_coin<CoinTypeB>(coins_b),
+			pool::merge_coin<CoinTypeA>(coins_a),
+			pool::merge_coin<CoinTypeB>(coins_b),
 			owner,
 			tick_lower_index_i32,
 			tick_upper_index_i32,
@@ -188,8 +187,8 @@ module turbos_clmm::position_manager {
 
 		let (liquidity_delta, amount_a, amount_b) = add_liquidity(
 			pool,
-			merge_coin<CoinTypeA>(coins_a),
-			merge_coin<CoinTypeB>(coins_b),
+			pool::merge_coin<CoinTypeA>(coins_a),
+			pool::merge_coin<CoinTypeB>(coins_b),
 			owner,
 			position.tick_lower_index,
 			position.tick_upper_index,
@@ -357,15 +356,6 @@ module turbos_clmm::position_manager {
                 vector::remove(user_position, index);
             };
         }
-    }
-
-	public fun merge_coin<CoinType>(
-        coins: vector<Coin<CoinType>>, 
-    ): Coin<CoinType> {
-        let self = vector::pop_back(&mut coins);
-        pay::join_vec(&mut self, coins);
-        
-		self
     }
 
     #[test_only]
