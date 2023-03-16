@@ -119,8 +119,6 @@ module turbos_clmm::pool {
 
     public fun mint<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-        coin_a: Coin<CoinTypeA>,
-        coin_b: Coin<CoinTypeB>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -147,27 +145,8 @@ module turbos_clmm::pool {
         );
 
         assert!(!i128::is_neg(amount_a) && !i128::is_neg(amount_b), EInvildMintReturnAmount);
-        let (amount_a_u64, amount_b_u64) = ((i128::abs_u128(amount_a) as u64), (i128::abs_u128(amount_b) as u64));
 
-        let balance_a_before = balance::value(&pool.coin_a);
-        let balance_b_before = balance::value(&pool.coin_b);
-
-        split_and_transfer(
-            pool, 
-            coin_a, 
-		    amount_a_u64,
-		    coin_b, 
-		    amount_b_u64,
-            ctx
-        );
-
-        let balance_a_current = balance::value(&pool.coin_a);
-        let balance_b_current = balance::value(&pool.coin_b);
-
-        assert!(balance_a_before + amount_a_u64 <= balance_a_current, EInvildMintAmount);
-        assert!(balance_b_before + amount_b_u64 <= balance_b_current, EInvildMintAmount);
-
-        (amount_a_u64, amount_b_u64)
+        ((i128::abs_u128(amount_a) as u64), (i128::abs_u128(amount_b) as u64))
     }
 
     public fun burn<CoinTypeA, CoinTypeB, FeeType>(
@@ -1018,7 +997,7 @@ module turbos_clmm::pool {
         };
     }
 
-    fun split_and_transfer<CoinTypeA, CoinTypeB, FeeType>(
+    public fun split_and_transfer<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         coin_a: Coin<CoinTypeA>, 
 		amount_a: u64,
@@ -1112,6 +1091,15 @@ module turbos_clmm::pool {
         };
 	}
 
+    public fun get_pool_balance<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+	): (u64, u64) {
+        (
+			balance::value<CoinTypeA>(&pool.coin_a),
+			balance::value<CoinTypeB>(&pool.coin_b),
+		)
+    }
+
 	#[test_only]
     public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
@@ -1130,16 +1118,6 @@ module turbos_clmm::pool {
 			pool.fee_growth_global_a,
 			pool.fee_growth_global_b,
 			pool.liquidity
-		)
-    }
-
-    #[test_only]
-    public fun get_pool_balance<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
-	): (u64, u64) {
-        (
-			balance::value<CoinTypeA>(&pool.coin_a),
-			balance::value<CoinTypeB>(&pool.coin_b),
 		)
     }
 

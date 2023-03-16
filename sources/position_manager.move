@@ -26,6 +26,7 @@ module turbos_clmm::position_manager {
     const ENoCoins: u64 = 4;
     const EPriceSlippageCheck: u64 = 5;
     const EPositionNotCleared: u64 = 6;
+    const EInvildMintAmount: u64 = 7;
 
 	struct Position has key, store {
         id: UID,
@@ -154,14 +155,26 @@ module turbos_clmm::position_manager {
 
         let (amount_a, amount_b) = pool::mint(
             pool,
-            coin_a,
-            coin_b,
             recipient,
             tick_lower_index,
             tick_upper_index,
             liquidity_delta,
             ctx,
         );
+
+        let (balance_a_before, balance_b_before) = pool::get_pool_balance(pool);
+        pool::split_and_transfer(
+            pool,
+            coin_a,
+            amount_a,
+            coin_b,
+            amount_b,
+            ctx,
+        );
+        let (balance_a_current, balance_b_current) = pool::get_pool_balance(pool);
+
+        assert!(balance_a_before + amount_a <= balance_a_current, EInvildMintAmount);
+        assert!(balance_b_before + amount_b <= balance_b_current, EInvildMintAmount);
 
         (liquidity_delta, amount_a, amount_b)
     }
