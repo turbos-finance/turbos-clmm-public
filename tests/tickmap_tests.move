@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #[test_only]
-module turbos_clmm::pool_tests {
+module turbos_clmm::tickmap_tests {
 
     use sui::test_scenario::{Self};
     use turbos_clmm::pool_factory_tests;

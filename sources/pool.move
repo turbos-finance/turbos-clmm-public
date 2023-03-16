@@ -1133,6 +1133,17 @@ module turbos_clmm::pool {
 		)
     }
 
+    #[test_only]
+    public fun get_pool_balance<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+	): (u64, u64) {
+        (
+			balance::value<CoinTypeA>(&pool.coin_a),
+			balance::value<CoinTypeB>(&pool.coin_b),
+		)
+    }
+
+
 	#[test_only]
 	public fun get_position_info<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -1150,6 +1161,7 @@ module turbos_clmm::pool {
 		)
     }
 
+    #[test_only]
 	public fun tick_is_initialized<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		tick_index: I32
