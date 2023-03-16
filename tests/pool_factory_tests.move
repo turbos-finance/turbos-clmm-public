@@ -10,6 +10,7 @@ module turbos_clmm::pool_factory_tests {
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::tools_tests;
     use turbos_clmm::fee500bps::{FEE500BPS};
+    use turbos_clmm::math_sqrt_price::{Self};
 
 	public fun init_pools(
 		admin: address,
@@ -42,7 +43,7 @@ module turbos_clmm::pool_factory_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             //price=1 1btc = 1usdc
-            let sqrt_price = 18446744073709551616;
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEE500BPS>(
                 &mut pool_config,
                 &fee_type,
@@ -61,7 +62,7 @@ module turbos_clmm::pool_factory_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             //price=0.01 1usdc = 0.01BTC
-            let sqrt_price = 1844674407370955161;
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 100);
             pool_factory::deploy_pool<USDC, BTC, FEE500BPS>(
                 &mut pool_config,
                 &fee_type,

@@ -13,6 +13,8 @@ module turbos_clmm::math_sqrt_price {
     const RESOLUTION: u8 = 64;
     const Q64: u128 = 0x10000000000000000;
     const MAX_U64: u128 = 0xffffffffffffffff;
+    const SCALE_FACTOR: u128 = 10000;
+    const DECIMAL_PLACES: u8 = 64;
 
     /// @notice Gets the amount0 delta between two prices
     /// @dev Calculates liquidity / sqrt(lower) - liquidity / sqrt(upper),
@@ -257,5 +259,34 @@ module turbos_clmm::math_sqrt_price {
 
             sqrt_price - quotient
         }
+    }
+    
+    #[test_only]
+    fun div_with_scale(a: u128, b: u128): u128 {
+        (a * SCALE_FACTOR) / b
+    }
+
+    #[test_only]
+    fun div_with_decimal(a: u128, b: u128, decimal_places: u8): u128 {
+        (a << decimal_places) / b
+    }
+
+    #[test_only]
+    public fun encode_price_sqrt(reserve1: u128, reserve0: u128): u128 {
+        // Calculate the square root of (reserve1 * SCALE_FACTOR) / reserve0
+        let ratio = div_with_scale(reserve1, reserve0);
+        let sqrt_ratio = sui::math::sqrt_u128(ratio);
+
+        // Multiply by 2^64 and round to the nearest integer
+        //let integer_result = sqrt_ratio * (1 << 64) / sqrt scale;
+        let integer_result = sqrt_ratio * (1 << 64) / sui::math::sqrt_u128(SCALE_FACTOR);
+
+        integer_result
+    }
+
+    #[test]
+    fun test_encode_price_sqrt() {
+        assert!(encode_price_sqrt(1, 1) == 18446744073709551616, 0);
+        assert!(encode_price_sqrt(1, 100) == 1844674407370955161, 0);
     }
 }

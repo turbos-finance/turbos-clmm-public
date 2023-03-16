@@ -19,6 +19,7 @@ module turbos_clmm::swap_router_tests {
 	use turbos_clmm::swap_router;
 	use turbos_clmm::position_manager_tests;
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
+    use turbos_clmm::math_sqrt_price::{Self};
 
 	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -54,7 +55,7 @@ module turbos_clmm::swap_router_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
             //price=1, 1btc = 1usdc
-            let sqrt_price = 18446744073709551616;
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
