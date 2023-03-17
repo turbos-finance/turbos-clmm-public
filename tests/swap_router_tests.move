@@ -3,9 +3,8 @@
 
 #[test_only]
 module turbos_clmm::swap_router_tests {
-    use std::vector;
     use sui::test_utils::{assert_eq};
-	use sui::coin::{Self, Coin};
+	use sui::coin::{Coin};
     use sui::test_scenario::{Self, Scenario};
     use turbos_token::btc::{BTC};
 	use turbos_token::usdc::{USDC};
@@ -117,7 +116,6 @@ module turbos_clmm::swap_router_tests {
 
         prepare_tests(admin, player, player2, scenario);
 
-		// swap btc to usdc
         let (balance_a_before, balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
 		test_scenario::next_tx(scenario, player);
@@ -129,10 +127,9 @@ module turbos_clmm::swap_router_tests {
 
             //get trader balance before
             let coins;
-            (coins, trader_balance_a_before) = get_user_coin<BTC>(scenario);
-            trader_balance_b_before = get_user_coin_balance<USDC>(scenario);
+            (coins, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
+            trader_balance_b_before = tools_tests::get_user_coin_balance<USDC>(scenario);
 
-            //swap 100 btc to 1000 usdc
 			swap_router::swap_a_b(
 				&mut pool_a,
 				coins,
@@ -151,8 +148,8 @@ module turbos_clmm::swap_router_tests {
         {
             let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let (balance_a_after, balance_b_after) = pool::get_pool_balance(&mut pool_a);
-            let trader_balance_a_after = get_user_coin_balance<BTC>(scenario);
-            let trader_balance_b_after = get_user_coin_balance<USDC>(scenario);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let trader_balance_b_after = tools_tests::get_user_coin_balance<USDC>(scenario);
 
             assert_eq(balance_a_after - balance_a_before, 3);
             assert_eq(balance_b_before - balance_b_after, 1);
@@ -162,48 +159,106 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_a);
         };
 
+		test_scenario::next_tx(scenario, player);
+        {
+			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+
+            //pool balance before
+            (balance_a_before, balance_b_before) = pool::get_pool_balance(&mut pool_a);
+
+            //get trader balance before
+            let coins;
+            (coins, trader_balance_b_before) = tools_tests::get_user_coin<USDC>(scenario);
+            trader_balance_a_before = tools_tests::get_user_coin_balance<BTC>(scenario);
+
+			swap_router::swap_b_a(
+				&mut pool_a,
+				coins,
+				3, //amount_in 
+				1, //amount_out_min
+				MAX_SQRT_PRICE_X64 - 1,
+				player,
+				1,
+				test_scenario::ctx(scenario),
+			);
+
+			test_scenario::return_shared(pool_a);
+		};
+
+        test_scenario::next_tx(scenario, player);
+        {
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let (balance_a_after, balance_b_after) = pool::get_pool_balance(&mut pool_a);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let trader_balance_b_after = tools_tests::get_user_coin_balance<USDC>(scenario);
+
+            assert_eq(balance_a_before - balance_a_after, 1);
+            assert_eq(balance_b_after - balance_b_before, 3);
+            assert_eq(trader_balance_a_after - trader_balance_a_before, 1);
+            assert_eq(trader_balance_b_before - trader_balance_b_after, 3);
+
+            test_scenario::return_shared(pool_a);
+        };
+
 		test_scenario::end(scenario_val);
 	}
 
-    public fun get_user_coin_balance<T>(
-        scenario: &mut Scenario,
-    ): u64 {
-        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
-        let trader_balance_a = 0;
-        while (!vector::is_empty(&coin_ids)) {
-            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
-            trader_balance_a = trader_balance_a + coin::value(&coin);
-            test_scenario::return_to_sender(scenario, coin);
-        };
+    // #[test]
+	// public fun test_swap_b_a() {
+	// 	let admin = @0x0;
+    //     let player = @0x1;
+	// 	let player2 = @0x2;
 
-        trader_balance_a
-    }
+    //     let scenario_val = test_scenario::begin(admin);
+    //     let scenario = &mut scenario_val;
 
-    public fun get_user_coin_vec<T>(
-        scenario: &mut Scenario,
-    ): vector<Coin<T>> {
-        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
-        let coins = vector::empty<Coin<T>>();
-        while (!vector::is_empty(&coin_ids)) {
-            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
-            vector::push_back(&mut coins, coin);
-        };
+	// 	position_manager_tests::init_pool_manager(admin, scenario);
 
-        coins
-    }
+    //     prepare_tests(admin, player, player2, scenario);
 
-    public fun get_user_coin<T>(
-        scenario: &mut Scenario,
-    ): (vector<Coin<T>>, u64) {
-        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
-        let coins = vector::empty<Coin<T>>();
-        let trader_balance_a = 0;
-        while (!vector::is_empty(&coin_ids)) {
-            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
-            trader_balance_a = trader_balance_a + coin::value(&coin);
-            vector::push_back(&mut coins, coin);
-        };
+    //     let (balance_a_before, balance_b_before);
+    //     let (trader_balance_a_before, trader_balance_b_before);
+	// 	test_scenario::next_tx(scenario, player);
+    //     {
+	// 		let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 
-        (coins, trader_balance_a)
-    }
+    //         //pool balance before
+    //         (balance_a_before, balance_b_before) = pool::get_pool_balance(&mut pool_a);
+
+    //         //get trader balance before
+    //         let coins;
+    //         (coins, trader_balance_b_before) = tools_tests::get_user_coin<USDC>(scenario);
+    //         trader_balance_a_before = tools_tests::get_user_coin_balance<BTC>(scenario);
+
+	// 		swap_router::swap_b_a(
+	// 			&mut pool_a,
+	// 			coins,
+	// 			3, //amount_in 
+	// 			1, //amount_out_min
+	// 			MAX_SQRT_PRICE_X64 - 1,
+	// 			player,
+	// 			1,
+	// 			test_scenario::ctx(scenario),
+	// 		);
+
+	// 		test_scenario::return_shared(pool_a);
+	// 	};
+
+    //     test_scenario::next_tx(scenario, player);
+    //     {
+    //         let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+    //         let (balance_a_after, balance_b_after) = pool::get_pool_balance(&mut pool_a);
+    //         let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
+    //         let trader_balance_b_after = tools_tests::get_user_coin_balance<USDC>(scenario);
+
+    //         assert_eq(balance_a_before - balance_a_after, 2);
+    //         assert_eq(balance_b_after - balance_b_before, 3);
+    //         assert_eq(trader_balance_a_after - trader_balance_a_before, 1);
+    //         assert_eq(trader_balance_b_before - trader_balance_b_after, 3);
+
+    //         test_scenario::return_shared(pool_a);
+    //     };
+
+	// 	test_scenario::end(scenario_val);
+	// }
 }

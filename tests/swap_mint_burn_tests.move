@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #[test_only]
-module turbos_clmm::swap_tests {
+module turbos_clmm::swap_mint_burn_tests {
     use sui::test_utils::{assert_eq};
     use sui::test_scenario::{Self, Scenario};
     use turbos_token::btc::{BTC};

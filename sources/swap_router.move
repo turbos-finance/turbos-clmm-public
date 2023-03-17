@@ -9,6 +9,8 @@ module turbos_clmm::swap_router {
 
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
+
+    const ECoinsVectorMustBeEmpty: u64 = 1;
     
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -35,6 +37,36 @@ module turbos_clmm::swap_router {
 			pool::merge_coin(coins_a),
 			amount_a_64,
             amount_b_64,
+            recipient,
+			ctx
+		);
+    }
+
+    public entry fun swap_b_a<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		coins_b: vector<Coin<CoinTypeB>>, 
+		amount_in: u128,
+        _amount_out_min: u128,
+        sqrt_price_limit: u128,
+        recipient: address,
+        _deadline: u128,
+		ctx: &mut TxContext
+    ) {
+        let (amount_a, amount_b) = pool::swap(
+			pool,
+			false,
+			i128::from(amount_in),
+			sqrt_price_limit,
+			ctx
+		);
+        let amount_a_64 = (i128::abs_u128(amount_a) as u64);
+        let amount_b_64 = (i128::abs_u128(amount_b) as u64);
+
+		pool::swap_coin_b_a(
+			pool,
+			pool::merge_coin(coins_b),
+            amount_b_64,
+			amount_a_64,
             recipient,
 			ctx
 		);

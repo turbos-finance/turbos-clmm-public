@@ -108,4 +108,46 @@ module turbos_clmm::tools_tests {
         };
     }
 
+     public fun get_user_coin_balance<T>(
+        scenario: &mut Scenario,
+    ): u64 {
+        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
+        let trader_balance_a = 0;
+        while (!vector::is_empty(&coin_ids)) {
+            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
+            trader_balance_a = trader_balance_a + coin::value(&coin);
+            test_scenario::return_to_sender(scenario, coin);
+        };
+
+        trader_balance_a
+    }
+
+    public fun get_user_coin_vec<T>(
+        scenario: &mut Scenario,
+    ): vector<Coin<T>> {
+        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
+        let coins = vector::empty<Coin<T>>();
+        while (!vector::is_empty(&coin_ids)) {
+            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
+            vector::push_back(&mut coins, coin);
+        };
+
+        coins
+    }
+
+    public fun get_user_coin<T>(
+        scenario: &mut Scenario,
+    ): (vector<Coin<T>>, u64) {
+        let coin_ids = test_scenario::ids_for_sender<Coin<T>>(scenario);
+        let coins = vector::empty<Coin<T>>();
+        let trader_balance_a = 0;
+        while (!vector::is_empty(&coin_ids)) {
+            let coin = test_scenario::take_from_sender_by_id<Coin<T>>(scenario, vector::pop_back(&mut coin_ids));
+            trader_balance_a = trader_balance_a + coin::value(&coin);
+            vector::push_back(&mut coins, coin);
+        };
+
+        (coins, trader_balance_a)
+    }
+
 }
