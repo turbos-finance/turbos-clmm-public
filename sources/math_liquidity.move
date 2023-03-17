@@ -61,11 +61,12 @@ module turbos_clmm::math_liquidity {
 
     public fun add_delta(x: u128, y: I128): u128 {
         let z;
+        let abs_y = i128::abs_u128(y);
         if (i128::is_neg(y)) {
-            z = x - i128::abs_u128(y);
-            assert!(z < x, EAddDelta);
+            assert!(x >= abs_y, EAddDelta);
+            z = x - abs_y;
         } else {
-            z = x + i128::abs_u128(y);
+            z = x + abs_y;
             assert!(z >= x, EAddDelta);
         };
 

@@ -500,7 +500,6 @@ module turbos_clmm::pool {
 
     public fun collect<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-        recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
         amount_a_requested: u64,
@@ -519,20 +518,13 @@ module turbos_clmm::pool {
         if (amount_b > 0) {
             position.tokens_owed_b = position.tokens_owed_b - amount_b;
         };
-        transfer_out(
-            pool,
-            amount_a,
-            amount_b,
-            recipient,
-            ctx
-        );
 
         (amount_a, amount_b)
     }
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
     /// @return amount_b the amount of token1 owed to the pool, negative if the pool should pay the recipient
-    public fun modify_position<CoinTypeA, CoinTypeB, FeeType>(
+    fun modify_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
@@ -559,7 +551,7 @@ module turbos_clmm::pool {
                 // right, when we'll need _more_ token0 (it's becoming more valuable) so user must provide it
                 amount_a = math_sqrt_price::get_amount_a_delta(
                     math_tick::sqrt_price_from_tick_index(tick_lower_index),
-                    math_tick::sqrt_price_from_tick_index(tick_lower_index),
+                    math_tick::sqrt_price_from_tick_index(tick_upper_index),
                     liquidity_delta
                 );
             } else if (i32::lt(pool.tick_current_index, tick_upper_index)) {
@@ -573,14 +565,13 @@ module turbos_clmm::pool {
                     pool.sqrt_price,
                     liquidity_delta
                 );
-
                 pool.liquidity = math_liquidity::add_delta(pool.liquidity, liquidity_delta);
             } else {
                 // current tick is above the passed range; liquidity can only become in range by crossing from right to
                 // left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
                 amount_b = math_sqrt_price::get_amount_b_delta(
                     math_tick::sqrt_price_from_tick_index(tick_lower_index),
-                    math_tick::sqrt_price_from_tick_index(tick_lower_index),
+                    math_tick::sqrt_price_from_tick_index(tick_upper_index),
                     liquidity_delta
                 );
             };
@@ -1100,6 +1091,13 @@ module turbos_clmm::pool {
 		)
     }
 
+    #[test_only]
+    public fun get_pool_tick_current_index<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): I32 {
+        pool.tick_current_index
+    }
+
 	#[test_only]
     public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
@@ -1121,6 +1119,22 @@ module turbos_clmm::pool {
 		)
     }
 
+    #[test_only]
+	public fun get_tick_info<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32,
+    ): (u128, I128, u128, u128, bool) {
+        if (!df::exists_(&pool.id, tick_index)) return (0, i128::zero(), 0, 0, false);
+
+        let tick = get_tick(pool, tick_index);
+		(
+			tick.liquidity_gross,
+			tick.liquidity_net,
+			tick.fee_growth_outside_a,
+			tick.fee_growth_outside_b,
+			tick.initialized
+		)
+    }
 
 	#[test_only]
 	public fun get_position_info<CoinTypeA, CoinTypeB, FeeType>(

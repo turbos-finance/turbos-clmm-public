@@ -305,14 +305,21 @@ module turbos_clmm::position_manager {
             if (amount_b_max > tokens_owed_b) tokens_owed_b else amount_b_max
         );
 
-        pool::collect(
+        let (amount_a, amount_b) = pool::collect(
             pool,
-            recipient,
             position.tick_lower_index,
 			position.tick_upper_index,
             amount_a_collect,
             amount_b_collect,
             ctx,
+        );
+
+        pool::transfer_out(
+            pool,
+            amount_a,
+            amount_b,
+            recipient,
+            ctx
         );
 
         position.tokens_owed_a = position.tokens_owed_a - amount_a_collect;
