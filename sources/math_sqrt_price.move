@@ -309,7 +309,7 @@ module turbos_clmm::math_sqrt_price {
             18446744073709551616,
             false
         );
-        std::debug::print(&delta);
+        assert!(delta == 989999946868, 1);
     }
 
     #[test]

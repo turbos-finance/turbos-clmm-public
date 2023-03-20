@@ -476,7 +476,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(amount_a, 31623);
-			assert_eq(amount_b, 3162); // todo uniswap is 3162
+			assert_eq(amount_b, 3162);
 			test_scenario::return_shared(pool);
 		};
 		test_scenario::end(scenario_val);
@@ -600,7 +600,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(amount_a, 0);
-			assert_eq(amount_b, 3160); // todo uniswap is 3161
+			assert_eq(amount_b, 3160);
 			test_scenario::return_shared(pool);
 		};
 		test_scenario::end(scenario_val);

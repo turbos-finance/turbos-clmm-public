@@ -189,6 +189,7 @@ module turbos_clmm::swap_router_tests {
 				3, //amount_in 
 				1, //amount_out_min
 				MIN_SQRT_PRICE_X64 + 1,
+                true,
 				player,
 				1,
 				test_scenario::ctx(scenario),
@@ -248,6 +249,7 @@ module turbos_clmm::swap_router_tests {
 				3, //amount_in 
 				1, //amount_out_min
 				MAX_SQRT_PRICE_X64 - 1,
+                true,
 				player,
 				1,
 				test_scenario::ctx(scenario),
@@ -311,6 +313,7 @@ module turbos_clmm::swap_router_tests {
 				30, //amount_in 
 				1, //amount_out_min
 				MIN_SQRT_PRICE_X64 + 1,
+                true,
 				player,
 				1,
 				test_scenario::ctx(scenario),
