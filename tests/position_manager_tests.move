@@ -16,7 +16,7 @@ module turbos_clmm::position_manager_tests {
     use turbos_clmm::math_tick;
     use turbos_clmm::math_liquidity;
     use sui::test_utils::{assert_eq};
-    use turbos_clmm::fee::{Self, Fee};
+    use turbos_clmm::fee::{Fee};
 
     public fun init_pool_manager(
 		admin: address,
@@ -51,9 +51,8 @@ module turbos_clmm::position_manager_tests {
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
             position_manager::mint<BTC, USDC, FEE500BPS>(
                 &mut pool,
                 &mut positions,
@@ -154,9 +153,8 @@ module turbos_clmm::position_manager_tests {
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
             position_manager::mint<USDC, BTC, FEE500BPS>(
                 &mut pool,
                 &mut positions,
@@ -244,9 +242,8 @@ module turbos_clmm::position_manager_tests {
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
 
             position_manager::increase_liquidity(
                 &mut pool,
@@ -301,9 +298,8 @@ module turbos_clmm::position_manager_tests {
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
 
             position_manager::decrease_liquidity(
                 &mut pool,
@@ -381,9 +377,8 @@ module turbos_clmm::position_manager_tests {
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
 
             position_manager::collect(
                 &mut pool,
@@ -462,9 +457,8 @@ module turbos_clmm::position_manager_tests {
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
 
             position_manager::decrease_liquidity(
                 &mut pool,
@@ -528,9 +522,8 @@ module turbos_clmm::position_manager_tests {
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let fee = fee::get_fee<FEE500BPS>(&fee_type);
-            let min_tick_index = math_tick::get_min_tick(fee);
-            let max_tick_index = math_tick::get_max_tick(fee);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
 
             position_manager::collect(
                 &mut pool,

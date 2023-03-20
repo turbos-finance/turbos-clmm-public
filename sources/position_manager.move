@@ -42,7 +42,7 @@ module turbos_clmm::position_manager {
 	struct Positions has key, store {
         id: UID,
 		nft_minted: u64,
-        user_position: VecMap<address, vector<ID>>,
+        user_position: VecMap<address, ID>,
     }
 
 	struct TurbosPositionNFT<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
@@ -126,7 +126,7 @@ module turbos_clmm::position_manager {
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_a == 0, EPositionNotCleared);
-        delete_user_position(positions, object::uid_to_inner(&position.id), nft_address);
+        delete_user_position(positions, nft_address);
         burn_nft(nft);
     }
 
@@ -355,26 +355,16 @@ module turbos_clmm::position_manager {
         nft_address: address
     ) {
         if (!vec_map::contains(&positions.user_position, &nft_address)) {
-            let user_position = vector::empty<ID>();
-            vector::push_back(&mut user_position, position_id);
-            vec_map::insert(&mut positions.user_position, nft_address, user_position);
-        } else {
-            let user_position = vec_map::get_mut(&mut positions.user_position, &nft_address);
-            vector::push_back(user_position, position_id);
+            vec_map::insert(&mut positions.user_position, nft_address, position_id);
         }
     }
 
     fun delete_user_position(
         positions: &mut Positions, 
-        position_id: ID, 
         nft_address: address
     ) {
         if (vec_map::contains(&positions.user_position, &nft_address)) {
-            let user_position = vec_map::get_mut(&mut positions.user_position, &nft_address);
-            let (is_exists, index) = vector::index_of(user_position, &position_id);
-            if (is_exists) {
-                vector::remove(user_position, index);
-            };
+            vec_map::remove(&mut positions.user_position, &nft_address);
         }
     }
 

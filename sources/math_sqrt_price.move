@@ -3,6 +3,7 @@
 
 module turbos_clmm::math_sqrt_price {
     use turbos_clmm::math_u128;
+    use turbos_clmm::math_u256;
     use turbos_clmm::full_math_u128;
     use turbos_clmm::i128::{Self, I128};
 
@@ -30,25 +31,25 @@ module turbos_clmm::math_sqrt_price {
         liquidity: u128,
         round_up: bool,
     ): u128 {
-        if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
-
-        let numerator1 = liquidity << RESOLUTION;
-        let numerator2 = sqrt_price_b - sqrt_price_a;
-
         assert!(sqrt_price_a > 0, EInvildSqrtPrice);
+        if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
+        let (sqrt_price_a_u256, sqrt_price_b_u256, liquidity_u256) = ((sqrt_price_a as u256), (sqrt_price_b as u256), (liquidity as u256));
+
+        let numerator1 = liquidity_u256 << RESOLUTION;
+        let numerator2 = sqrt_price_b_u256 - sqrt_price_a_u256;
 
         let amount_a;
         if (round_up) {
-            amount_a = math_u128::checked_div_round(
-                full_math_u128::mul_div_round(numerator1, numerator2, sqrt_price_b),
-                sqrt_price_a,
+            amount_a = math_u256::div_round(
+                numerator1 * numerator2 / sqrt_price_b_u256,
+                sqrt_price_a_u256,
                 true
             );
         } else {
-            amount_a = full_math_u128::mul_div_floor(numerator1, numerator2, sqrt_price_b) / sqrt_price_a;
+            amount_a = numerator1 * numerator2 / sqrt_price_b_u256 / sqrt_price_a_u256;
         };
 
-        amount_a
+        (amount_a as u128)
     }
 
     /// @notice Gets the amount1 delta between two prices
@@ -133,6 +134,30 @@ module turbos_clmm::math_sqrt_price {
         }
     }
 
+    public fun get_next_sqrt_price(
+        sqrt_price: u128,
+        liquidity: u128,
+        amount: u128,
+        amount_specified_is_input: bool,
+        a_to_b: bool,
+    ): u128 {
+        if (amount_specified_is_input == a_to_b) {
+            get_next_sqrt_price_from_amount_a_rounding_up(
+                sqrt_price,
+                liquidity,
+                amount,
+                amount_specified_is_input,
+            )
+        } else {
+            get_next_sqrt_price_from_amount_b_rounding_down(
+                sqrt_price,
+                liquidity,
+                amount,
+                amount_specified_is_input,
+            )
+        }
+    }
+
     /// @notice Gets the next sqrt price given an input amount of token0 or token1
     /// @dev Throws if price or liquidity are 0, or if the next price is out of bounds
     /// @param sqrt_price The starting price, i.e., before accounting for the input amount
@@ -198,29 +223,21 @@ module turbos_clmm::math_sqrt_price {
         amount: u128,
         add: bool
     ): u128 {
-        // we short circuit amount == 0 because the result is otherwise not guaranteed to equal the input price
         if (amount == 0) return sqrt_price;
-        let numerator1 = liquidity << RESOLUTION;
+        let (sqrt_price_u256, liquidity_u256, amount_u256) = ((sqrt_price as u256), (liquidity as u256), (amount as u256));
 
-        if (add) {
-            let product = full_math_u128::mul_div_floor(amount, sqrt_price, amount);
-            if (product == sqrt_price) {
-                let denominator = numerator1 + product;
-                if (denominator >= numerator1) {
-                    return full_math_u128::mul_div_round(numerator1, sqrt_price, denominator)
-                };
-            };
+        let p = amount_u256 * sqrt_price_u256;
+        let numerator = (liquidity_u256 * sqrt_price_u256) << RESOLUTION;
+        //todo check numerator overflow u256
+        let liquidity_shl = liquidity_u256 << RESOLUTION;
+        let denominator = if (add) liquidity_shl + p else liquidity_shl - p;
 
-            math_u128::checked_div_round(numerator1, (numerator1 / sqrt_price) + amount, true)
-        } else {
-            let product = full_math_u128::mul_div_floor(amount, sqrt_price, amount);
-            // if the product overflows, we know the denominator underflows
-            // in addition, we must check that the denominator does not underflow
-            assert!(product == sqrt_price && numerator1 > product, EDenominatorOverflow);
-            let denominator = numerator1 - product;
+        (math_u256::div_round(numerator, denominator, true) as u128)
+    }
 
-            full_math_u128::mul_div_round(numerator1, sqrt_price, denominator)
-        }
+    public fun mul_div_round_fixed(num1: u256, num2: u256, denom: u256): u128 {
+        let r = (num1 * num2  + (denom >> 1)) / denom;
+        (r as u128)
     }
 
     /// @notice Gets the next sqrt price given a delta of token1
@@ -282,6 +299,17 @@ module turbos_clmm::math_sqrt_price {
         let integer_result = sqrt_ratio * (1 << 64) / sui::math::sqrt_u128(SCALE_FACTOR);
 
         integer_result
+    }
+
+    #[test]
+    fun test_get_amount_b_delta_() {
+        let delta = get_amount_b_delta_(
+            18446743083709604748,
+            18446744073709551616,
+            18446744073709551616,
+            false
+        );
+        std::debug::print(&delta);
     }
 
     #[test]

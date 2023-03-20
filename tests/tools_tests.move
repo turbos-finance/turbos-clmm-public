@@ -15,6 +15,8 @@ module turbos_clmm::tools_tests {
     use turbos_clmm::fee3000bps::{Self};
     use turbos_clmm::fee10000bps::{Self};
     use turbos_clmm::pool_factory;
+    use turbos_clmm::i32::{I32};
+    use turbos_clmm::pool::{Self, Pool};
 
 	const MAX_TICK_INDEX: u32 = 443636;
 
@@ -37,7 +39,7 @@ module turbos_clmm::tools_tests {
     public fun init_tests_coin(
 		admin: address,
 		player: address,
-		player2: address, 
+		_player2: address, 
         init_amount: u64,
 		scenario: &mut Scenario,
 	) {
@@ -82,7 +84,7 @@ module turbos_clmm::tools_tests {
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<ETH>>(scenario);
             let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
-            transfer::transfer(coins, copy player2);
+            transfer::transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 	}
@@ -148,6 +150,38 @@ module turbos_clmm::tools_tests {
         };
 
         (coins, trader_balance_a)
+    }
+
+    public fun get_pool_tick_index<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): I32 {
+        let (_,_,_,_,_,tick_current_index,_,_,_,_,_,_,_,) = pool::get_pool_info(pool);
+
+        tick_current_index
+    }
+    
+    public fun get_pool_sqrt_price<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): u128 {
+        let (_,_,_,_,sqrt_price,_,_,_,_,_,_,_,_,) = pool::get_pool_info(pool);
+
+        sqrt_price
+    }
+
+    public fun get_pool_fee_growth_global<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): (u128, u128) {
+        let (_,_,_,_,_,_,_,_,_,_,fee_growth_global_a,fee_growth_global_b,_,) = pool::get_pool_info(pool);
+
+        (fee_growth_global_a, fee_growth_global_b)
+    }
+
+    public fun get_pool_protocol_fees<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): (u64, u64) {
+        let (_,_,protocol_fees_a,protocol_fees_b,_,_,_,_,_,_,_,_,_,) = pool::get_pool_info(pool);
+
+        (protocol_fees_a, protocol_fees_b)
     }
 
 }

@@ -74,7 +74,7 @@ module turbos_clmm::swap_router {
 
     public entry fun swap_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
-        pool_b: &mut Pool<CoinTypeB, CoinTypeB, CoinTypeC>,
+        pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount_in: u128,
         _amount_out_min: u128,

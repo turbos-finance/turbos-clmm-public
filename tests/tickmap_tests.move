@@ -3,7 +3,6 @@
 
 #[test_only]
 module turbos_clmm::tickmap_tests {
-
     use sui::test_scenario::{Self};
     use turbos_clmm::pool_factory_tests;
     use turbos_clmm::pool::{Self, Pool};
@@ -15,6 +14,7 @@ module turbos_clmm::tickmap_tests {
 	use sui::test_utils::{assert_eq};
 	use std::vector;
 	use sui::tx_context::{TxContext};
+	use turbos_clmm::math_tick;
 
 	public fun init_tick<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -385,6 +385,49 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, true);
 			assert_eq(i32::eq(next, i32::from(3400)), true);
 
+            test_scenario::return_shared(pool);
+		};
+
+		test_scenario::end(scenario_val);
+	}
+
+	#[test]
+	public fun test_next_initialized_tick_within_min_max() {
+		let admin = @0x0;
+        let player = @0x1;
+		let player2 = @0x2;
+
+        let scenario_val = test_scenario::begin(admin);
+        let scenario = &mut scenario_val;
+
+		position_manager_tests::init_pool_manager(admin, scenario);
+
+        pool_factory_tests::init_pools(admin, player, player2, scenario);
+
+		//is_initialized
+		test_scenario::next_tx(scenario, player);
+        {
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+
+			let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
+			let ticks = vector::empty<I32>();
+			vector::push_back(&mut ticks, min_tick_index);
+			vector::push_back(&mut ticks, max_tick_index);
+
+			init_tick(
+				&mut pool,
+				&mut ticks,
+				test_scenario::ctx(scenario),
+			);
+
+			let (next, initialized) = pool::next_initialized_tick_within_one_word(
+				&mut pool,
+				i32::neg_from(1),
+				true
+			);
+			assert_eq(initialized, false);
+			assert_eq(i32::eq(next, i32::neg_from(2560)), true);
             test_scenario::return_shared(pool);
 		};
 

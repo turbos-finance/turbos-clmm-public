@@ -15,12 +15,12 @@ module turbos_clmm::pool_factory {
 	const EInvalidTicKSpacing: u64 = 2;
     const EFeeAlreadyExists: u64 = 3;
 
-
 	struct PoolFactoryAdminCap has key, store { id: UID }
 
     struct PoolConfig has key, store {
         id: UID,
         fee_amount_tick_spacing: VecMap<u32, u32>,
+		fee_protocol: u32,
 		pools: vector<ID>,
     }
 
@@ -36,6 +36,7 @@ module turbos_clmm::pool_factory {
         let pool_config = PoolConfig {
 			id: object::new(ctx), 
 			fee_amount_tick_spacing: fee_amount_tick_spacing,
+			fee_protocol: 0,
 			pools: vector::empty(),
 		};
 
@@ -58,6 +59,7 @@ module turbos_clmm::pool_factory {
             fee,
             *tick_spacing,
             sqrt_price,
+			pool_config.fee_protocol,
             ctx);
 		vector::push_back(&mut pool_config.pools, object::id(&pool));
         transfer::share_object(pool);
@@ -75,6 +77,32 @@ module turbos_clmm::pool_factory {
 		assert!(!vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeAlreadyExists);
 		vec_map::insert(&mut pool_config.fee_amount_tick_spacing, fee, tick_spacing);
 	}
+
+	public entry fun set_fee_protocol(
+		_: &PoolFactoryAdminCap,
+		pool_config: &mut PoolConfig,
+		fee_protocol: u32,
+	) {
+		assert!(fee_protocol < 1000000, EInvalidFee);
+		pool_config.fee_protocol = fee_protocol;
+	}
+
+	#[test_only]
+	public fun mock_init_for_testing(ctx: &mut TxContext) {
+		let fee_amount_tick_spacing = vec_map::empty<u32, u32>();
+		vec_map::insert(&mut fee_amount_tick_spacing, 500, 10);
+		vec_map::insert(&mut fee_amount_tick_spacing, 3000, 60);
+		vec_map::insert(&mut fee_amount_tick_spacing, 10000, 1);
+        let pool_config = PoolConfig {
+			id: object::new(ctx), 
+			fee_amount_tick_spacing: fee_amount_tick_spacing,
+			fee_protocol: 2500,
+			pools: vector::empty(),
+		};
+
+		transfer::share_object(pool_config);
+		transfer::transfer(PoolFactoryAdminCap { id: object::new(ctx) }, tx_context::sender(ctx));
+    }
 
     #[test_only]
     public fun init_for_testing(ctx: &mut TxContext) {

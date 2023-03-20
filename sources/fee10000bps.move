@@ -12,7 +12,7 @@ module turbos_clmm::fee10000bps {
 	fun init(witness: FEE10000BPS, ctx: &mut TxContext) {
 		let fee = fee::create_fee(
 			witness,
-			500,
+			10000,
 			ctx
 		);
 

@@ -14,6 +14,7 @@ module turbos_clmm::pool {
     use sui::vec_map::{Self, VecMap};
     use sui::coin::{Self, Coin};
 	use turbos_clmm::math_tick;
+	use turbos_clmm::math_swap;
     use turbos_clmm::string_tools;
 	use turbos_clmm::i32::{Self, I32};
 	use turbos_clmm::i128::{Self, I128};
@@ -91,6 +92,7 @@ module turbos_clmm::pool {
         fee: u32,
         tick_spacing: u32,
         sqrt_price: u128,
+        fee_protocol: u32,
         ctx: &mut TxContext
     ) :Pool<CoinTypeA, CoinTypeB, FeeType> {
         let tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
@@ -107,7 +109,7 @@ module turbos_clmm::pool {
             tick_spacing: tick_spacing,
             max_liquidity_per_tick: max_liquidity_per_tick,
             fee: fee,
-            fee_protocol: 0,
+            fee_protocol: fee_protocol,
             unlocked: true,
             fee_growth_global_a: 0,
             fee_growth_global_b: 0,
@@ -194,7 +196,7 @@ module turbos_clmm::pool {
 
 		//cache
         let liquidity_start = pool.liquidity;
-		let fee_protocol = if (a_for_b) pool.fee_protocol % 16 else pool.fee_protocol >> 4;
+		//let fee_protocol = if (a_for_b) pool.fee_protocol % 16 else pool.fee_protocol >> 4;
 
 		let exact_input = i128::gt(amount_specified, i128::zero());
 
@@ -227,9 +229,10 @@ module turbos_clmm::pool {
 			let step_amount_out;
 			let step_fee_amount;
 			let limit = if (a_for_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
-            (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = compute_swap_step(
+            let target = if (limit) sqrt_price_limit else step_sqrt_price_next;
+            (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = math_swap::compute_swap(
                 sqrt_price,
-                if (limit) sqrt_price_limit else step_sqrt_price_next,
+                target,
                 liquidity,
                 amount_specified_remaining,
                 pool.fee
@@ -243,8 +246,8 @@ module turbos_clmm::pool {
 				amount_calculated = i128::add(amount_calculated, i128::from(step_amount_in + step_fee_amount));
 			};
 
-			if (fee_protocol > 0) {
-				let delta = step_fee_amount / (fee_protocol as u128);
+			if (pool.fee_protocol > 0) {
+				let delta = step_fee_amount * (pool.fee_protocol as u128) / 10000;
                 step_fee_amount = step_fee_amount - delta;
                 protocol_fee = protocol_fee + delta;
 			};
@@ -276,11 +279,13 @@ module turbos_clmm::pool {
 				tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
 			};
 		};
-
-		pool.sqrt_price = sqrt_price;
-		if (!i32::eq(tick_current_index, pool.tick_current_index)) {
-			pool.tick_current_index = tick_current_index;
-		};
+        
+        if (!i32::eq(tick_current_index, pool.tick_current_index)) {
+            pool.sqrt_price = sqrt_price;
+            pool.tick_current_index = tick_current_index;
+        } else {
+		    pool.sqrt_price = sqrt_price;
+        };
 
 		if (liquidity_start != liquidity) pool.liquidity = liquidity;
 
@@ -301,7 +306,7 @@ module turbos_clmm::pool {
 		} else {
 			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
 		};
-
+       
 		(amount_a, amount_b)
     }
 
@@ -315,7 +320,7 @@ module turbos_clmm::pool {
     {
         let a_for_b = sqrt_price_current >= sqrt_price_target;
         let exact_in = i128::gte(amount_remaining, i128::zero());
-		let sqrt_pric_next: u128;
+		let sqrt_price_next: u128;
 		let amount_in: u128 = 0;
 		let amount_out: u128 = 0;
 		let fee_amount: u128;
@@ -332,9 +337,9 @@ module turbos_clmm::pool {
 				math_sqrt_price::get_amount_b_delta_(sqrt_price_current, sqrt_price_target, liquidity, true)
 			};
             if (amount_remaining_less_fee >= amount_in) {
-				sqrt_pric_next = sqrt_price_target;
+				sqrt_price_next = sqrt_price_target;
 			} else {
-                sqrt_pric_next = math_sqrt_price::get_next_sqrt_price_from_input(
+                sqrt_price_next = math_sqrt_price::get_next_sqrt_price_from_input(
                     sqrt_price_current,
                     liquidity,
                     amount_remaining_less_fee,
@@ -348,9 +353,9 @@ module turbos_clmm::pool {
 				math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_price_target, liquidity, false)
 			};
 			if (i128::abs_u128(amount_remaining) >= amount_out) {
-				sqrt_pric_next = sqrt_price_target;
+				sqrt_price_next = sqrt_price_target;
 			} else {
-                sqrt_pric_next = math_sqrt_price::get_next_sqrt_price_from_output(
+                sqrt_price_next = math_sqrt_price::get_next_sqrt_price_from_output(
                     sqrt_price_current,
                     liquidity,
                     i128::abs_u128(amount_remaining),
@@ -359,23 +364,27 @@ module turbos_clmm::pool {
 			};
         };
 
-        let max = sqrt_price_target == sqrt_pric_next;
+        let max = sqrt_price_target == sqrt_price_next;
 
         // get the input/output amounts
         if (a_for_b) {
-            amount_in = if (max && exact_in)
-                amount_in
-                else math_sqrt_price::get_amount_a_delta_(sqrt_pric_next, sqrt_price_current, liquidity, true);
-            amount_out = if (max && !exact_in)
-                amount_out
-                else math_sqrt_price::get_amount_b_delta_(sqrt_pric_next, sqrt_price_current, liquidity, false);
+            if (max && exact_in) {
+                amount_in = amount_in;
+            } else {
+                amount_in = math_sqrt_price::get_amount_a_delta_(sqrt_price_next, sqrt_price_current, liquidity, true);
+            };
+            if (max && !exact_in) {
+                amount_out = amount_out;
+            } else {
+                amount_out = math_sqrt_price::get_amount_b_delta_(sqrt_price_next, sqrt_price_current, liquidity, false);
+            };
         } else {
             amount_in = if (max && exact_in)
                 amount_in
-                else math_sqrt_price::get_amount_b_delta_(sqrt_price_current, sqrt_pric_next, liquidity, true);
+                else math_sqrt_price::get_amount_b_delta_(sqrt_price_current, sqrt_price_next, liquidity, true);
             amount_out = if (max && !exact_in)
                 amount_out
-                else math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_pric_next, liquidity, false);
+                else math_sqrt_price::get_amount_a_delta_(sqrt_price_current, sqrt_price_next, liquidity, false);
         };
 
         // cap the output amount to not exceed the remaining output amount
@@ -383,14 +392,14 @@ module turbos_clmm::pool {
             amount_out = i128::abs_u128(amount_remaining);
         };
 
-        if (exact_in && sqrt_pric_next != sqrt_price_target) {
+        if (exact_in && sqrt_price_next != sqrt_price_target) {
             // we didn't reach the target, so take the remainder of the maximum input as fee
             fee_amount = i128::abs_u128(amount_remaining) - amount_in;
         } else {
             fee_amount = full_math_u128::mul_div_round(amount_in, (fee_bips as u128), ((1000000 - fee_bips)as u128));
         };
-
-		(sqrt_pric_next, amount_in, amount_out, fee_amount)
+            
+		(sqrt_price_next, amount_in, amount_out, fee_amount)
     }
 
 	public fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
@@ -1077,27 +1086,27 @@ module turbos_clmm::pool {
 
 	public entry fun swap_coin_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
-        pool_b: &mut Pool<CoinTypeB, CoinTypeB, CoinTypeC>,
+        pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 
-		amount_a: u64,
-		amount_b: u64,
-		amount_c: u64,
+		amount_in: u64,
+		amount_mid: u64,
+		amount_out: u64,
         recipient: address,
 		ctx: &mut TxContext
     ) {
 		//transfer a in pool_a
-        let left = coin::split(&mut coin_a, amount_a, ctx);
-		balance::join(&mut pool_a.coin_a, coin::into_balance(left));
+        let coin_in = coin::split(&mut coin_a, amount_in, ctx);
+		balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
 
 		//transer b from pool_a to pool_b
-		let amount_b_balance = balance::split(&mut pool_a.coin_b, amount_b);
-		let amount_b_coin = coin::from_balance(amount_b_balance, ctx);
-		balance::join(&mut pool_b.coin_a, coin::into_balance(amount_b_coin));
+		let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
+		let coin_mid = coin::from_balance(balance_mid, ctx);
+		balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
 
 		//transfer c from pool_b to recipient
-		let amount_c_balance = balance::split(&mut pool_b.coin_b, amount_c);
-        let amount_c_coin = coin::from_balance(amount_c_balance, ctx);
-        transfer::transfer(amount_c_coin, recipient);
+		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
+        let coin_out = coin::from_balance(balance_out, ctx);
+        transfer::transfer(coin_out, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
