@@ -8,6 +8,8 @@ module turbos_clmm::position_nft {
     use sui::event;
     use sui::tx_context::{Self, TxContext};
 
+	friend turbos_clmm::position_manager;
+
     struct TurbosPositionNFT<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
         id: UID,
         /// Name for the token
@@ -29,7 +31,7 @@ module turbos_clmm::position_nft {
     }
 
     /// Create a new position_nft
-    public fun mint<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun mint<CoinTypeA, CoinTypeB, FeeType>(
         name: vector<u8>,
         description: vector<u8>,
         url: vector<u8>,
@@ -49,14 +51,6 @@ module turbos_clmm::position_nft {
         });
 
 		nft
-    }
-
-    /// Update the `description` of `nft` to `new_description`
-    public entry fun update_description<CoinTypeA, CoinTypeB, FeeType>(
-        nft: &mut TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
-        new_description: vector<u8>,
-    ) {
-        nft.description = string::utf8(new_description)
     }
 
     /// Permanently delete `nft`
