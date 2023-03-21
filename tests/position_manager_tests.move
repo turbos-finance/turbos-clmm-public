@@ -11,7 +11,8 @@ module turbos_clmm::position_manager_tests {
     use turbos_clmm::fee500bps::{FEE500BPS};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::tools_tests;
-    use turbos_clmm::position_manager::{Self, Positions, TurbosPositionNFT};
+    use turbos_clmm::position_manager::{Self, Positions};
+    use turbos_clmm::position_nft::{TurbosPositionNFT};
     use turbos_clmm::i32::{Self};
     use turbos_clmm::math_tick;
     use turbos_clmm::math_liquidity;

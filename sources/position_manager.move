@@ -5,7 +5,6 @@ module turbos_clmm::position_manager {
 	use std::vector;
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
-    use std::string::{String, utf8};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
@@ -16,6 +15,7 @@ module turbos_clmm::position_manager {
     use turbos_clmm::math_liquidity;
     use turbos_clmm::math_tick;
     use turbos_clmm::pool::{Self, Pool};
+    use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     
     const Q64: u128 = 0x10000000000000000;
     
@@ -43,11 +43,6 @@ module turbos_clmm::position_manager {
         id: UID,
 		nft_minted: u64,
         user_position: VecMap<address, ID>,
-    }
-
-	struct TurbosPositionNFT<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
-        id: UID,
-        img_url: String,
     }
 
 	fun init(ctx: &mut TxContext) {
@@ -331,12 +326,14 @@ module turbos_clmm::position_manager {
         recipient: address,
         ctx: &mut TxContext
     ): address {
-		let nft = TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType> {
-			id: object::new(ctx),
-			img_url: utf8(b"https://turbos.finance/"),
-		};
+        let nft = position_nft::mint<CoinTypeA, CoinTypeB, FeeType>(
+            b"Turbos Position's NFT",
+            b"An NFT created by Turbos CLMM",
+			b"ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png",
+            ctx,
+        );
 		positions.nft_minted = positions.nft_minted + 1;
-		let nft_address = object::uid_to_address(&nft.id);
+		let nft_address = position_nft::nft_address(&nft);
 		transfer(nft, recipient);
 
 		nft_address
@@ -345,8 +342,7 @@ module turbos_clmm::position_manager {
 	fun burn_nft<CoinTypeA, CoinTypeB, FeeType>(
         nft: TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>
     ) {
-		let TurbosPositionNFT { id, img_url: _} = nft;
-		object::delete(id)
+        position_nft::burn<CoinTypeA, CoinTypeB, FeeType>(nft);
 	}
 
     fun insert_user_position(
