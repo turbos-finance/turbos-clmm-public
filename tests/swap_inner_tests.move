@@ -71,7 +71,7 @@ module turbos_clmm::swap_inner_tests {
             let min_tick_index = math_tick::get_min_tick(1);
             let max_tick_index = math_tick::get_max_tick(1);
 
-            let (amount_a, amount_b) = pool::mint(
+            let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				min_tick_index,
@@ -99,7 +99,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::swap(
+			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				true,
 				i128::from(1000000000000), //amount_in 
@@ -132,7 +132,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::swap(
+			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				false,
 				i128::from(1000000000000), //amount_in 
@@ -165,7 +165,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::swap(
+			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				true,
 				i128::neg_from(1000000000000), //amount_in 
@@ -198,7 +198,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::swap(
+			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				false,
 				i128::neg_from(1000000000000), //amount_in 

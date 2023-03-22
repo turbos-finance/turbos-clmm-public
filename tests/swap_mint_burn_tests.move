@@ -68,7 +68,7 @@ module turbos_clmm::swap_mint_burn_tests {
             let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
 
-            let (amount_a, amount_b) = pool::mint(
+            let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				min_tick_index,
@@ -98,7 +98,7 @@ module turbos_clmm::swap_mint_burn_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(22980),
@@ -125,7 +125,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let max_tick_index = math_tick::get_max_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::sub(max_tick_index, i32::from(60)),
@@ -150,7 +150,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let max_tick_index = math_tick::get_max_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(22980),
@@ -174,7 +174,7 @@ module turbos_clmm::swap_mint_burn_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(240),
@@ -185,7 +185,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			assert_eq(amount_a, 121);
 			assert_eq(amount_b, 0);
 
-			(amount_a, amount_b) = pool::burn(
+			(amount_a, amount_b) = pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(240),
@@ -210,7 +210,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let tick_lower_index = i32::neg_from(240);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -227,7 +227,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			(liquidity_gross,_,_,_,_) = pool::get_tick_info(&pool, i32::from(120));
 			assert_eq(liquidity_gross, 0);
 
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -244,7 +244,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			(liquidity_gross,_,_,_,_) = pool::get_tick_info(&pool, i32::from(120));
 			assert_eq(liquidity_gross, 0);
 
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::zero(),
@@ -275,7 +275,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let tick_lower_index = i32::neg_from(240);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -283,7 +283,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				100,
 				test_scenario::ctx(scenario),
 			);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -291,7 +291,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				40,
 				test_scenario::ctx(scenario),
 			);
-			pool::burn(
+			pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(240),
@@ -318,7 +318,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let tick_lower_index = i32::neg_from(240);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -326,7 +326,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				100,
 				test_scenario::ctx(scenario),
 			);
-			pool::burn(
+			pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(240),
@@ -358,7 +358,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let tick_lower_index = i32::neg_from(240);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				tick_lower_index,
@@ -366,7 +366,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				100,
 				test_scenario::ctx(scenario),
 			);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(60),
@@ -374,7 +374,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				250,
 				test_scenario::ctx(scenario),
 			);
-			pool::burn(
+			pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(240),
@@ -409,7 +409,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::add(min_tick_index, i32::from(60)),
@@ -437,7 +437,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::add(min_tick_index, i32::from(60)),
@@ -467,7 +467,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				min_tick_index,
@@ -495,7 +495,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::add(min_tick_index, i32::from(60)),
@@ -503,7 +503,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				100,
 				test_scenario::ctx(scenario),
 			);
-			pool::burn(
+			pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::add(min_tick_index, i32::from(60)),
@@ -511,7 +511,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				100,
 				test_scenario::ctx(scenario),
 			);
-			let (amount_a, amount_b) = pool::collect(
+			let (amount_a, amount_b) = pool::collect_for_testing(
 				&mut pool,
 				i32::add(min_tick_index, i32::from(60)),
 				i32::sub(max_tick_index, i32::from(60)),
@@ -537,7 +537,7 @@ module turbos_clmm::swap_mint_burn_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(46080),
@@ -564,7 +564,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				min_tick_index,
@@ -591,7 +591,7 @@ module turbos_clmm::swap_mint_burn_tests {
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 			let min_tick_index = math_tick::get_min_tick(60);
-			let (amount_a, amount_b) = pool::mint(
+			let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
 				player,
 				min_tick_index,
@@ -617,7 +617,7 @@ module turbos_clmm::swap_mint_burn_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-			pool::mint(
+			pool::mint_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(46080),
@@ -625,7 +625,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				10000,
 				test_scenario::ctx(scenario),
 			);
-			pool::burn(
+			pool::burn_for_testing(
 				&mut pool,
 				player,
 				i32::neg_from(46080),
@@ -633,7 +633,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				10000,
 				test_scenario::ctx(scenario),
 			);
-			let (amount_a, amount_b) = pool::collect(
+			let (amount_a, amount_b) = pool::collect_for_testing(
 				&mut pool,
 				i32::neg_from(46080),
 				i32::neg_from(46020),

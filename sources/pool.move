@@ -26,9 +26,6 @@ module turbos_clmm::pool {
     friend turbos_clmm::position_manager;
     friend turbos_clmm::pool_factory;
     friend turbos_clmm::swap_router;
-    friend turbos_clmm::tickmap_tests;
-    friend turbos_clmm::swap_inner_tests;
-    friend turbos_clmm::swap_mint_burn_tests;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -200,12 +197,10 @@ module turbos_clmm::pool {
         } else {
             assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
         };
+		let exact_input = i128::gt(amount_specified, i128::zero());
 
 		//cache
         let liquidity_start = pool.liquidity;
-		//let fee_protocol = if (a_for_b) pool.fee_protocol % 16 else pool.fee_protocol >> 4;
-
-		let exact_input = i128::gt(amount_specified, i128::zero());
 
 		//state
 		let amount_specified_remaining = amount_specified;
@@ -317,7 +312,32 @@ module turbos_clmm::pool {
 		(amount_a, amount_b)
     }
 
-	public(friend) fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
+
+    public(friend) fun collect<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        ctx: &mut TxContext
+    ): (u64, u64) {
+        let owner = tx_context::sender(ctx);
+        let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
+
+        let amount_a = if (amount_a_requested > position.tokens_owed_a) position.tokens_owed_a else amount_a_requested;
+        let amount_b = if (amount_b_requested > position.tokens_owed_b) position.tokens_owed_b else amount_b_requested;
+
+        if (amount_a > 0) {
+            position.tokens_owed_a = position.tokens_owed_a - amount_a;
+        };
+        if (amount_b > 0) {
+            position.tokens_owed_b = position.tokens_owed_b - amount_b;
+        };
+
+        (amount_a, amount_b)
+    }
+
+	fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		tick_current_index: I32,
 		lte: bool
@@ -408,42 +428,18 @@ module turbos_clmm::pool {
 		};
     }
 
-	public fun get_tick_word<CoinTypeA, CoinTypeB, FeeType>(
+	fun get_tick_word<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
 	): u256 {
 		*vec_map::get(& pool.tick_map, &word_pos)
     }
 
-	public fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
+	fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
 	): &mut u256 {
 		vec_map::get_mut(&mut pool.tick_map, &word_pos)
-    }
-
-    public(friend) fun collect<CoinTypeA, CoinTypeB, FeeType>(
-        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-        tick_lower_index: I32,
-        tick_upper_index: I32,
-        amount_a_requested: u64,
-        amount_b_requested: u64,
-        ctx: &mut TxContext
-    ): (u64, u64) {
-        let owner = tx_context::sender(ctx);
-        let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
-
-        let amount_a = if (amount_a_requested > position.tokens_owed_a) position.tokens_owed_a else amount_a_requested;
-        let amount_b = if (amount_b_requested > position.tokens_owed_b) position.tokens_owed_b else amount_b_requested;
-
-        if (amount_a > 0) {
-            position.tokens_owed_a = position.tokens_owed_a - amount_a;
-        };
-        if (amount_b > 0) {
-            position.tokens_owed_b = position.tokens_owed_b - amount_b;
-        };
-
-        (amount_a, amount_b)
     }
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
@@ -706,7 +702,7 @@ module turbos_clmm::pool {
 		tick.initialized = false;
     }
 
-    public(friend) fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
+    fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         _ctx: &mut TxContext,
@@ -800,7 +796,7 @@ module turbos_clmm::pool {
         get_position_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
     }
 
-    public fun get_position_mut<CoinTypeA, CoinTypeB, FeeType>(
+    fun get_position_mut<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
@@ -809,14 +805,14 @@ module turbos_clmm::pool {
         get_position_mut_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
     }
 
-    public fun get_position_by_key<CoinTypeA, CoinTypeB, FeeType>(
+    fun get_position_by_key<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): &Position {
         dof::borrow<String, Position>(&pool.id, key)
     }
 
-    public fun get_position_mut_by_key<CoinTypeA, CoinTypeB, FeeType>(
+    fun get_position_mut_by_key<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
     ): &mut Position {
@@ -1106,4 +1102,95 @@ module turbos_clmm::pool {
 		);
 		if (i32::eq(next_index, tick_index)) initialized else false
 	}
+
+    #[test_only]
+    public fun next_initialized_tick_within_one_word_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		tick_current_index: I32,
+		lte: bool
+	): (I32, bool) {
+        next_initialized_tick_within_one_word(pool, tick_current_index, lte)
+    }
+
+    #[test_only]
+    public fun flip_tick_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32,
+        ctx: &mut TxContext,
+    ) {
+        flip_tick(pool, tick_index, ctx)
+    }
+
+    #[test_only]
+    public fun collect_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        ctx: &mut TxContext
+    ): (u64, u64) {
+        collect(
+            pool, 
+            tick_lower_index, 
+            tick_upper_index, 
+            amount_a_requested, 
+            amount_b_requested, 
+        ctx)
+    }
+
+    #[test_only]
+    public fun mint_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        liquidity_delta: u128,
+        ctx: &mut TxContext,
+    ): (u64, u64) {
+        mint(
+            pool,
+            owner,
+            tick_lower_index,
+            tick_upper_index,
+            liquidity_delta,
+            ctx
+        )
+    }
+
+    #[test_only]
+    public fun burn_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        liquidity_delta: u128,
+        ctx: &mut TxContext
+    ): (u64, u64) {
+        burn(
+            pool,
+            owner,
+            tick_lower_index,
+            tick_upper_index,
+            liquidity_delta,
+            ctx
+        )
+    }
+
+    #[test_only]
+    public fun swap_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        a_for_b: bool,
+        amount_specified: I128,
+        sqrt_price_limit: u128,
+        ctx: &mut TxContext
+    ): (I128, I128) {
+        swap(
+            pool,
+            a_for_b,
+            amount_specified,
+            sqrt_price_limit,
+            ctx
+        )
+    }
 }

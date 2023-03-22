@@ -22,7 +22,7 @@ module turbos_clmm::tickmap_tests {
 		ctx: &mut TxContext
 	){
 		while (!vector::is_empty(ticks)) {
-			pool::flip_tick(
+			pool::flip_tick_for_testing(
 				pool,
 				vector::pop_back(ticks), 
 				ctx,
@@ -46,7 +46,7 @@ module turbos_clmm::tickmap_tests {
 	}
 
 	#[test]
-	public fun test_flip_tick() {
+	public fun test_flip_tick_for_testing() {
 		let admin = @0x0;
         let player = @0x1;
 		let player2 = @0x2;
@@ -67,7 +67,7 @@ module turbos_clmm::tickmap_tests {
 			);
 			assert_eq(is_initialized, false);
 
-			pool::flip_tick(
+			pool::flip_tick_for_testing(
 				&mut pool,
 				i32::from(10), 
 				test_scenario::ctx(scenario),
@@ -79,7 +79,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(is_initialized_1, true);
 
 			//flip back
-			pool::flip_tick(
+			pool::flip_tick_for_testing(
 				&mut pool,
 				i32::from(10), 
 				test_scenario::ctx(scenario),
@@ -99,7 +99,7 @@ module turbos_clmm::tickmap_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
 
 			//right
-			pool::flip_tick(&mut pool, i32::from(100), test_scenario::ctx(scenario));
+			pool::flip_tick_for_testing(&mut pool, i32::from(100), test_scenario::ctx(scenario));
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(100)), true);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(110)), false);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(120)), false);
@@ -107,7 +107,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(90)), false);
 
 			//left
-			pool::flip_tick(&mut pool, i32::neg_from(100), test_scenario::ctx(scenario));
+			pool::flip_tick_for_testing(&mut pool, i32::neg_from(100), test_scenario::ctx(scenario));
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::neg_from(100)), true);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::neg_from(110)), false);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::neg_from(120)), false);
@@ -115,7 +115,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(90)), false);
 
 			//skip words
-			pool::flip_tick(&mut pool, i32::from(2560), test_scenario::ctx(scenario));
+			pool::flip_tick_for_testing(&mut pool, i32::from(2560), test_scenario::ctx(scenario));
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(2560)), true);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(2570)), false);
 			assert_eq(pool::tick_is_initialized(&mut pool, i32::from(2580)), false);
@@ -128,7 +128,7 @@ module turbos_clmm::tickmap_tests {
 	}
 
 	#[test]
-	public fun test_next_initialized_tick_within_one_word_left() {
+	public fun test_next_initialized_tick_within_one_word_for_testing_left() {
 		let admin = @0x0;
         let player = @0x1;
 		let player2 = @0x2;
@@ -163,7 +163,7 @@ module turbos_clmm::tickmap_tests {
 			);
 
 			//lte = true, to the left
-			let (next, initialized) = pool::next_initialized_tick_within_one_word(
+			let (next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(780),
 				true
@@ -172,7 +172,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, true);
 
 			//returns tick directly to the left of input tick if not initialized
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(790),
 				true
@@ -181,7 +181,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, true);
 
 			//will not exceed the word boundary
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(2580),
 				true
@@ -190,7 +190,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			//at the word boundary
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(2560),
 				true
@@ -199,7 +199,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			//word boundary less 1 (next initialized tick in next word)
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(720),
 				true
@@ -208,7 +208,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, true);
 
 			//word boundary
-			let (next, initialized) = pool::next_initialized_tick_within_one_word(
+			let (next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::neg_from(2570),
 				true
@@ -217,7 +217,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			// eintire empty word
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(10230),
 				true
@@ -226,7 +226,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			//halfway through empty word
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(9000),
 				true
@@ -235,12 +235,12 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			//boundary is initialized
-			pool::flip_tick(
+			pool::flip_tick_for_testing(
 				&mut pool,
 				i32::from(3290),
 				test_scenario::ctx(scenario),
 			);
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(4560),
 				true
@@ -255,7 +255,7 @@ module turbos_clmm::tickmap_tests {
 	}
 
 	#[test]
-	public fun test_next_initialized_tick_within_one_word_right() {
+	public fun test_next_initialized_tick_within_one_word_for_testing_right() {
 		let admin = @0x0;
         let player = @0x1;
 		let player2 = @0x2;
@@ -291,7 +291,7 @@ module turbos_clmm::tickmap_tests {
 
 			//lte = false, to the right
 			//returns tick to right if at initialized tick
-			let (next, initialized) = pool::next_initialized_tick_within_one_word(
+			let (next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(780),
 				false
@@ -300,7 +300,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::from(840)), true);
 
 			//returns tick to right if at initialized tick
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::neg_from(550),
 				false
@@ -309,7 +309,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::neg_from(40)), true);
 
 			//returns the tick directly to the right
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(770),
 				false
@@ -318,7 +318,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::from(780)), true);	
 
 			//returns the tick directly to the right
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::neg_from(560),
 				false
@@ -327,7 +327,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::neg_from(550)), true);	
 
 			//returns the next words initialized tick if on the right boundary
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(2550),
 				false
@@ -336,7 +336,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(initialized, false);
 
 			//returns the next words initialized tick if on the right boundary
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::neg_from(2570),
 				false
@@ -345,7 +345,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::neg_from(2000)), true);
 
 			//does not exceed boundary
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(5080),
 				false
@@ -354,7 +354,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::from(5110)), true);
 
 			//skips entire word
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(2550),
 				false
@@ -363,7 +363,7 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::from(5110)), true);
 
 			//skips half word
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(3830),
 				false
@@ -372,12 +372,12 @@ module turbos_clmm::tickmap_tests {
 			assert_eq(i32::eq(next, i32::from(5110)), true);
 
 			//returns the next initialized tick from the next word
-			pool::flip_tick(
+			pool::flip_tick_for_testing(
 				&mut pool,
 				i32::from(3400),
 				test_scenario::ctx(scenario),
 			);
-			(next, initialized) = pool::next_initialized_tick_within_one_word(
+			(next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::from(3280),
 				false
@@ -421,7 +421,7 @@ module turbos_clmm::tickmap_tests {
 				test_scenario::ctx(scenario),
 			);
 
-			let (next, initialized) = pool::next_initialized_tick_within_one_word(
+			let (next, initialized) = pool::next_initialized_tick_within_one_word_for_testing(
 				&mut pool,
 				i32::neg_from(1),
 				true
