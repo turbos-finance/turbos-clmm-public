@@ -86,27 +86,51 @@ module turbos_clmm::swap_router {
         _deadline: u128,
 		ctx: &mut TxContext
     ) {
-        //a for b
-        let (amount_a, amount_b) = pool::swap(
-			pool_a,
-			true,
-			if(is_exact_in) i128::from(amount_in) else i128::neg_from(amount_in),
-			sqrt_price_limit,
-			ctx
-		);
+        let (amount_a_64, amount_b_64, amount_c_64);
 
-        //b for c
-        let (_amount_c, amount_d) = pool::swap(
-			pool_b,
-			true,
-			if(is_exact_in) i128::abs(amount_b) else amount_b,
-			MIN_SQRT_PRICE_X64 + 1,
-			ctx
-		);
+        if (is_exact_in) {
+            let (amount_a, amount_b) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::from(amount_in),
+			    sqrt_price_limit,
+			    ctx
+		    );
 
-        let amount_a_64 = (i128::abs_u128(amount_a) as u64);
-        let amount_b_64 = (i128::abs_u128(amount_b) as u64);
-        let amount_c_64 = (i128::abs_u128(amount_d) as u64);
+            //b for c
+            let (_amount_c, amount_d) = pool::swap(
+			    pool_b,
+			    true,
+			    i128::abs(amount_b),
+			    MIN_SQRT_PRICE_X64 + 1,
+			    ctx
+		    );
+
+            amount_a_64 = (i128::abs_u128(amount_a) as u64);
+            amount_b_64 = (i128::abs_u128(amount_b) as u64);
+            amount_c_64 = (i128::abs_u128(amount_d) as u64);
+        } else {
+            //b for c, exact out
+            let (amount_c, amount_d) = pool::swap(
+			    pool_b,
+			    true,
+			    i128::neg_from(amount_in),
+			    MIN_SQRT_PRICE_X64 + 1,
+			    ctx
+		    );
+            
+            //a for b, exact out
+            let (amount_a, _amount_b) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::neg_from(i128::as_u128(amount_c)),
+			    sqrt_price_limit,
+			    ctx
+		    );
+            amount_a_64 = (i128::abs_u128(amount_a) as u64);
+            amount_b_64 = (i128::abs_u128(amount_c) as u64);
+            amount_c_64 = (i128::abs_u128(amount_d) as u64);
+        };
 
         pool::swap_coin_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
