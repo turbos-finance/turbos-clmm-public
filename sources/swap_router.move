@@ -15,7 +15,7 @@ module turbos_clmm::swap_router {
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount_in: u128,
+		amount: u128,
         _amount_out_min: u128,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -26,7 +26,7 @@ module turbos_clmm::swap_router {
         let (amount_a, amount_b) = pool::swap(
 			pool,
 			true,
-			if(is_exact_in) i128::from(amount_in) else i128::neg_from(amount_in),
+			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
 			ctx
 		);
@@ -46,7 +46,7 @@ module turbos_clmm::swap_router {
     public entry fun swap_b_a<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_b: vector<Coin<CoinTypeB>>, 
-		amount_in: u128,
+		amount: u128,
         _amount_out_min: u128,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -57,25 +57,164 @@ module turbos_clmm::swap_router {
         let (amount_a, amount_b) = pool::swap(
 			pool,
 			false,
-			if(is_exact_in) i128::from(amount_in) else i128::neg_from(amount_in),
+			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
 			ctx
 		);
-        let amount_a_64 = (i128::abs_u128(amount_a) as u64);
-        let amount_b_64 = (i128::abs_u128(amount_b) as u64);
+        let amount_a_64 = (i128::abs_u128(amount_b) as u64);
+        let amount_b_64 = (i128::abs_u128(amount_a) as u64);
 
 		pool::swap_coin_b_a(
 			pool,
 			pool::merge_coin(coins_b),
-            amount_b_64,
 			amount_a_64,
+            amount_b_64,
             recipient,
 			ctx
 		);
     }
 
-    public entry fun swap_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+    public entry fun swap_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
+		coins_a: vector<Coin<CoinTypeA>>, 
+		amount: u128,
+        _amount_out_min: u128,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        recipient: address,
+        _deadline: u128,
+		ctx: &mut TxContext
+    ) {
+        let (amount_a_64, amount_b_64, amount_c_64);
+
+        if (is_exact_in) {
+            let (step1_in, step1_out) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::from(amount),
+			    sqrt_price_limit,
+			    ctx
+		    );
+
+            let (_step2_in, step2_out) = pool::swap(
+			    pool_b,
+			    true,
+			    i128::abs(step1_out),
+			    MIN_SQRT_PRICE_X64 + 1,
+			    ctx
+		    );
+
+            amount_a_64 = (i128::abs_u128(step1_in) as u64);
+            amount_b_64 = (i128::abs_u128(step1_out) as u64);
+            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+        } else {
+            //exact_out
+            let (step2_in, step2_out) = pool::swap(
+			    pool_b,
+			    true,
+			    i128::neg_from(amount),
+			    MIN_SQRT_PRICE_X64 + 1,
+			    ctx
+		    );
+
+            let (step1_in, step1_out) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::neg_from(i128::as_u128(step2_in)),
+			    sqrt_price_limit,
+			    ctx
+		    );
+
+            amount_a_64 = (i128::abs_u128(step1_in) as u64);
+            amount_b_64 = (i128::abs_u128(step1_out) as u64);
+            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+        };
+
+        pool::swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+            pool_a,
+            pool_b,
+            pool::merge_coin(coins_a),
+            amount_a_64,
+            amount_b_64,
+            amount_c_64,
+            recipient,
+            ctx
+        );
+    }
+
+    public entry fun swap_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
+		coins_a: vector<Coin<CoinTypeA>>, 
+		amount_in: u128,
+        _amount_out_min: u128,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        recipient: address,
+        _deadline: u128,
+		ctx: &mut TxContext
+    ) {
+        let (amount_a_64, amount_b_64, amount_c_64);
+
+        if (is_exact_in) {
+            let (step1_in, step1_out) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::from(amount_in),
+			    sqrt_price_limit,
+			    ctx
+		    );
+
+            //c for b
+            let (step2_out, _step2_in) = pool::swap(
+			    pool_b,
+			    false,
+			    i128::abs(step1_out),
+			    MAX_SQRT_PRICE_X64 - 1,
+			    ctx
+		    );
+            amount_a_64 = (i128::abs_u128(step1_in) as u64);
+            amount_b_64 = (i128::abs_u128(step1_out) as u64);
+            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+        } else {
+            //b for c, exact out
+            let (step2_out, step2_in) = pool::swap(
+			    pool_b,
+			    false,
+			    i128::neg_from(amount_in),
+			    MAX_SQRT_PRICE_X64 - 1,
+			    ctx
+		    );
+            
+            //a for b, exact out
+            let (step1_in, step1_out) = pool::swap(
+			    pool_a,
+			    true,
+			    i128::neg_from(i128::abs_u128(step2_in)),
+			    sqrt_price_limit,
+			    ctx
+		    );
+            //std::debug::print(&i128::abs_u128(step2_out));
+            amount_a_64 = (i128::abs_u128(step1_in) as u64);
+            amount_b_64 = (i128::abs_u128(step1_out) as u64);
+            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+        };
+
+        pool::swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+            pool_a,
+            pool_b,
+            pool::merge_coin(coins_a),
+            amount_a_64,
+            amount_b_64,
+            amount_c_64,
+            recipient,
+            ctx
+        );
+    }
+
+    public entry fun swap_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount_in: u128,
@@ -91,7 +230,7 @@ module turbos_clmm::swap_router {
         if (is_exact_in) {
             let (amount_a, amount_b) = pool::swap(
 			    pool_a,
-			    true,
+			    false,
 			    i128::from(amount_in),
 			    sqrt_price_limit,
 			    ctx
@@ -101,13 +240,13 @@ module turbos_clmm::swap_router {
             let (_amount_c, amount_d) = pool::swap(
 			    pool_b,
 			    true,
-			    i128::abs(amount_b),
+			    i128::abs(amount_a),
 			    MIN_SQRT_PRICE_X64 + 1,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(amount_a) as u64);
-            amount_b_64 = (i128::abs_u128(amount_b) as u64);
+            amount_a_64 = (i128::abs_u128(amount_b) as u64);
+            amount_b_64 = (i128::abs_u128(amount_a) as u64);
             amount_c_64 = (i128::abs_u128(amount_d) as u64);
         } else {
             //b for c, exact out
@@ -118,21 +257,93 @@ module turbos_clmm::swap_router {
 			    MIN_SQRT_PRICE_X64 + 1,
 			    ctx
 		    );
-            
+
             //a for b, exact out
-            let (amount_a, _amount_b) = pool::swap(
+            let (_amount_a, amount_b) = pool::swap(
 			    pool_a,
-			    true,
+			    false,
 			    i128::neg_from(i128::as_u128(amount_c)),
 			    sqrt_price_limit,
 			    ctx
 		    );
-            amount_a_64 = (i128::abs_u128(amount_a) as u64);
+
+            amount_a_64 = (i128::abs_u128(amount_b) as u64);
             amount_b_64 = (i128::abs_u128(amount_c) as u64);
             amount_c_64 = (i128::abs_u128(amount_d) as u64);
         };
 
-        pool::swap_coin_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool::swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+            pool_a,
+            pool_b,
+            pool::merge_coin(coins_a),
+            amount_a_64,
+            amount_b_64,
+            amount_c_64,
+            recipient,
+            ctx
+        );
+    }
+
+    public entry fun swap_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
+		coins_a: vector<Coin<CoinTypeA>>, 
+		amount_in: u128,
+        _amount_out_min: u128,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        recipient: address,
+        _deadline: u128,
+		ctx: &mut TxContext
+    ) {
+        let (amount_a_64, amount_b_64, amount_c_64);
+
+        if (is_exact_in) {
+            let (amount_a, amount_b) = pool::swap(
+			    pool_a,
+			    false,
+			    i128::from(amount_in),
+			    sqrt_price_limit,
+			    ctx
+		    );
+
+            //b for c
+            let (amount_c, _amount_d) = pool::swap(
+			    pool_b,
+			    false,
+			    i128::abs(amount_a),
+			    MAX_SQRT_PRICE_X64 - 1,
+			    ctx
+		    );
+
+            amount_a_64 = (i128::abs_u128(amount_b) as u64);
+            amount_b_64 = (i128::abs_u128(amount_a) as u64);
+            amount_c_64 = (i128::abs_u128(amount_c) as u64);
+        } else {
+            //b for c, exact out
+            let (amount_c, amount_d) = pool::swap(
+			    pool_b,
+			    false,
+			    i128::neg_from(amount_in),
+			    MAX_SQRT_PRICE_X64 - 1,
+			    ctx
+		    );
+
+            //a for b, exact out
+            let (_amount_a, amount_b) = pool::swap(
+			    pool_a,
+			    false,
+			    i128::neg_from(i128::as_u128(amount_d)),
+			    sqrt_price_limit,
+			    ctx
+		    );
+
+            amount_a_64 = (i128::abs_u128(amount_b) as u64);
+            amount_b_64 = (i128::abs_u128(amount_d) as u64);
+            amount_c_64 = (i128::abs_u128(amount_c) as u64);
+        };
+
+        pool::swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
             pool::merge_coin(coins_a),

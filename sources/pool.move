@@ -985,7 +985,8 @@ module turbos_clmm::pool {
         };
     }
 
-	public(friend) entry fun swap_coin_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+    /// swap: a=>c, pool_a: (a,b), pool_b:(b,c)
+	public(friend) entry fun swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 
@@ -1006,6 +1007,111 @@ module turbos_clmm::pool {
 
 		//transfer c from pool_b to recipient
 		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
+        let coin_out = coin::from_balance(balance_out, ctx);
+        transfer::transfer(coin_out, recipient);
+
+		if (coin::value(&coin_a) == 0) {
+            coin::destroy_zero(coin_a);
+        } else {
+            transfer::transfer(
+                coin_a,
+                tx_context::sender(ctx)
+            );
+        };
+	}
+
+    /// swap: a=>c, pool_a: (a,b), pool_b:(c,b)
+	public(friend) entry fun swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
+		coin_a: Coin<CoinTypeA>, 
+		amount_in: u64,
+		amount_mid: u64,
+		amount_out: u64,
+        recipient: address,
+		ctx: &mut TxContext
+    ) {
+		//transfer a in pool_a
+        let coin_in = coin::split(&mut coin_a, amount_in, ctx);
+		balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
+
+		//transer b from pool_a to pool_b
+		let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
+		let coin_mid = coin::from_balance(balance_mid, ctx);
+		balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
+
+		//transfer c from pool_b to recipient
+		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
+        let coin_out = coin::from_balance(balance_out, ctx);
+        transfer::transfer(coin_out, recipient);
+
+		if (coin::value(&coin_a) == 0) {
+            coin::destroy_zero(coin_a);
+        } else {
+            transfer::transfer(
+                coin_a,
+                tx_context::sender(ctx)
+            );
+        };
+	}
+
+    /// swap: a=>c, pool_a: (b,a), pool_b:(b,c)
+	public(friend) entry fun swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
+		coin_a: Coin<CoinTypeA>, 
+		amount_in: u64,
+		amount_mid: u64,
+		amount_out: u64,
+        recipient: address,
+		ctx: &mut TxContext
+    ) {
+		//transfer a in pool_a
+        let coin_in = coin::split(&mut coin_a, amount_in, ctx);
+		balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
+
+		//transer b from pool_a to pool_b
+		let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
+		let coin_mid = coin::from_balance(balance_mid, ctx);
+		balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
+
+		//transfer c from pool_b to recipient
+		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
+        let coin_out = coin::from_balance(balance_out, ctx);
+        transfer::transfer(coin_out, recipient);
+
+		if (coin::value(&coin_a) == 0) {
+            coin::destroy_zero(coin_a);
+        } else {
+            transfer::transfer(
+                coin_a,
+                tx_context::sender(ctx)
+            );
+        };
+	}
+
+    /// swap: a=>c, pool_a: (b,a), pool_b:(c,b)
+	public(friend) entry fun swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
+        pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
+		coin_a: Coin<CoinTypeA>, 
+		amount_in: u64,
+		amount_mid: u64,
+		amount_out: u64,
+        recipient: address,
+		ctx: &mut TxContext
+    ) {
+		//transfer a in pool_a
+        let coin_in = coin::split(&mut coin_a, amount_in, ctx);
+		balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
+
+		//transer b from pool_a to pool_b
+		let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
+		let coin_mid = coin::from_balance(balance_mid, ctx);
+		balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
+
+		//transfer c from pool_b to recipient
+		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
         transfer::transfer(coin_out, recipient);
 
