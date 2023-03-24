@@ -116,6 +116,23 @@ module turbos_clmm::swap_inner_tests {
 			let (protocol_fees_a, protocol_fees_b) = tools_tests::get_pool_protocol_fees(&pool);
 			assert_eq(protocol_fees_a, 2500000000);
 			assert_eq(protocol_fees_b, 0);
+			// test 
+			let min_tick_index = math_tick::get_min_tick(1);
+            let max_tick_index = math_tick::get_max_tick(1);
+			pool::burn_for_testing(&mut pool, player, min_tick_index, max_tick_index, 0, test_scenario::ctx(scenario));
+			let (
+				liquidity,
+				fee_growth_inside_a,
+				fee_growth_inside_b,
+				tokens_owed_a,
+				tokens_owed_b
+			) = pool::get_position_info(&pool, player, min_tick_index, max_tick_index);
+			assert_eq(liquidity, 18446744073709551616);
+			assert_eq(fee_growth_inside_a, 7500000000);
+			assert_eq(fee_growth_inside_b, 0);
+			assert_eq(tokens_owed_a, 7500000000);
+			assert_eq(tokens_owed_b, 0);
+
 			test_scenario::return_shared(pool);
 		};
 

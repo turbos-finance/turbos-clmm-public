@@ -5,6 +5,7 @@ module turbos_clmm::position_manager {
 	use std::vector;
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
+    use sui::event;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
@@ -43,6 +44,27 @@ module turbos_clmm::position_manager {
         id: UID,
 		nft_minted: u64,
         user_position: VecMap<address, ID>,
+    }
+
+    struct IncreaseLiquidityEvent has copy, drop {
+        pool: ID,
+        amount_a: u64,
+        amount_b: u64,
+        liquidity: u128,
+    }
+
+    struct DecreaseLiquidityEvent has copy, drop {
+        pool: ID,
+        amount_a: u64,
+        amount_b: u64,
+        liquidity: u128,
+    }
+
+    struct CollectEvent has copy, drop {
+        pool: ID,
+        amount_a: u64,
+        amount_b: u64,
+        recipient: address,
     }
 
 	fun init(ctx: &mut TxContext) {
@@ -111,6 +133,13 @@ module turbos_clmm::position_manager {
 		};
 		dof::add<address, Position>(&mut positions.id, nft_address, position_m);
         insert_user_position(positions, position_inner_id, nft_address);
+
+        event::emit(IncreaseLiquidityEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            liquidity: liquidity_delta,
+        });
     }
 
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
@@ -170,6 +199,12 @@ module turbos_clmm::position_manager {
 
         assert!(balance_a_before + amount_a <= balance_a_current, EInvildMintAmount);
         assert!(balance_b_before + amount_b <= balance_b_current, EInvildMintAmount);
+        event::emit(IncreaseLiquidityEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            liquidity: liquidity_delta,
+        });
 
         (liquidity_delta, amount_a, amount_b)
     }
@@ -257,6 +292,13 @@ module turbos_clmm::position_manager {
         position.fee_growth_inside_a = fee_growth_inside_a;
         position.fee_growth_inside_b = fee_growth_inside_b;
         position.liquidity = position.liquidity - liquidity;
+
+        event::emit(DecreaseLiquidityEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            liquidity: liquidity,
+        });
     }
 
     public entry fun collect<CoinTypeA, CoinTypeB, FeeType>(
@@ -319,6 +361,13 @@ module turbos_clmm::position_manager {
 
         position.tokens_owed_a = position.tokens_owed_a - amount_a_collect;
         position.tokens_owed_b = position.tokens_owed_b - amount_b_collect;
+
+        event::emit(CollectEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            recipient: recipient,
+        });
     }
 
 	fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(

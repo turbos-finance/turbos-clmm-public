@@ -3,6 +3,7 @@
 
 module turbos_clmm::pool_factory {
 	use std::vector;
+	use sui::event;
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
     use sui::object::{Self, UID, ID};
@@ -26,6 +27,20 @@ module turbos_clmm::pool_factory {
 		pools: vector<ID>,
     }
 
+	struct PoolCreatedEvent has copy, drop {
+        account: address,
+        pool: ID,
+        fee: u32,
+        tick_spacing: u32,
+        fee_protocol: u32,
+		sqrt_price: u128,
+    }
+
+	struct FeeAmountEnabledEvent has copy, drop {
+		fee: u32,
+		tick_spacing: u32,
+	}
+
 	fun init(ctx: &mut TxContext) {
         init_(ctx);
     }
@@ -33,8 +48,12 @@ module turbos_clmm::pool_factory {
 	fun init_(ctx: &mut TxContext) {
 		let fee_amount_tick_spacing = vec_map::empty<u32, u32>();
 		vec_map::insert(&mut fee_amount_tick_spacing, 500, 10);
+		event::emit(FeeAmountEnabledEvent {fee: 500, tick_spacing: 10});
 		vec_map::insert(&mut fee_amount_tick_spacing, 3000, 60);
+		event::emit(FeeAmountEnabledEvent {fee: 3000, tick_spacing: 60});
 		vec_map::insert(&mut fee_amount_tick_spacing, 10000, 200);
+		event::emit(FeeAmountEnabledEvent {fee: 10000, tick_spacing: 200});
+
         let pool_config = PoolConfig {
 			id: object::new(ctx), 
 			fee_amount_tick_spacing: fee_amount_tick_spacing,
@@ -68,14 +87,23 @@ module turbos_clmm::pool_factory {
 		let fee = fee::get_fee(feeType);
         let key = fee;
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
-		let tick_spacing = vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
+		let tick_spacing = *vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
 
 		let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
             fee,
-            *tick_spacing,
+            tick_spacing,
             sqrt_price,
 			pool_config.fee_protocol,
             ctx);
+
+		event::emit(PoolCreatedEvent {
+			account: tx_context::sender(ctx),
+			pool: object::id(&pool),
+			fee: fee,
+			tick_spacing: tick_spacing,
+			fee_protocol: pool_config.fee_protocol,
+			sqrt_price: sqrt_price,
+		});
 		//mint
 		position_manager::mint(
 			&mut pool,
@@ -109,15 +137,24 @@ module turbos_clmm::pool_factory {
 		let fee = fee::get_fee(feeType);
         let key = fee;
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
-		let tick_spacing = vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
+		let tick_spacing = *vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
 
 		let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
             fee,
-            *tick_spacing,
+            tick_spacing,
             sqrt_price,
 			pool_config.fee_protocol,
             ctx);
 		vector::push_back(&mut pool_config.pools, object::id(&pool));
+
+		event::emit(PoolCreatedEvent {
+			account: tx_context::sender(ctx),
+			pool: object::id(&pool),
+			fee: fee,
+			tick_spacing: tick_spacing,
+			fee_protocol: pool_config.fee_protocol,
+			sqrt_price: sqrt_price,
+		});
         transfer::share_object(pool);
     }
 
