@@ -101,6 +101,7 @@ module turbos_clmm::swap_inner_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
+				player,
 				true,
 				i128::from(1000000000000), //amount_in 
 				MIN_SQRT_PRICE_X64 + 1,
@@ -151,6 +152,7 @@ module turbos_clmm::swap_inner_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
+				player,
 				false,
 				i128::from(1000000000000), //amount_in 
 				MAX_SQRT_PRICE_X64 - 1,
@@ -184,6 +186,7 @@ module turbos_clmm::swap_inner_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
+				player,
 				true,
 				i128::neg_from(1000000000000), //amount_in 
 				MIN_SQRT_PRICE_X64 + 1,
@@ -217,6 +220,7 @@ module turbos_clmm::swap_inner_tests {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
+				player,
 				false,
 				i128::neg_from(1000000000000), //amount_in 
 				MAX_SQRT_PRICE_X64 - 1,

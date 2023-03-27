@@ -25,6 +25,7 @@ module turbos_clmm::swap_router {
     ) {
         let (amount_a, amount_b) = pool::swap(
 			pool,
+            recipient,
 			true,
 			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
@@ -56,6 +57,7 @@ module turbos_clmm::swap_router {
     ) {
         let (amount_a, amount_b) = pool::swap(
 			pool,
+            recipient,
 			false,
 			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
@@ -92,6 +94,7 @@ module turbos_clmm::swap_router {
         if (is_exact_in) {
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
+                recipient,
 			    true,
 			    i128::from(amount),
 			    sqrt_price_limit,
@@ -100,6 +103,7 @@ module turbos_clmm::swap_router {
 
             let (_step2_in, step2_out) = pool::swap(
 			    pool_b,
+                recipient,
 			    true,
 			    i128::abs(step1_out),
 			    MIN_SQRT_PRICE_X64 + 1,
@@ -113,6 +117,7 @@ module turbos_clmm::swap_router {
             //exact_out
             let (step2_in, step2_out) = pool::swap(
 			    pool_b,
+                recipient,
 			    true,
 			    i128::neg_from(amount),
 			    MIN_SQRT_PRICE_X64 + 1,
@@ -121,6 +126,7 @@ module turbos_clmm::swap_router {
 
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
+                recipient,
 			    true,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,
@@ -161,6 +167,7 @@ module turbos_clmm::swap_router {
         if (is_exact_in) {
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
+                recipient,
 			    true,
 			    i128::from(amount),
 			    sqrt_price_limit,
@@ -170,6 +177,7 @@ module turbos_clmm::swap_router {
             //c for b
             let (step2_out, _step2_in) = pool::swap(
 			    pool_b,
+                recipient,
 			    false,
 			    i128::abs(step1_out),
 			    MAX_SQRT_PRICE_X64 - 1,
@@ -182,6 +190,7 @@ module turbos_clmm::swap_router {
             //b for c, exact out
             let (step2_out, step2_in) = pool::swap(
 			    pool_b,
+                recipient,
 			    false,
 			    i128::neg_from(amount),
 			    MAX_SQRT_PRICE_X64 - 1,
@@ -191,6 +200,7 @@ module turbos_clmm::swap_router {
             //a for b, exact out
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
+                recipient,
 			    true,
 			    i128::neg_from(i128::abs_u128(step2_in)),
 			    sqrt_price_limit,
@@ -231,6 +241,7 @@ module turbos_clmm::swap_router {
         if (is_exact_in) {
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
+                recipient,
 			    false,
 			    i128::from(amount),
 			    sqrt_price_limit,
@@ -240,6 +251,7 @@ module turbos_clmm::swap_router {
             //b for c
             let (_step2_in, step2_out) = pool::swap(
 			    pool_b,
+                recipient,
 			    true,
 			    i128::abs(step1_out),
 			    MIN_SQRT_PRICE_X64 + 1,
@@ -253,6 +265,7 @@ module turbos_clmm::swap_router {
             //b for c, exact out
             let (step2_in, step2_out) = pool::swap(
 			    pool_b,
+                recipient,
 			    true,
 			    i128::neg_from(amount),
 			    MIN_SQRT_PRICE_X64 + 1,
@@ -262,6 +275,7 @@ module turbos_clmm::swap_router {
             //a for b, exact out
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
+                recipient,
 			    false,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,
@@ -302,6 +316,7 @@ module turbos_clmm::swap_router {
         if (is_exact_in) {
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
+                recipient,
 			    false,
 			    i128::from(amount),
 			    sqrt_price_limit,
@@ -311,6 +326,7 @@ module turbos_clmm::swap_router {
             //b for c
             let (step2_out, _step2_in) = pool::swap(
 			    pool_b,
+                recipient,
 			    false,
 			    i128::abs(step1_out),
 			    MAX_SQRT_PRICE_X64 - 1,
@@ -324,6 +340,7 @@ module turbos_clmm::swap_router {
             //b for c, exact out
             let (step2_out, step2_in) = pool::swap(
 			    pool_b,
+                recipient,
 			    false,
 			    i128::neg_from(amount),
 			    MAX_SQRT_PRICE_X64 - 1,
@@ -333,6 +350,7 @@ module turbos_clmm::swap_router {
             //a for b, exact out
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
+                recipient,
 			    false,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,

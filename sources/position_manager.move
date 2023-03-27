@@ -199,12 +199,6 @@ module turbos_clmm::position_manager {
 
         assert!(balance_a_before + amount_a <= balance_a_current, EInvildMintAmount);
         assert!(balance_b_before + amount_b <= balance_b_current, EInvildMintAmount);
-        event::emit(IncreaseLiquidityEvent {
-            pool: object::id(pool),
-            amount_a: amount_a,
-            amount_b: amount_b,
-            liquidity: liquidity_delta,
-        });
 
         (liquidity_delta, amount_a, amount_b)
     }
@@ -253,6 +247,13 @@ module turbos_clmm::position_manager {
         position.fee_growth_inside_a = fee_growth_inside_a;
         position.fee_growth_inside_b = fee_growth_inside_b;
         position.liquidity = position.liquidity + liquidity_delta;
+
+        event::emit(IncreaseLiquidityEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            liquidity: liquidity_delta,
+        });
     }
 
     public entry fun decrease_liquidity<CoinTypeA, CoinTypeB, FeeType>(
@@ -344,6 +345,7 @@ module turbos_clmm::position_manager {
 
         let (amount_a, amount_b) = pool::collect(
             pool,
+            recipient,
             position.tick_lower_index,
 			position.tick_upper_index,
             amount_a_collect,

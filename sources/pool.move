@@ -4,6 +4,7 @@
 module turbos_clmm::pool {
 	use std::vector;
 	use sui::pay;
+    use sui::event;
     use sui::transfer;
     use std::string::{String};
     use sui::object::{Self, UID, ID};
@@ -88,6 +89,46 @@ module turbos_clmm::pool {
 		tick_map: VecMap<I32, u256>,
     }
 
+    struct SwapEvent has copy, drop {
+        pool: ID,
+        recipient: address,
+        amount_a: u64,
+        amount_b: u64,
+        liquidity: u128,
+        tick_current_index: I32,
+        sqrt_price: u128,
+        protocol_fee: u64,
+    }
+
+    struct MintEvent has copy, drop {
+        pool: ID,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a: u64,
+        amount_b: u64,
+        liquidity_delta: u128,
+    }
+
+    struct BurnEvent has copy, drop {
+        pool: ID,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a: u64,
+        amount_b: u64,
+        liquidity_delta: u128,
+    }
+
+    struct CollectEvent has copy, drop {
+        pool: ID,
+        recipient: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a: u64,
+        amount_b: u64,
+    }
+
     fun init(_ctx: &mut TxContext) {
         //some init
     }
@@ -151,8 +192,19 @@ module turbos_clmm::pool {
         );
 
         assert!(!i128::is_neg(amount_a) && !i128::is_neg(amount_b), EInvildMintReturnAmount);
+        let (amount_a_u64, amount_b_u64) = ((i128::abs_u128(amount_a) as u64), (i128::abs_u128(amount_b) as u64));
 
-        ((i128::abs_u128(amount_a) as u64), (i128::abs_u128(amount_b) as u64))
+        event::emit(MintEvent {
+            pool: object::id(pool),
+            owner: owner,
+            tick_lower_index: tick_lower_index,
+            tick_upper_index: tick_upper_index,
+            amount_a: amount_a_u64,
+            amount_b: amount_b_u64,
+            liquidity_delta: liquidity_delta,
+        });
+
+        (amount_a_u64, amount_b_u64)
     }
 
     public(friend) fun burn<CoinTypeA, CoinTypeB, FeeType>(
@@ -180,11 +232,22 @@ module turbos_clmm::pool {
             position.tokens_owed_b = position.tokens_owed_b + amount_b_u64;
         };
 
+        event::emit(BurnEvent {
+            pool: object::id(pool),
+            owner: owner,
+            tick_lower_index: tick_lower_index,
+            tick_upper_index: tick_upper_index,
+            amount_a: amount_a_u64,
+            amount_b: amount_b_u64,
+            liquidity_delta: liquidity_delta,
+        });
+
         (amount_a_u64, amount_b_u64)
     }
 
 	public(friend) fun swap<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
@@ -308,6 +371,17 @@ module turbos_clmm::pool {
 		} else {
 			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
 		};
+
+        event::emit(SwapEvent {
+            pool: object::id(pool),
+            recipient: recipient,
+            amount_a: (i128::abs_u128(amount_a) as u64),
+            amount_b: (i128::abs_u128(amount_b) as u64),
+            liquidity: liquidity,
+            tick_current_index: tick_current_index,
+            sqrt_price: sqrt_price,
+            protocol_fee: (protocol_fee as u64),
+        });
        
 		(amount_a, amount_b)
     }
@@ -315,6 +389,7 @@ module turbos_clmm::pool {
 
     public(friend) fun collect<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
         amount_a_requested: u64,
@@ -333,6 +408,15 @@ module turbos_clmm::pool {
         if (amount_b > 0) {
             position.tokens_owed_b = position.tokens_owed_b - amount_b;
         };
+
+        event::emit(CollectEvent {
+            pool: object::id(pool),
+            recipient: recipient,
+            tick_lower_index: tick_lower_index,
+            tick_upper_index: tick_upper_index,
+            amount_a: amount_a,
+            amount_b: amount_b,
+        });
 
         (amount_a, amount_b)
     }
@@ -1230,6 +1314,7 @@ module turbos_clmm::pool {
     #[test_only]
     public fun collect_for_testing<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
         amount_a_requested: u64,
@@ -1238,6 +1323,7 @@ module turbos_clmm::pool {
     ): (u64, u64) {
         collect(
             pool, 
+            recipient,
             tick_lower_index, 
             tick_upper_index, 
             amount_a_requested, 
@@ -1286,6 +1372,7 @@ module turbos_clmm::pool {
     #[test_only]
     public fun swap_for_testing<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
@@ -1293,6 +1380,7 @@ module turbos_clmm::pool {
     ): (I128, I128) {
         swap(
             pool,
+            recipient,
             a_for_b,
             amount_specified,
             sqrt_price_limit,

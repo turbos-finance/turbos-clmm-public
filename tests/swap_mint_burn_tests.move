@@ -513,6 +513,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			);
 			let (amount_a, amount_b) = pool::collect_for_testing(
 				&mut pool,
+				player,
 				i32::add(min_tick_index, i32::from(60)),
 				i32::sub(max_tick_index, i32::from(60)),
 				0xffffffffffffffff,
@@ -635,6 +636,7 @@ module turbos_clmm::swap_mint_burn_tests {
 			);
 			let (amount_a, amount_b) = pool::collect_for_testing(
 				&mut pool,
+				player,
 				i32::neg_from(46080),
 				i32::neg_from(46020),
 				0xffffffffffffffff,

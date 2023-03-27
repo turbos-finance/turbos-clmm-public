@@ -104,7 +104,7 @@ module turbos_clmm::pool_factory {
 			fee_protocol: pool_config.fee_protocol,
 			sqrt_price: sqrt_price,
 		});
-		//mint
+
 		position_manager::mint(
 			&mut pool,
 			positions,
