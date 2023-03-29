@@ -16,7 +16,7 @@ module turbos_clmm::fee10000bps {
 			ctx
 		);
 
-		transfer::freeze_object(fee);
+		transfer::public_freeze_object(fee);
     }
 
 	#[test_only]

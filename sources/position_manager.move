@@ -9,7 +9,6 @@ module turbos_clmm::position_manager {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
-	use sui::transfer::transfer;
 	use sui::coin::{Coin};
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::full_math_u128;
@@ -385,7 +384,7 @@ module turbos_clmm::position_manager {
         );
 		positions.nft_minted = positions.nft_minted + 1;
 		let nft_address = position_nft::nft_address(&nft);
-		transfer(nft, recipient);
+		transfer::public_transfer(nft, recipient);
 
 		nft_address
 	}

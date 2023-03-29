@@ -13,8 +13,8 @@ module turbos_token::btc {
 
     fun init(witness: BTC, ctx: &mut TxContext) {
         let (treasury, metadata) = coin::create_currency(witness, 9, b"TurbosTestBtc", b"BTC", b"", option::none(), ctx);
-        transfer::freeze_object(metadata);
-        transfer::transfer(treasury, tx_context::sender(ctx));
+        transfer::public_freeze_object(metadata);
+        transfer::public_transfer(treasury, tx_context::sender(ctx));
     }
 
     #[test_only]

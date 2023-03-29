@@ -973,12 +973,12 @@ module turbos_clmm::pool {
         if (amount_a > 0) {
             let amount_out_balance = balance::split(&mut pool.coin_a, amount_a);
             let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
-            transfer::transfer(amount_out_coin, recipient);
+            transfer::public_transfer(amount_out_coin, recipient);
         };
         if (amount_b > 0) {
             let amount_out_balance = balance::split(&mut pool.coin_b, amount_b);
             let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
-            transfer::transfer(amount_out_coin, recipient);
+            transfer::public_transfer(amount_out_coin, recipient);
         };
     }
 
@@ -999,7 +999,7 @@ module turbos_clmm::pool {
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );
@@ -1008,7 +1008,7 @@ module turbos_clmm::pool {
 		if (coin::value(&coin_b) == 0) {
             coin::destroy_zero(coin_b);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_b,
                 tx_context::sender(ctx)
             );
@@ -1030,12 +1030,12 @@ module turbos_clmm::pool {
 		//transfer b from pool_a to recipient
 		let amount_out_balance = balance::split(&mut pool.coin_b, amount_out);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
-        transfer::transfer(amount_out_coin, recipient);
+        transfer::public_transfer(amount_out_coin, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );
@@ -1057,12 +1057,12 @@ module turbos_clmm::pool {
 		//transfer b from pool_a to recipient
 		let amount_out_balance = balance::split(&mut pool.coin_a, amount_out);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
-        transfer::transfer(amount_out_coin, recipient);
+        transfer::public_transfer(amount_out_coin, recipient);
 
 		if (coin::value(&coin_b) == 0) {
             coin::destroy_zero(coin_b);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_b,
                 tx_context::sender(ctx)
             );
@@ -1092,12 +1092,12 @@ module turbos_clmm::pool {
 		//transfer c from pool_b to recipient
 		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
-        transfer::transfer(coin_out, recipient);
+        transfer::public_transfer(coin_out, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );
@@ -1127,12 +1127,12 @@ module turbos_clmm::pool {
 		//transfer c from pool_b to recipient
 		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
-        transfer::transfer(coin_out, recipient);
+        transfer::public_transfer(coin_out, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );
@@ -1162,12 +1162,12 @@ module turbos_clmm::pool {
 		//transfer c from pool_b to recipient
 		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
-        transfer::transfer(coin_out, recipient);
+        transfer::public_transfer(coin_out, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );
@@ -1197,12 +1197,12 @@ module turbos_clmm::pool {
 		//transfer c from pool_b to recipient
 		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
-        transfer::transfer(coin_out, recipient);
+        transfer::public_transfer(coin_out, recipient);
 
 		if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
-            transfer::transfer(
+            transfer::public_transfer(
                 coin_a,
                 tx_context::sender(ctx)
             );

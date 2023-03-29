@@ -124,7 +124,7 @@ module turbos_clmm::pool_factory {
 		);
 
 		vector::push_back(&mut pool_config.pools, object::id(&pool));
-        transfer::share_object(pool);
+        transfer::public_share_object(pool);
 
     }
 
@@ -155,7 +155,7 @@ module turbos_clmm::pool_factory {
 			fee_protocol: pool_config.fee_protocol,
 			sqrt_price: sqrt_price,
 		});
-        transfer::share_object(pool);
+        transfer::public_share_object(pool);
     }
 
 	public entry fun enable_fee_amount(

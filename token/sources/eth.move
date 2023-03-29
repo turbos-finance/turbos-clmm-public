@@ -13,8 +13,8 @@ module turbos_token::eth {
 
     fun init(witness: ETH, ctx: &mut TxContext) {
         let (treasury, metadata) = coin::create_currency(witness, 9, b"TurbosTestEth", b"ETH", b"", option::none(), ctx);
-        transfer::freeze_object(metadata);
-        transfer::transfer(treasury, tx_context::sender(ctx));
+        transfer::public_freeze_object(metadata);
+        transfer::public_transfer(treasury, tx_context::sender(ctx));
     }
 
     #[test_only]

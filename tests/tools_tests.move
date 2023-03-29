@@ -66,7 +66,7 @@ module turbos_clmm::tools_tests {
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<BTC>>(scenario);
             let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
-            transfer::transfer(coins, copy player);
+            transfer::public_transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 
@@ -75,7 +75,7 @@ module turbos_clmm::tools_tests {
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<USDC>>(scenario);
             let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
-            transfer::transfer(coins, copy player);
+            transfer::public_transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 
@@ -84,7 +84,7 @@ module turbos_clmm::tools_tests {
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<ETH>>(scenario);
             let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
-            transfer::transfer(coins, copy player);
+            transfer::public_transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 	}
