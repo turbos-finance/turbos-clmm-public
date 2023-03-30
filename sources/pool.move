@@ -23,6 +23,7 @@ module turbos_clmm::pool {
 	use turbos_clmm::math_sqrt_price;
     use turbos_clmm::full_math_u128;
 	use turbos_clmm::math_bit;
+    use sui::clock::{Self, Clock};
 
     friend turbos_clmm::position_manager;
     friend turbos_clmm::pool_factory;
@@ -87,6 +88,7 @@ module turbos_clmm::pool {
         liquidity: u128,
         user_position: VecMap<address, vector<ID>>,
 		tick_map: VecMap<I32, u256>,
+        deploy_time_ms: u64,
     }
 
     struct SwapEvent has copy, drop {
@@ -138,6 +140,7 @@ module turbos_clmm::pool {
         tick_spacing: u32,
         sqrt_price: u128,
         fee_protocol: u32,
+        clock: &Clock,
         ctx: &mut TxContext
     ) :Pool<CoinTypeA, CoinTypeB, FeeType> {
         let tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
@@ -160,7 +163,8 @@ module turbos_clmm::pool {
             fee_growth_global_b: 0,
             liquidity: 0,
             user_position: vec_map::empty(),
-			tick_map: vec_map::empty()
+			tick_map: vec_map::empty(),
+            deploy_time_ms: clock::timestamp_ms(clock),
         }
     }
 

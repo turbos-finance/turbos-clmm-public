@@ -20,6 +20,7 @@ module turbos_clmm::swap_router_tests {
 	use turbos_clmm::position_manager_tests;
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
     use turbos_clmm::math_sqrt_price::{Self};
+    use sui::clock::{Self, Clock};
 
 	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -48,21 +49,30 @@ module turbos_clmm::swap_router_tests {
             scenario
         );
 
+        // init clock
+        test_scenario::next_tx(scenario, player);
+        {
+            clock::create_for_testing(test_scenario::ctx(scenario));
+        };
+
         //init BTCUSDC pool
         test_scenario::next_tx(scenario, admin);
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
             //price=1, 1btc = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(clock);
             test_scenario::return_shared(pool_config);
             test_scenario::return_immutable(fee_type);
         };
@@ -73,14 +83,17 @@ module turbos_clmm::swap_router_tests {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<ETH, USDC, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(clock);
             test_scenario::return_shared(pool_config);
             test_scenario::return_immutable(fee_type);
         };
@@ -91,16 +104,19 @@ module turbos_clmm::swap_router_tests {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
             //price=1, 1btc = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<USDC, ETH, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
         };
 
@@ -110,15 +126,18 @@ module turbos_clmm::swap_router_tests {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<USDC, BTC, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
         };
 

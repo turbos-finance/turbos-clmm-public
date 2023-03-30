@@ -12,6 +12,7 @@ module turbos_clmm::pool_factory {
     use turbos_clmm::pool;
 	use turbos_clmm::position_manager::{Self, Positions};
     use turbos_clmm::fee::{Self, Fee};
+	use sui::clock::{Clock};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -82,6 +83,7 @@ module turbos_clmm::pool_factory {
         amount_b_min: u64,
         recipient: address,
         deadline: u128,
+		clock: &Clock,
 		ctx: &mut TxContext
     ) {
 		let fee = fee::get_fee(feeType);
@@ -94,7 +96,9 @@ module turbos_clmm::pool_factory {
             tick_spacing,
             sqrt_price,
 			pool_config.fee_protocol,
-            ctx);
+			clock,
+            ctx,
+		);
 
 		event::emit(PoolCreatedEvent {
 			account: tx_context::sender(ctx),
@@ -132,6 +136,7 @@ module turbos_clmm::pool_factory {
 		pool_config: &mut PoolConfig,
 		feeType: &Fee<FeeType>,
 		sqrt_price: u128,
+		clock: &Clock,
 		ctx: &mut TxContext
     ) {
 		let fee = fee::get_fee(feeType);
@@ -144,7 +149,9 @@ module turbos_clmm::pool_factory {
             tick_spacing,
             sqrt_price,
 			pool_config.fee_protocol,
-            ctx);
+			clock,
+            ctx
+		);
 		vector::push_back(&mut pool_config.pools, object::id(&pool));
 
 		event::emit(PoolCreatedEvent {
