@@ -74,9 +74,9 @@ module turbos_clmm::pool_factory {
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
 		tick_lower_index: u32,
-		tick_lower_index_is_neg: bool,
+		tick_lower_index_is_neg_u8: u8,
         tick_upper_index: u32,
-		tick_upper_index_is_neg: bool,
+		tick_upper_index_is_neg_u8: u8,
 		amount_a_desired: u128,
         amount_b_desired: u128,
         amount_a_min: u64,
@@ -86,6 +86,8 @@ module turbos_clmm::pool_factory {
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
+		let tick_lower_index_is_neg = if (tick_lower_index_is_neg_u8 == 1) { true } else { false };
+		let tick_upper_index_is_neg = if (tick_upper_index_is_neg_u8 == 1) { true } else { false };
 		let fee = fee::get_fee(feeType);
         let key = fee;
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
