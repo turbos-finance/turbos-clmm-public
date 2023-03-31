@@ -1,7 +1,7 @@
 [package]
 name = "TurbosToken"
 version = "0.0.1"
-published-at = "0xfaf4e2441c904cd67d24704ff635587a7c9156c5f0d6f0b75d67b8c2f9f40c8c"
+published-at = "0x97ba869857fd684dc888f48073887a3192de20a8c018e57fbf18971988069e9a"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir="crates/sui-framework/packages/sui-framework/", rev = "devnet" }

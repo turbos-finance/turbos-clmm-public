@@ -71,8 +71,8 @@ module turbos_clmm::pool_factory {
 		feeType: &Fee<FeeType>,
 		sqrt_price: u128,
 		positions: &mut Positions,
-		coins_a: vector<Coin<CoinTypeA>>, 
-		coins_b: vector<Coin<CoinTypeB>>, 
+		coin_a: Coin<CoinTypeA>,
+		coin_b: Coin<CoinTypeB>,
 		tick_lower_index: u32,
 		tick_lower_index_is_neg_u8: u8,
         tick_upper_index: u32,
@@ -114,8 +114,8 @@ module turbos_clmm::pool_factory {
 		position_manager::mint(
 			&mut pool,
 			positions,
-			coins_a,
-			coins_b,
+			coin_to_vec(coin_a),
+			coin_to_vec(coin_b),
 			tick_lower_index,
 			tick_lower_index_is_neg,
 			tick_upper_index,
@@ -132,6 +132,12 @@ module turbos_clmm::pool_factory {
 		vector::push_back(&mut pool_config.pools, object::id(&pool));
         transfer::public_share_object(pool);
 
+    }
+
+	public fun coin_to_vec<T>(coin: Coin<T>): vector<Coin<T>> {
+        let self = vector::empty<Coin<T>>();
+        vector::push_back(&mut self, coin);
+        self
     }
 
     public entry fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
