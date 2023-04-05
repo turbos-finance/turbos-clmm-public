@@ -42,12 +42,16 @@ module turbos_clmm::pool {
 	const ESwapGatherThanMaxSqrtPrice: u64 = 10;
 	const EPoolOverflow: u64 = 11;
 	const EInvildTickIndex: u64 = 12;
+    const EInvalidRewardIndex: u64 = 13;
+    const EInvalidRewardVault: u64 = 14;
+    const EInvalidTimestamp: u64 = 15;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
 	const MIN_SQRT_PRICE: u128 = 4295048016;
 	const MAX_SQRT_PRICE: u128 = 79226673515401279992447579055;
+    const NUM_REWARDS: u64 = 3;
 
 	struct Tick has key, store {
 		id: UID,
@@ -55,7 +59,14 @@ module turbos_clmm::pool {
         liquidity_net: I128,
         fee_growth_outside_a: u128,
 		fee_growth_outside_b: u128,
+        reward_growths_outside: vector<u128>,
         initialized: bool,
+    }
+
+    struct PositionRewardInfo has key, store {
+        id: UID,
+        reward_growth_inside: u128,
+        amount_owed: u64,
     }
 
     struct Position has key, store {
@@ -68,6 +79,25 @@ module turbos_clmm::pool {
 		// the fees owed to the position owner in token0/token1
         tokens_owed_a: u64,
         tokens_owed_b: u64,
+        reward_infos: vector<PositionRewardInfo>,
+    }
+
+    struct PoolRewardVault<phantom RewardCoin> has key, store {
+        id: UID,
+        coin: Balance<RewardCoin>,
+    }
+    
+    struct PoolRewardInfo has key, store {
+        id: UID,
+        vault: address,
+        emissions_per_second: u128,
+        growth_global: u128,
+    }
+
+    struct NextPoolRewardInfo has drop {
+        vault: address,
+        emissions_per_second: u128,
+        growth_global: u128,
     }
 
     struct Pool<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
@@ -89,6 +119,8 @@ module turbos_clmm::pool {
         user_position: VecMap<address, vector<ID>>,
 		tick_map: VecMap<I32, u256>,
         deploy_time_ms: u64,
+        reward_infos: vector<PoolRewardInfo>,
+        reward_last_updated_time_ms: u64,
     }
 
     struct SwapEvent has copy, drop {
@@ -165,6 +197,8 @@ module turbos_clmm::pool {
             user_position: vec_map::empty(),
 			tick_map: vec_map::empty(),
             deploy_time_ms: clock::timestamp_ms(clock),
+            reward_infos: vector::empty(),
+            reward_last_updated_time_ms: 0,
         }
     }
 
@@ -255,7 +289,8 @@ module turbos_clmm::pool {
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
-        ctx: &mut TxContext
+        ctx: &mut TxContext,
+        //clock: &Clock,
     ): (I128, I128) {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
@@ -265,6 +300,9 @@ module turbos_clmm::pool {
             assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
         };
 		let exact_input = i128::gt(amount_specified, i128::zero());
+        //reword
+        //let rewad_growth = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
+        let reward_growths = next_pool_reward_infos(pool, 0);
 
 		//cache
         let liquidity_start = pool.liquidity;
@@ -333,6 +371,7 @@ module turbos_clmm::pool {
                         step_tick_next_index,
                         if(a_for_b) fee_growth_global else fee_growth_global_a,
                         if(a_for_b) fee_growth_global_b else fee_growth_global,
+                        &reward_growths,
 						ctx
                     );
                     // if we're moving leftward, we interpret liquidity_net as the opposite sign
@@ -423,6 +462,102 @@ module turbos_clmm::pool {
         });
 
         (amount_a, amount_b)
+    }
+
+    public(friend) fun init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        ctx: &mut TxContext
+    ): PoolRewardVault<RewardCoin> {
+        assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
+        assert!(reward_index == vector::length(&pool.reward_infos), EInvalidRewardIndex);
+
+        let vault = PoolRewardVault {
+            id: object::new(ctx),
+            coin: balance::zero<RewardCoin>(),
+        };
+        vector::insert(&mut pool.reward_infos, PoolRewardInfo {
+            id: object::new(ctx), 
+            vault: object::id_address(&vault),
+            emissions_per_second: 0,
+            growth_global: 0,
+        }, reward_index);
+        
+        vault
+    }
+
+    public(friend) fun update_reward_emissions<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        emissions_per_second: u128,
+        _ctx: &mut TxContext
+    ) {
+        assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
+
+        let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
+        reward_info.emissions_per_second = emissions_per_second;
+    }
+
+    public(friend) fun add_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        vault: &mut  PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        coin: Coin<RewardCoin>,
+        amount: u64,
+        ctx: &mut TxContext
+    ) {
+        assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
+        let reward_info = vector::borrow(&pool.reward_infos, reward_index);
+        assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
+
+        let coin_in = coin::split(&mut coin, amount, ctx);
+        balance::join(&mut vault.coin, coin::into_balance(coin_in));
+
+        if (coin::value(&coin) == 0) {
+            coin::destroy_zero(coin);
+        } else {
+            transfer::public_transfer(
+                coin,
+                tx_context::sender(ctx)
+            );
+        };
+    }
+
+    // returns [growth_global]
+    fun next_pool_reward_infos<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        next_time_ms: u64,
+    ) :vector<u128> {
+        let curr_time_ms = pool.reward_last_updated_time_ms;
+        assert!(next_time_ms >= curr_time_ms, EInvalidTimestamp);
+
+        let growth_global_vector = vector::empty<u128>();
+
+        // Calculate new global reward growth
+        let time_delta = (next_time_ms - curr_time_ms) / 1000;
+        let len = vector::length(&pool.reward_infos);
+        let i = 0;
+        while (i < len) {
+            if (pool.liquidity == 0 || time_delta == 0) {
+                vector::insert(&mut growth_global_vector, 0, i);
+            } else {
+                let reward_info = vector::borrow_mut(&mut pool.reward_infos, i);
+                // Calculate the new reward growth delta.
+                let reward_growth_delta = full_math_u128::mul_div_floor(
+                    (time_delta as u128),
+                    reward_info.emissions_per_second,
+                    pool.liquidity,
+                );
+
+                let curr_growth_global = reward_info.growth_global;
+                reward_info.growth_global = curr_growth_global + reward_growth_delta;
+                vector::insert(&mut growth_global_vector, reward_info.growth_global, i);
+            };
+
+            i = i + 1;
+        };
+
+        growth_global_vector
     }
 
 	fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
@@ -604,6 +739,7 @@ module turbos_clmm::pool {
         		fee_growth_inside_b: 0,
         		tokens_owed_a: 0,
         		tokens_owed_b: 0,
+                reward_infos: vector::empty(),
 			});
 		};
     }
@@ -655,12 +791,21 @@ module turbos_clmm::pool {
             ctx
         );
 
+        let reward_growths_inside = next_reward_growths_inside(
+            pool,
+            tick_lower_index,
+            tick_upper_index,
+            tick_current_index,
+            ctx
+        );
+
         update_position_metadata(
             pool, 
             get_position_key(owner, tick_lower_index, tick_upper_index),
             liquidity_delta, 
             fee_growth_inside_a, 
             fee_growth_inside_b, 
+            reward_growths_inside,
             ctx
         );
 
@@ -751,6 +896,7 @@ module turbos_clmm::pool {
         	liquidity_net: i128::zero(),
         	fee_growth_outside_a: 0,
 			fee_growth_outside_b: 0,
+            reward_growths_outside: vector::empty(),
         	initialized: false,
 		});
 
@@ -762,6 +908,7 @@ module turbos_clmm::pool {
         tick_index: I32,
         fee_growth_global_a: u128,
 		fee_growth_global_b: u128,
+        reward_growth_global: &vector<u128>,
         ctx: &mut TxContext,
     ): I128 {
 		let tick;
@@ -773,6 +920,16 @@ module turbos_clmm::pool {
 
 		tick.fee_growth_outside_a = fee_growth_global_a - tick.fee_growth_outside_a;
         tick.fee_growth_outside_b = fee_growth_global_b - tick.fee_growth_outside_b;
+
+        let i = 0;
+        let len = vector::length(reward_growth_global);
+        while (i < len) {
+            let reward_new = vector::borrow(reward_growth_global, i);
+            //todo reward may be null
+            let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
+            *reward = *reward_new - *reward;
+            i = i + 1;
+        };
 
         tick.liquidity_net
     }
@@ -842,14 +999,56 @@ module turbos_clmm::pool {
 		(fee_growth_inside_a, fee_growth_inside_b)
     }
 
+    fun next_reward_growths_inside<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        tick_current_index: I32,
+        _ctx: &mut TxContext,
+    ): vector<u128> {
+        let reward_growths_inside = vector::empty();
+
+        let i = 0;
+        let len = vector::length(&pool.reward_infos);
+        while (i < len) {
+            let tick_lower = get_tick(pool, tick_lower_index);
+            let tick_upper = get_tick(pool, tick_upper_index);
+            let reward_info = vector::borrow(&pool.reward_infos, i);
+            let reward_growths_outside_lower = *vector::borrow(&tick_lower.reward_growths_outside, i);
+            let reward_growths_outside_upper = *vector::borrow(&tick_upper.reward_growths_outside, i);
+
+            // calculate reword growth below
+            let reward_growth_below;
+            if (i32::gte(tick_current_index, tick_lower_index)) {
+                reward_growth_below = reward_growths_outside_lower;
+            } else {
+                reward_growth_below = reward_info.growth_global - reward_growths_outside_lower;
+            };
+
+            // calculate reword growth above
+            let reward_growth_above;
+            if (i32::lt(tick_current_index, tick_upper_index)) {
+                reward_growth_above = reward_growths_outside_upper;
+            } else {
+                reward_growth_above = reward_info.growth_global - reward_growths_outside_upper;
+            };
+
+            vector::insert(&mut reward_growths_inside, reward_info.growth_global - reward_growth_below - reward_growth_above, i);
+        };
+
+        reward_growths_inside
+    }
+
     fun update_position_metadata<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         position_key: String,
         liquidity_delta: I128,
         fee_growth_inside_a: u128,
         fee_growth_inside_b: u128,
+        reward_growths_inside: vector<u128>,
         _ctx: &mut TxContext,
     ) {
+        let reward_infos_len = vector::length(&pool.reward_infos);
         let position = get_position_mut_by_key(pool, position_key);
 
         let liquidity_next;
@@ -872,7 +1071,20 @@ module turbos_clmm::pool {
             // overflow is acceptable, have to withdraw before you hit type(uint128).max fees
             position.tokens_owed_a = position.tokens_owed_a + tokens_owed_a;
             position.tokens_owed_b = position.tokens_owed_b + tokens_owed_b;
-        }
+        };
+
+        let i = 0;
+        while (i < reward_infos_len) {
+            let reward_growth_inside = *vector::borrow(&reward_growths_inside, i);
+            //todo curr_reward_info may be null
+            let curr_reward_info = vector::borrow_mut(&mut position.reward_infos, i);
+            let reward_growth_delta = reward_growth_inside - curr_reward_info.reward_growth_inside;
+            curr_reward_info.reward_growth_inside = reward_growth_inside;
+            curr_reward_info.amount_owed = curr_reward_info.amount_owed + (reward_growth_delta as u64);
+
+            i = i + 1;
+        };
+
     }
 
     public fun get_position<CoinTypeA, CoinTypeB, FeeType>(
