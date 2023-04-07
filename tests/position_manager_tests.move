@@ -6,8 +6,8 @@ module turbos_clmm::position_manager_tests {
     use sui::coin::{Self, Coin};
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::pool_factory_tests;
-    use turbos_token::btc::{BTC};
-	use turbos_token::usdc::{USDC};
+    use turbos_clmm::btc::{BTC};
+	use turbos_clmm::usdc::{USDC};
     use turbos_clmm::fee500bps::{FEE500BPS};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::tools_tests;

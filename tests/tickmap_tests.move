@@ -8,8 +8,8 @@ module turbos_clmm::tickmap_tests {
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::i32::{Self, I32};
 	use turbos_clmm::position_manager_tests;
-	use turbos_token::btc::{BTC};
-	use turbos_token::usdc::{USDC};
+	use turbos_clmm::btc::{BTC};
+	use turbos_clmm::usdc::{USDC};
     use turbos_clmm::fee500bps::{FEE500BPS};
 	use sui::test_utils::{assert_eq};
 	use std::vector;

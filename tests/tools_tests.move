@@ -7,9 +7,9 @@ module turbos_clmm::tools_tests {
     use std::vector;
     use sui::test_scenario::{Self, Scenario};
 	use sui::transfer;
-    use turbos_token::btc::{Self, BTC};
-	use turbos_token::usdc::{Self, USDC};
-    use turbos_token::eth::{Self, ETH};
+    use turbos_clmm::btc::{Self, BTC};
+	use turbos_clmm::usdc::{Self, USDC};
+    use turbos_clmm::eth::{Self, ETH};
     use sui::coin::{Self, TreasuryCap};
     use turbos_clmm::fee500bps::{Self};
     use turbos_clmm::fee3000bps::{Self};

@@ -1,9 +1,8 @@
 // Copyright (c) Turbos Finance, Inc.
 // SPDX-License-Identifier: MIT
 
-/// Coin<BTC> is the mock token used to test in Turbos.
-/// It has 9 decimals
-module turbos_token::btc {
+#[test_only]
+module turbos_clmm::btc {
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
     use sui::coin::{Self};

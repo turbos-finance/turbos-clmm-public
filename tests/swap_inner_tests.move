@@ -5,8 +5,8 @@
 module turbos_clmm::swap_inner_tests {
     use sui::test_utils::{assert_eq};
     use sui::test_scenario::{Self, Scenario};
-    use turbos_token::btc::{BTC};
-	use turbos_token::usdc::{USDC};
+    use turbos_clmm::btc::{BTC};
+	use turbos_clmm::usdc::{USDC};
     use turbos_clmm::fee10000bps::{FEE10000BPS};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::tools_tests;

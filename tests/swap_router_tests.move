@@ -6,9 +6,9 @@ module turbos_clmm::swap_router_tests {
     use sui::test_utils::{assert_eq};
 	use sui::coin::{Coin};
     use sui::test_scenario::{Self, Scenario};
-    use turbos_token::btc::{BTC};
-	use turbos_token::usdc::{USDC};
-    use turbos_token::eth::{ETH};
+    use turbos_clmm::btc::{BTC};
+	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::eth::{ETH};
     use turbos_clmm::fee3000bps::{FEE3000BPS};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::tools_tests;
