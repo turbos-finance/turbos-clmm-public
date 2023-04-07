@@ -163,19 +163,19 @@ module turbos_clmm::math_sqrt_price {
     /// @param sqrt_price The starting price, i.e., before accounting for the input amount
     /// @param liquidity The amount of usable liquidity
     /// @param amountIn How much of token0, or token1, is being swapped in
-    /// @param a_for_b Whether the amount in is token0 or token1
+    /// @param a_to_b Whether the amount in is token0 or token1
     /// @return sqrtQX96 The price after adding the input amount to token0 or token1
     public fun get_next_sqrt_price_from_input(
         sqrt_price: u128,
         liquidity: u128,
         amount_in: u128,
-        a_for_b: bool
+        a_to_b: bool
     ): u128 {
         assert!(sqrt_price > 0, EInvildSqrtPrice);
         assert!(liquidity > 0, ELiquidity);
 
         // round to make sure that we don't pass the target price
-        if (a_for_b) {
+        if (a_to_b) {
             get_next_sqrt_price_from_amount_a_rounding_up(sqrt_price, liquidity, amount_in, false)
         } else {
             get_next_sqrt_price_from_amount_b_rounding_down(sqrt_price, liquidity, amount_in, false)
@@ -187,19 +187,19 @@ module turbos_clmm::math_sqrt_price {
     /// @param sqrt_price The starting price before accounting for the output amount
     /// @param liquidity The amount of usable liquidity
     /// @param amount_out How much of token0, or token1, is being swapped out
-    /// @param a_for_b Whether the amount out is token0 or token1
+    /// @param a_to_b Whether the amount out is token0 or token1
     /// @return sqrtQX96 The price after removing the output amount of token0 or token1
     public fun get_next_sqrt_price_from_output(
         sqrt_price: u128,
         liquidity: u128,
         amount_out: u128,
-         a_for_b: bool
+         a_to_b: bool
     ): u128 {
         assert!(sqrt_price > 0, EInvildSqrtPrice);
         assert!(liquidity > 0, ELiquidity);
 
         // round to make sure that we pass the target price
-        if (a_for_b) {
+        if (a_to_b) {
             get_next_sqrt_price_from_amount_b_rounding_down(sqrt_price, liquidity, amount_out, false)
         } else {
             get_next_sqrt_price_from_amount_a_rounding_up(sqrt_price, liquidity, amount_out, false)

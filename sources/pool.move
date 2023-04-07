@@ -125,6 +125,8 @@ module turbos_clmm::pool {
         tick_current_index: I32,
         sqrt_price: u128,
         protocol_fee: u64,
+        fee_growth_global_delta: u64,
+        a_to_b: bool,
     }
 
     struct MintEvent has copy, drop {
@@ -279,7 +281,7 @@ module turbos_clmm::pool {
 	public(friend) fun swap<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
-        a_for_b: bool,
+        a_to_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
         clock: &Clock,
@@ -287,7 +289,7 @@ module turbos_clmm::pool {
     ): (I128, I128) {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
-        if (a_for_b) {
+        if (a_to_b) {
             assert!(sqrt_price_limit < pool.sqrt_price && sqrt_price_limit > MIN_SQRT_PRICE, ESwapLessThanMinSqrtPrice);
         } else {
             assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
@@ -303,16 +305,17 @@ module turbos_clmm::pool {
 		let amount_calculated = i128::zero();
 		let sqrt_price = pool.sqrt_price;
 		let tick_current_index = pool.tick_current_index;
-		let fee_growth_global = if (a_for_b) pool.fee_growth_global_a else pool.fee_growth_global_b;
+		let fee_growth_global = if (a_to_b) pool.fee_growth_global_a else pool.fee_growth_global_b;
 		let protocol_fee = 0;
 		let liquidity = pool.liquidity;
+        let fee_growth_global_delta = 0;
 
 		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=sqrt_price_limit) {
 			let step_sqrt_price_start = sqrt_price;
 			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
 				pool,
 				tick_current_index,
-				a_for_b
+				a_to_b
 			);
 
 			if (i32::lt(step_tick_next_index, i32::neg_from(MAX_TICK_INDEX))) {
@@ -326,7 +329,7 @@ module turbos_clmm::pool {
 			let step_amount_in;
 			let step_amount_out;
 			let step_fee_amount;
-			let limit = if (a_for_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
+			let limit = if (a_to_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
             let target = if (limit) sqrt_price_limit else step_sqrt_price_next;
             (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = math_swap::compute_swap(
                 sqrt_price,
@@ -351,7 +354,8 @@ module turbos_clmm::pool {
 			};
 
 			if (liquidity > 0) {
-				fee_growth_global = fee_growth_global + full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
+                fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
+				fee_growth_global = fee_growth_global + fee_growth_global_delta;
 			};
 
 			if (sqrt_price == step_sqrt_price_next) {
@@ -360,20 +364,20 @@ module turbos_clmm::pool {
 					let liquidity_net = cross_tick(
 						pool,
                         step_tick_next_index,
-                        if(a_for_b) fee_growth_global else fee_growth_global_a,
-                        if(a_for_b) fee_growth_global_b else fee_growth_global,
+                        if(a_to_b) fee_growth_global else fee_growth_global_a,
+                        if(a_to_b) fee_growth_global_b else fee_growth_global,
                         &reward_growths,
 						ctx
                     );
                     // if we're moving leftward, we interpret liquidity_net as the opposite sign
                     // safe because liquidity_net cannot be type(int128).min
-                    if (a_for_b) {
+                    if (a_to_b) {
 						liquidity_net = i128::neg(liquidity_net);
 					};
 
                     liquidity = math_liquidity::add_delta(liquidity, liquidity_net);
 				};
-				tick_current_index = if (a_for_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
+				tick_current_index = if (a_to_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
 			} else if (sqrt_price != step_sqrt_price_start) {
 				tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
 			};
@@ -388,7 +392,7 @@ module turbos_clmm::pool {
 
 		if (liquidity_start != liquidity) pool.liquidity = liquidity;
 
-		if (a_for_b) {
+		if (a_to_b) {
 			pool.fee_growth_global_a = fee_growth_global;
 			if (protocol_fee > 0) {
 				pool.protocol_fees_a = pool.protocol_fees_a + (protocol_fee as u64);
@@ -400,7 +404,7 @@ module turbos_clmm::pool {
 			};
 		};
 
-		let (amount_a, amount_b) = if (a_for_b == exact_input) {
+		let (amount_a, amount_b) = if (a_to_b == exact_input) {
             (i128::sub(amount_specified, amount_specified_remaining), amount_calculated)
 		} else {
 			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
@@ -415,6 +419,8 @@ module turbos_clmm::pool {
             tick_current_index: tick_current_index,
             sqrt_price: sqrt_price,
             protocol_fee: (protocol_fee as u64),
+            fee_growth_global_delta: (fee_growth_global_delta as u64),
+            a_to_b: a_to_b,
         });
        
 		(amount_a, amount_b)
@@ -1603,7 +1609,7 @@ module turbos_clmm::pool {
     public fun swap_for_testing<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
-        a_for_b: bool,
+        a_to_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
         clock: &Clock,
@@ -1612,7 +1618,7 @@ module turbos_clmm::pool {
         swap(
             pool,
             recipient,
-            a_for_b,
+            a_to_b,
             amount_specified,
             sqrt_price_limit,
             clock,
