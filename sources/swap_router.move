@@ -6,6 +6,7 @@ module turbos_clmm::swap_router {
     use sui::tx_context::{TxContext};
     use turbos_clmm::pool::{Self, Pool};
 	use sui::coin::{Coin};
+    use sui::clock::{Clock};
 
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -21,6 +22,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a, amount_b) = pool::swap(
@@ -29,6 +31,7 @@ module turbos_clmm::swap_router {
 			true,
 			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
+            clock,
 			ctx
 		);
         let amount_a_64 = (i128::abs_u128(amount_a) as u64);
@@ -53,6 +56,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a, amount_b) = pool::swap(
@@ -61,6 +65,7 @@ module turbos_clmm::swap_router {
 			false,
 			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
 			sqrt_price_limit,
+            clock,
 			ctx
 		);
         let amount_a_64 = (i128::abs_u128(amount_b) as u64);
@@ -87,6 +92,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -98,6 +104,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::from(amount),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -107,6 +114,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::abs(step1_out),
 			    MIN_SQRT_PRICE_X64 + 1,
+                clock,
 			    ctx
 		    );
 
@@ -121,6 +129,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::neg_from(amount),
 			    MIN_SQRT_PRICE_X64 + 1,
+                clock,
 			    ctx
 		    );
 
@@ -130,6 +139,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -160,6 +170,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -171,6 +182,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::from(amount),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -181,6 +193,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::abs(step1_out),
 			    MAX_SQRT_PRICE_X64 - 1,
+                clock,
 			    ctx
 		    );
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
@@ -194,6 +207,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::neg_from(amount),
 			    MAX_SQRT_PRICE_X64 - 1,
+                clock,
 			    ctx
 		    );
             
@@ -204,6 +218,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::neg_from(i128::abs_u128(step2_in)),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
             //std::debug::print(&i128::abs_u128(step2_out));
@@ -234,6 +249,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -245,6 +261,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::from(amount),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -255,6 +272,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::abs(step1_out),
 			    MIN_SQRT_PRICE_X64 + 1,
+                clock,
 			    ctx
 		    );
 
@@ -269,6 +287,7 @@ module turbos_clmm::swap_router {
 			    true,
 			    i128::neg_from(amount),
 			    MIN_SQRT_PRICE_X64 + 1,
+                clock,
 			    ctx
 		    );
 
@@ -279,6 +298,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -309,6 +329,7 @@ module turbos_clmm::swap_router {
         is_exact_in: bool,
         recipient: address,
         _deadline: u128,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -320,6 +341,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::from(amount),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 
@@ -330,6 +352,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::abs(step1_out),
 			    MAX_SQRT_PRICE_X64 - 1,
+                clock,
 			    ctx
 		    );
 
@@ -344,6 +367,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::neg_from(amount),
 			    MAX_SQRT_PRICE_X64 - 1,
+                clock,
 			    ctx
 		    );
 
@@ -354,6 +378,7 @@ module turbos_clmm::swap_router {
 			    false,
 			    i128::neg_from(i128::as_u128(step2_in)),
 			    sqrt_price_limit,
+                clock,
 			    ctx
 		    );
 

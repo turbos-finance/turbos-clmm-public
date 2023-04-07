@@ -63,8 +63,7 @@ module turbos_clmm::pool {
         initialized: bool,
     }
 
-    struct PositionRewardInfo has key, store {
-        id: UID,
+    struct PositionRewardInfo has store {
         reward_growth_inside: u128,
         amount_owed: u64,
     }
@@ -89,12 +88,6 @@ module turbos_clmm::pool {
     
     struct PoolRewardInfo has key, store {
         id: UID,
-        vault: address,
-        emissions_per_second: u128,
-        growth_global: u128,
-    }
-
-    struct NextPoolRewardInfo has drop {
         vault: address,
         emissions_per_second: u128,
         growth_global: u128,
@@ -289,8 +282,8 @@ module turbos_clmm::pool {
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
+        clock: &Clock,
         ctx: &mut TxContext,
-        //clock: &Clock,
     ): (I128, I128) {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
@@ -301,9 +294,7 @@ module turbos_clmm::pool {
         };
 		let exact_input = i128::gt(amount_specified, i128::zero());
         //reword
-        //let rewad_growth = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
-        let reward_growths = next_pool_reward_infos(pool, 0);
-
+        let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
 		//cache
         let liquidity_start = pool.liquidity;
 
@@ -744,6 +735,29 @@ module turbos_clmm::pool {
 		};
     }
 
+    fun try_init_reward_infos(
+        reward_infos: &mut vector<PositionRewardInfo>,
+        index: u64,
+    ) {
+        let len = vector::length(reward_infos);
+        if (index == len) {
+            vector::push_back(reward_infos, PositionRewardInfo {
+                reward_growth_inside: 0,
+                amount_owed: 0,
+            });
+        }
+    }
+
+    fun try_init_tick_reward_growths(
+        reward_growths_outside: &mut vector<u128>,
+        index: u64,
+    ) {
+        let len = vector::length(reward_growths_outside);
+        if (index == len) {
+            vector::push_back(reward_growths_outside, 0);
+        }
+    }
+
     fun update_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
@@ -925,7 +939,7 @@ module turbos_clmm::pool {
         let len = vector::length(reward_growth_global);
         while (i < len) {
             let reward_new = vector::borrow(reward_growth_global, i);
-            //todo reward may be null
+            try_init_tick_reward_growths(&mut tick.reward_growths_outside, i);
             let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
             *reward = *reward_new - *reward;
             i = i + 1;
@@ -1076,7 +1090,7 @@ module turbos_clmm::pool {
         let i = 0;
         while (i < reward_infos_len) {
             let reward_growth_inside = *vector::borrow(&reward_growths_inside, i);
-            //todo curr_reward_info may be null
+            try_init_reward_infos(&mut position.reward_infos, i);
             let curr_reward_info = vector::borrow_mut(&mut position.reward_infos, i);
             let reward_growth_delta = reward_growth_inside - curr_reward_info.reward_growth_inside;
             curr_reward_info.reward_growth_inside = reward_growth_inside;
@@ -1592,6 +1606,7 @@ module turbos_clmm::pool {
         a_for_b: bool,
         amount_specified: I128,
         sqrt_price_limit: u128,
+        clock: &Clock,
         ctx: &mut TxContext
     ): (I128, I128) {
         swap(
@@ -1600,6 +1615,7 @@ module turbos_clmm::pool {
             a_for_b,
             amount_specified,
             sqrt_price_limit,
+            clock,
             ctx
         )
     }

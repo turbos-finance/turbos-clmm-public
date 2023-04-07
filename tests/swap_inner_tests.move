@@ -108,6 +108,7 @@ module turbos_clmm::swap_inner_tests {
 
 		test_scenario::next_tx(scenario, player);
         {
+			let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
@@ -115,6 +116,7 @@ module turbos_clmm::swap_inner_tests {
 				true,
 				i128::from(1000000000000), //amount_in 
 				MIN_SQRT_PRICE_X64 + 1,
+				&clock,
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(i128::abs_u128(amount_a), 1000000000000);
@@ -144,6 +146,7 @@ module turbos_clmm::swap_inner_tests {
 			assert_eq(tokens_owed_a, 7500000000);
 			assert_eq(tokens_owed_b, 0);
 
+			test_scenario::return_shared(clock);
 			test_scenario::return_shared(pool);
 		};
 
@@ -159,6 +162,7 @@ module turbos_clmm::swap_inner_tests {
 
 		test_scenario::next_tx(scenario, player);
         {
+			let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
@@ -166,6 +170,7 @@ module turbos_clmm::swap_inner_tests {
 				false,
 				i128::from(1000000000000), //amount_in 
 				MAX_SQRT_PRICE_X64 - 1,
+				&clock,
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(i128::abs_u128(amount_a), 989999946868);
@@ -178,6 +183,7 @@ module turbos_clmm::swap_inner_tests {
 			let (protocol_fees_a, protocol_fees_b) = tools_tests::get_pool_protocol_fees(&pool);
 			assert_eq(protocol_fees_a, 0);
 			assert_eq(protocol_fees_b, 2500000000);
+			test_scenario::return_shared(clock);
 			test_scenario::return_shared(pool);
 		};
 
@@ -193,6 +199,7 @@ module turbos_clmm::swap_inner_tests {
 
 		test_scenario::next_tx(scenario, player);
         {
+			let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
@@ -200,6 +207,7 @@ module turbos_clmm::swap_inner_tests {
 				true,
 				i128::neg_from(1000000000000), //amount_in 
 				MIN_SQRT_PRICE_X64 + 1,
+				&clock,
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(i128::abs_u128(amount_a), 1010101064860);
@@ -212,6 +220,7 @@ module turbos_clmm::swap_inner_tests {
 			let (protocol_fees_a, protocol_fees_b) = tools_tests::get_pool_protocol_fees(&pool);
 			assert_eq(protocol_fees_a, 2525252662);
 			assert_eq(protocol_fees_b, 0);
+			test_scenario::return_shared(clock);
 			test_scenario::return_shared(pool);
 		};
 
@@ -227,6 +236,7 @@ module turbos_clmm::swap_inner_tests {
 
 		test_scenario::next_tx(scenario, player);
         {
+			let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
@@ -234,6 +244,7 @@ module turbos_clmm::swap_inner_tests {
 				false,
 				i128::neg_from(1000000000000), //amount_in 
 				MAX_SQRT_PRICE_X64 - 1,
+				&clock,
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(i128::abs_u128(amount_a), 1000000000000);
@@ -246,6 +257,7 @@ module turbos_clmm::swap_inner_tests {
 			let (protocol_fees_a, protocol_fees_b) = tools_tests::get_pool_protocol_fees(&pool);
 			assert_eq(protocol_fees_a, 0);
 			assert_eq(protocol_fees_b, 2525252662);
+			test_scenario::return_shared(clock);
 			test_scenario::return_shared(pool);
 		};
 
