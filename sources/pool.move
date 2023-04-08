@@ -23,6 +23,7 @@ module turbos_clmm::pool {
 	use turbos_clmm::math_sqrt_price;
     use turbos_clmm::full_math_u128;
 	use turbos_clmm::math_bit;
+    use sui::table::{Self, Table};
     use sui::clock::{Self, Clock};
 
     friend turbos_clmm::position_manager;
@@ -109,8 +110,8 @@ module turbos_clmm::pool {
         fee_growth_global_a: u128,
         fee_growth_global_b: u128,
         liquidity: u128,
-        user_position: VecMap<address, vector<ID>>,
-		tick_map: VecMap<I32, u256>,
+        user_position: VecMap<address, vector<ID>>, //todo use table or dof
+		tick_map: Table<I32, u256>,
         deploy_time_ms: u64,
         reward_infos: vector<PoolRewardInfo>,
         reward_last_updated_time_ms: u64,
@@ -190,7 +191,7 @@ module turbos_clmm::pool {
             fee_growth_global_b: 0,
             liquidity: 0,
             user_position: vec_map::empty(),
-			tick_map: vec_map::empty(),
+			tick_map: table::new(ctx),
             deploy_time_ms: clock::timestamp_ms(clock),
             reward_infos: vector::empty(),
             reward_last_updated_time_ms: 0,
@@ -643,8 +644,8 @@ module turbos_clmm::pool {
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
 	) {
-		if (!vec_map::contains(&pool.tick_map, &word_pos)) {
-			vec_map::insert(&mut pool.tick_map, word_pos, 0u256);
+		if (!table::contains(&pool.tick_map, word_pos)) {
+			table::add(&mut pool.tick_map, word_pos, 0u256);
 		};
     }
 
@@ -652,14 +653,14 @@ module turbos_clmm::pool {
 		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
 	): u256 {
-		*vec_map::get(& pool.tick_map, &word_pos)
+		*table::borrow(& pool.tick_map, word_pos)
     }
 
 	fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		word_pos: I32
 	): &mut u256 {
-		vec_map::get_mut(&mut pool.tick_map, &word_pos)
+		table::borrow_mut(&mut pool.tick_map, word_pos)
     }
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
