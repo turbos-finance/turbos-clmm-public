@@ -3,13 +3,13 @@
 
 module turbos_clmm::position_manager {
 	use std::vector;
-    use sui::vec_map::{Self, VecMap};
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
 	use sui::coin::{Coin};
+    use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::full_math_u128;
     use turbos_clmm::math_liquidity;
@@ -42,7 +42,7 @@ module turbos_clmm::position_manager {
 	struct Positions has key, store {
         id: UID,
 		nft_minted: u64,
-        user_position: VecMap<address, ID>,
+        user_position: Table<address, ID>,
     }
 
     struct IncreaseLiquidityEvent has copy, drop {
@@ -74,7 +74,7 @@ module turbos_clmm::position_manager {
 		transfer::share_object(Positions {
 			id: object::new(ctx),
 			nft_minted: 0,
-            user_position: vec_map::empty(),
+            user_position: table::new(ctx),
 		});
     }
 
@@ -400,8 +400,8 @@ module turbos_clmm::position_manager {
         position_id: ID, 
         nft_address: address
     ) {
-        if (!vec_map::contains(&positions.user_position, &nft_address)) {
-            vec_map::insert(&mut positions.user_position, nft_address, position_id);
+        if (!table::contains(&positions.user_position, nft_address)) {
+            table::add(&mut positions.user_position, nft_address, position_id);
         }
     }
 
@@ -409,8 +409,8 @@ module turbos_clmm::position_manager {
         positions: &mut Positions, 
         nft_address: address
     ) {
-        if (vec_map::contains(&positions.user_position, &nft_address)) {
-            vec_map::remove(&mut positions.user_position, &nft_address);
+        if (table::contains(&positions.user_position, nft_address)) {
+            table::remove(&mut positions.user_position, nft_address);
         }
     }
 

@@ -12,7 +12,6 @@ module turbos_clmm::pool {
     use sui::dynamic_object_field as dof;
 	use sui::dynamic_field as df;
     use sui::balance::{Self, Balance};
-    use sui::vec_map::{Self, VecMap};
     use sui::coin::{Self, Coin};
 	use turbos_clmm::math_tick;
 	use turbos_clmm::math_swap;
@@ -110,7 +109,6 @@ module turbos_clmm::pool {
         fee_growth_global_a: u128,
         fee_growth_global_b: u128,
         liquidity: u128,
-        user_position: VecMap<address, vector<ID>>, //todo use table or dof
 		tick_map: Table<I32, u256>,
         deploy_time_ms: u64,
         reward_infos: vector<PoolRewardInfo>,
@@ -190,7 +188,6 @@ module turbos_clmm::pool {
             fee_growth_global_a: 0,
             fee_growth_global_b: 0,
             liquidity: 0,
-            user_position: vec_map::empty(),
 			tick_map: table::new(ctx),
             deploy_time_ms: clock::timestamp_ms(clock),
             reward_infos: vector::empty(),
