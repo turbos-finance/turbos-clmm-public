@@ -287,11 +287,19 @@ module turbos_clmm::position_manager {
         let tokens_owed_a = (full_math_u128::mul_div_floor(fee_growth_inside_a - position.fee_growth_inside_a, position.liquidity, Q64) as u64);
         let tokens_owed_b = (full_math_u128::mul_div_floor(fee_growth_inside_b - position.fee_growth_inside_b, position.liquidity, Q64) as u64);
 
-        position.tokens_owed_a = position.tokens_owed_a + amount_a + tokens_owed_a;
-        position.tokens_owed_b = position.tokens_owed_b + amount_b + tokens_owed_b;
+        position.tokens_owed_a = position.tokens_owed_a + tokens_owed_a;
+        position.tokens_owed_b = position.tokens_owed_b + tokens_owed_b;
         position.fee_growth_inside_a = fee_growth_inside_a;
         position.fee_growth_inside_b = fee_growth_inside_b;
         position.liquidity = position.liquidity - liquidity;
+
+        pool::transfer_out(
+            pool,
+            amount_a,
+            amount_b,
+            owner,
+            ctx
+        );
 
         event::emit(DecreaseLiquidityEvent {
             pool: object::id(pool),

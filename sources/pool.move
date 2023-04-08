@@ -257,11 +257,11 @@ module turbos_clmm::pool {
 
         let (amount_a_u64, amount_b_u64) = ((i128::abs_u128(amount_a) as u64), (i128::abs_u128(amount_b) as u64));
 
-        if (amount_a_u64 > 0 || amount_b_u64 > 0) {
-            let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
-            position.tokens_owed_a = position.tokens_owed_a + amount_a_u64;
-            position.tokens_owed_b = position.tokens_owed_b + amount_b_u64;
-        };
+        // if (amount_a_u64 > 0 || amount_b_u64 > 0) {
+        //     let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
+        //     position.tokens_owed_a = position.tokens_owed_a + amount_a_u64;
+        //     position.tokens_owed_b = position.tokens_owed_b + amount_b_u64;
+        // };
 
         event::emit(BurnEvent {
             pool: object::id(pool),
