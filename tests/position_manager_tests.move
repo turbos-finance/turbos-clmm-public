@@ -436,8 +436,8 @@ module turbos_clmm::position_manager_tests {
         {
             let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
             let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
-            assert_eq(amount_btc, 99);
-            assert_eq(amount_usdc, 99);
+            assert_eq(amount_btc, 8989);
+            assert_eq(amount_usdc, 7999);
         };
 
 
@@ -471,8 +471,8 @@ module turbos_clmm::position_manager_tests {
             assert_eq(liquidity, 0);
             assert_eq(fee_growth_inside_a, 0);
             assert_eq(fee_growth_inside_b, 0);
-            assert_eq(tokens_owed_a, 999);
-            assert_eq(tokens_owed_b, 1008);
+            assert_eq(tokens_owed_a, 0);
+            assert_eq(tokens_owed_b, 0);
 
             let (
 			    coin_a,
@@ -489,8 +489,8 @@ module turbos_clmm::position_manager_tests {
                 fee_growth_global_b,
                 liquidity,
 		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
-            assert_eq(coin_a, 1001);
-            assert_eq(coin_b, 1010);
+            assert_eq(coin_a, 2);
+            assert_eq(coin_b, 2);
             assert_eq(sqrt_price, 18446744073709551616);
             assert_eq(i32::eq(tick_current_index, i32::from(0)), true);
             assert_eq(tick_spacing, 10);

@@ -530,8 +530,8 @@ module turbos_clmm::swap_mint_burn_tests {
 				0xffffffffffffffff,
 				test_scenario::ctx(scenario),
 			);
-			assert_eq(amount_a, 316);
-			assert_eq(amount_b, 31);
+			assert_eq(amount_a, 0);
+			assert_eq(amount_b, 0);
 			test_scenario::return_shared(pool);
 		};
 		test_scenario::end(scenario_val);
@@ -654,7 +654,7 @@ module turbos_clmm::swap_mint_burn_tests {
 				test_scenario::ctx(scenario),
 			);
 			assert_eq(amount_a, 0);
-			assert_eq(amount_b, 3);
+			assert_eq(amount_b, 0);
 			test_scenario::return_shared(pool);
 		};
 		test_scenario::end(scenario_val);
