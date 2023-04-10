@@ -42,6 +42,10 @@ module turbos_clmm::pool_factory {
 		tick_spacing: u32,
 	}
 
+	struct SetFeeProtocolEvent has copy, drop {
+		fee_protocol: u32,
+	}
+
 	fun init(ctx: &mut TxContext) {
         init_(ctx);
     }
@@ -182,6 +186,7 @@ module turbos_clmm::pool_factory {
 		assert!(tick_spacing > 0 && tick_spacing < 16384, EInvalidTicKSpacing);
 		assert!(!vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeAlreadyExists);
 		vec_map::insert(&mut pool_config.fee_amount_tick_spacing, fee, tick_spacing);
+		event::emit(FeeAmountEnabledEvent {fee: fee, tick_spacing: tick_spacing});
 	}
 
 	public entry fun set_fee_protocol(
@@ -191,6 +196,7 @@ module turbos_clmm::pool_factory {
 	) {
 		assert!(fee_protocol < 1000000, EInvalidFee);
 		pool_config.fee_protocol = fee_protocol;
+		event::emit(SetFeeProtocolEvent {fee_protocol: fee_protocol});
 	}
 
 	#[test_only]

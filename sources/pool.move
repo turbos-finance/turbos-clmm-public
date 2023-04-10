@@ -161,6 +161,38 @@ module turbos_clmm::pool {
         amount_b: u64,
     }
 
+    struct InitRewardEvent has copy, drop {
+        pool: ID,
+        reward_index: u64,
+        reward_vault: address,
+        reward_manager: address,
+    }
+
+    struct UpdateRewardEmissionsEvent has copy, drop {
+        pool: ID,
+        reward_index: u64,
+        reward_vault: address,
+        reward_manager: address,
+        reward_emissions_per_second: u128,
+    }
+
+    struct AddRewardEvent has copy, drop {
+        pool: ID,
+        reward_index: u64,
+        reward_vault: address,
+        reward_manager: address,
+        amount: u64,
+    }
+
+    struct RemoveRewardEvent has copy, drop {
+        pool: ID,
+        reward_index: u64,
+        reward_vault: address,
+        reward_manager: address,
+        amount: u64,
+        recipient: address,
+    }
+
     fun init(_ctx: &mut TxContext) {
         //some init
     }
@@ -483,6 +515,13 @@ module turbos_clmm::pool {
             growth_global: 0,
             manager: manager,
         }, reward_index);
+
+        event::emit(InitRewardEvent {
+            pool: object::id(pool),
+            reward_index: reward_index,
+            reward_vault: object::id_address(&vault),
+            reward_manager: manager,
+        });
         
         vault
     }
@@ -493,11 +532,20 @@ module turbos_clmm::pool {
         emissions_per_second: u128,
         ctx: &mut TxContext
     ) {
+        let pool_id = object::id(pool);
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
         assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
 
         reward_info.emissions_per_second = emissions_per_second;
+
+        event::emit(UpdateRewardEmissionsEvent {
+            pool: pool_id,
+            reward_index: reward_index,
+            reward_vault: reward_info.vault,
+            reward_manager: reward_info.manager,
+            reward_emissions_per_second: emissions_per_second,
+        });
     }
 
     public(friend) fun add_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
@@ -512,7 +560,7 @@ module turbos_clmm::pool {
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
         assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
         assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
-
+        
         let coin_in = coin::split(&mut coin, amount, ctx);
         balance::join(&mut vault.coin, coin::into_balance(coin_in));
 
@@ -524,6 +572,14 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
+
+        event::emit(AddRewardEvent {
+            pool: object::id(pool),
+            reward_index: reward_index,
+            reward_vault: reward_info.vault,
+            reward_manager: reward_info.manager,
+            amount: amount,
+        });
     }
 
     public(friend) fun remove_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
@@ -543,6 +599,15 @@ module turbos_clmm::pool {
         let amount_out_balance = balance::split(&mut vault.coin, amount);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
         transfer::public_transfer(amount_out_coin, recipient);
+
+        event::emit(RemoveRewardEvent {
+            pool: object::id(pool),
+            reward_index: reward_index,
+            reward_vault: reward_info.vault,
+            reward_manager: reward_info.manager,
+            amount: amount,
+            recipient: recipient,
+        });
     }
 
     // returns [growth_global]
