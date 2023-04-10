@@ -28,6 +28,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::position_manager;
     friend turbos_clmm::pool_factory;
     friend turbos_clmm::swap_router;
+    friend turbos_clmm::reward_manager;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -44,7 +45,9 @@ module turbos_clmm::pool {
 	const EInvildTickIndex: u64 = 12;
     const EInvalidRewardIndex: u64 = 13;
     const EInvalidRewardVault: u64 = 14;
-    const EInvalidTimestamp: u64 = 15;
+	const EInvalidTimestamp: u64 = 15;
+    const EInvalidRemoveRewardAmount: u64 = 16;
+    const EInvalidRewardManager: u64 = 17;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
@@ -91,6 +94,7 @@ module turbos_clmm::pool {
         vault: address,
         emissions_per_second: u128,
         growth_global: u128,
+        manager: address,
     }
 
     struct Pool<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
@@ -462,6 +466,7 @@ module turbos_clmm::pool {
     public(friend) fun init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         reward_index: u64,
+        manager: address,
         ctx: &mut TxContext
     ): PoolRewardVault<RewardCoin> {
         assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
@@ -476,6 +481,7 @@ module turbos_clmm::pool {
             vault: object::id_address(&vault),
             emissions_per_second: 0,
             growth_global: 0,
+            manager: manager,
         }, reward_index);
         
         vault
@@ -485,11 +491,12 @@ module turbos_clmm::pool {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         reward_index: u64,
         emissions_per_second: u128,
-        _ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
-
         let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
+        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
+
         reward_info.emissions_per_second = emissions_per_second;
     }
 
@@ -503,6 +510,7 @@ module turbos_clmm::pool {
     ) {
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
+        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
         assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
 
         let coin_in = coin::split(&mut coin, amount, ctx);
@@ -516,6 +524,25 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
+    }
+
+    public(friend) fun remove_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        vault: &mut  PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        amount: u64,
+        recipient: address,
+        ctx: &mut TxContext
+    ) {
+        assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
+        let reward_info = vector::borrow(&pool.reward_infos, reward_index);
+        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
+        assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
+        assert!(amount <= balance::value(&vault.coin), EInvalidRemoveRewardAmount);
+
+        let amount_out_balance = balance::split(&mut vault.coin, amount);
+        let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
+        transfer::public_transfer(amount_out_coin, recipient);
     }
 
     // returns [growth_global]
