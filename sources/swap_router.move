@@ -6,25 +6,28 @@ module turbos_clmm::swap_router {
     use sui::tx_context::{TxContext};
     use turbos_clmm::pool::{Self, Pool};
 	use sui::coin::{Coin};
-    use sui::clock::{Clock};
+    use sui::clock::{Self, Clock};
 
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
 
     const ECoinsVectorMustBeEmpty: u64 = 1;
+    const ETransactionToOld: u64 = 2;
+    const ETooLittleReceived: u64 = 3; 
     
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a, amount_b) = pool::swap(
 			pool,
             recipient,
@@ -36,6 +39,7 @@ module turbos_clmm::swap_router {
 		);
         let amount_a_64 = (i128::abs_u128(amount_a) as u64);
         let amount_b_64 = (i128::abs_u128(amount_b) as u64);
+        assert!(amount_b_64 >= amount_out_min, ETooLittleReceived);
 
 		pool::swap_coin_a_b(
 			pool,
@@ -51,14 +55,15 @@ module turbos_clmm::swap_router {
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_b: vector<Coin<CoinTypeB>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a, amount_b) = pool::swap(
 			pool,
             recipient,
@@ -70,6 +75,7 @@ module turbos_clmm::swap_router {
 		);
         let amount_a_64 = (i128::abs_u128(amount_b) as u64);
         let amount_b_64 = (i128::abs_u128(amount_a) as u64);
+        assert!(amount_b_64 >= amount_out_min, ETooLittleReceived);
 
 		pool::swap_coin_b_a(
 			pool,
@@ -87,14 +93,15 @@ module turbos_clmm::swap_router {
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
@@ -148,6 +155,7 @@ module turbos_clmm::swap_router {
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
         };
 
+        assert!(amount_c_64 >= amount_out_min, ETooLittleReceived);
         pool::swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -165,14 +173,15 @@ module turbos_clmm::swap_router {
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
@@ -221,12 +230,13 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
-            //std::debug::print(&i128::abs_u128(step2_out));
+
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
         };
 
+        assert!(amount_c_64 >= amount_out_min, ETooLittleReceived);
         pool::swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -244,14 +254,15 @@ module turbos_clmm::swap_router {
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
@@ -307,6 +318,7 @@ module turbos_clmm::swap_router {
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
         };
 
+        assert!(amount_c_64 >= amount_out_min, ETooLittleReceived);
         pool::swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -324,14 +336,15 @@ module turbos_clmm::swap_router {
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u128,
-        _amount_out_min: u128,
+        amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
@@ -387,6 +400,7 @@ module turbos_clmm::swap_router {
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
         };
 
+        assert!(amount_c_64 >= amount_out_min, ETooLittleReceived);
         pool::swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
