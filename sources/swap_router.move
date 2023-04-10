@@ -18,7 +18,7 @@ module turbos_clmm::swap_router {
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -32,7 +32,7 @@ module turbos_clmm::swap_router {
 			pool,
             recipient,
 			true,
-			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
+			if(is_exact_in) i128::from((amount as u128)) else i128::neg_from((amount as u128)),
 			sqrt_price_limit,
             clock,
 			ctx
@@ -54,7 +54,7 @@ module turbos_clmm::swap_router {
     public entry fun swap_b_a<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		coins_b: vector<Coin<CoinTypeB>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -68,7 +68,7 @@ module turbos_clmm::swap_router {
 			pool,
             recipient,
 			false,
-			if(is_exact_in) i128::from(amount) else i128::neg_from(amount),
+			if(is_exact_in) i128::from((amount as u128)) else i128::neg_from((amount as u128)),
 			sqrt_price_limit,
             clock,
 			ctx
@@ -92,7 +92,7 @@ module turbos_clmm::swap_router {
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -109,7 +109,7 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    true,
-			    i128::from(amount),
+			    i128::from((amount as u128)),
 			    sqrt_price_limit,
                 clock,
 			    ctx
@@ -134,7 +134,7 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    true,
-			    i128::neg_from(amount),
+			    i128::neg_from((amount as u128)),
 			    MIN_SQRT_PRICE_X64 + 1,
                 clock,
 			    ctx
@@ -172,7 +172,7 @@ module turbos_clmm::swap_router {
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -189,7 +189,7 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    true,
-			    i128::from(amount),
+			    i128::from((amount as u128)),
 			    sqrt_price_limit,
                 clock,
 			    ctx
@@ -214,7 +214,7 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    false,
-			    i128::neg_from(amount),
+			    i128::neg_from((amount as u128)),
 			    MAX_SQRT_PRICE_X64 - 1,
                 clock,
 			    ctx
@@ -253,7 +253,7 @@ module turbos_clmm::swap_router {
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -270,7 +270,7 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    false,
-			    i128::from(amount),
+			    i128::from((amount as u128)),
 			    sqrt_price_limit,
                 clock,
 			    ctx
@@ -296,7 +296,7 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    true,
-			    i128::neg_from(amount),
+			    i128::neg_from((amount as u128)),
 			    MIN_SQRT_PRICE_X64 + 1,
                 clock,
 			    ctx
@@ -335,7 +335,7 @@ module turbos_clmm::swap_router {
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
-		amount: u128,
+		amount: u64,
         amount_out_min: u64,
         sqrt_price_limit: u128,
         is_exact_in: bool,
@@ -352,7 +352,7 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    false,
-			    i128::from(amount),
+			    i128::from((amount as u128)),
 			    sqrt_price_limit,
                 clock,
 			    ctx
@@ -378,7 +378,7 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    false,
-			    i128::neg_from(amount),
+			    i128::neg_from((amount as u128)),
 			    MAX_SQRT_PRICE_X64 - 1,
                 clock,
 			    ctx
