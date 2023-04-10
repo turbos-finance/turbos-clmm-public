@@ -16,6 +16,7 @@ module turbos_clmm::position_manager {
     use turbos_clmm::math_tick;
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
+    use sui::clock::{Self, Clock};
     
     const Q64: u128 = 0x10000000000000000;
     
@@ -27,6 +28,7 @@ module turbos_clmm::position_manager {
     const EPriceSlippageCheck: u64 = 5;
     const EPositionNotCleared: u64 = 6;
     const EInvildMintAmount: u64 = 7;
+    const ETransactionToOld: u64 = 8;
 
 	struct Position has key, store {
         id: UID,
@@ -87,14 +89,16 @@ module turbos_clmm::position_manager {
 		tick_lower_index_is_neg: bool,
         tick_upper_index: u32,
 		tick_upper_index_is_neg: bool,
-		amount_a_desired: u128,
-        amount_b_desired: u128,
+		amount_a_desired: u64,
+        amount_b_desired: u64,
         amount_a_min: u64,
         amount_b_min: u64,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
 		let owner = tx_context::sender(ctx);
@@ -160,8 +164,8 @@ module turbos_clmm::position_manager {
         recipient: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
-        amount_a_desired: u128,
-        amount_b_desired: u128,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
         ctx: &mut TxContext,
     ): (u128, u64, u64) {
         let sqrt_price_a = math_tick::sqrt_price_from_tick_index(tick_lower_index);
@@ -172,8 +176,8 @@ module turbos_clmm::position_manager {
             sqrt_price,
             sqrt_price_a,
             sqrt_price_b,
-            amount_a_desired,
-            amount_b_desired
+            (amount_a_desired as u128),
+            (amount_b_desired as u128)
         );
 
         let (amount_a, amount_b) = pool::mint(
@@ -208,13 +212,15 @@ module turbos_clmm::position_manager {
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
 		nft: &mut TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
-		amount_a_desired: u128,
-        amount_b_desired: u128,
+		amount_a_desired: u64,
+        amount_b_desired: u64,
         amount_a_min: u64,
         amount_b_min: u64,
-        _deadline: u128,
+        deadline: u64,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
         let nft_address = object::id_address(nft);
@@ -262,9 +268,11 @@ module turbos_clmm::position_manager {
 		liquidity: u128,
         amount_a_min: u64,
         amount_b_min: u64,
-        _deadline: u128,
+        deadline: u64,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
@@ -316,9 +324,11 @@ module turbos_clmm::position_manager {
         amount_a_max: u64,
         amount_b_max: u64,
         recipient: address,
-        _deadline: u128,
+        deadline: u64,
+        clock: &Clock,
 		ctx: &mut TxContext
     ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);

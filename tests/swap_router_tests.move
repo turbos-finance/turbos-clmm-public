@@ -144,6 +144,7 @@ module turbos_clmm::swap_router_tests {
         //add liquidity
 		test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -168,17 +169,20 @@ module turbos_clmm::swap_router_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
 			test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
 		};
 
         //add liquidity
 		test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let eth = test_scenario::take_from_sender<Coin<ETH>>(scenario);
@@ -202,17 +206,20 @@ module turbos_clmm::swap_router_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
 			test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
 		};
 
         //add liquidity
 		test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let eth = test_scenario::take_from_sender<Coin<ETH>>(scenario);
@@ -236,17 +243,20 @@ module turbos_clmm::swap_router_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
 			test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
 		};
 
         //add liquidity
 		test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
 			let pool = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -270,12 +280,14 @@ module turbos_clmm::swap_router_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
 			test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
 		};
     }
 

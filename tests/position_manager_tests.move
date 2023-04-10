@@ -18,11 +18,18 @@ module turbos_clmm::position_manager_tests {
     use turbos_clmm::math_liquidity;
     use sui::test_utils::{assert_eq};
     use turbos_clmm::fee::{Fee};
+    use sui::clock::{Self, Clock};
 
     public fun init_pool_manager(
 		admin: address,
 		scenario: &mut Scenario,
 	) {
+        // init clock
+        test_scenario::next_tx(scenario, admin);
+        {
+            clock::create_for_testing(test_scenario::ctx(scenario));
+        };
+
         //init pool position manager
         test_scenario::next_tx(scenario, admin);
 		{
@@ -47,6 +54,7 @@ module turbos_clmm::position_manager_tests {
         //test BTCUSDC pool, 1BTC = 1USDC
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -69,6 +77,7 @@ module turbos_clmm::position_manager_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
@@ -128,6 +137,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //check users coin
@@ -149,6 +159,7 @@ module turbos_clmm::position_manager_tests {
         //test USDCBTC pool, 1USDC = 0.01BTC
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<USDC, BTC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -171,6 +182,7 @@ module turbos_clmm::position_manager_tests {
                 0,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
 
@@ -216,6 +228,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //check users coin
@@ -237,6 +250,7 @@ module turbos_clmm::position_manager_tests {
         // increase position liquidity
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -257,6 +271,7 @@ module turbos_clmm::position_manager_tests {
                 0,
                 0,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             let (
@@ -276,6 +291,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //check users coin
@@ -295,6 +311,7 @@ module turbos_clmm::position_manager_tests {
         // decrease position liquidity
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
@@ -310,6 +327,7 @@ module turbos_clmm::position_manager_tests {
                 0,
                 0,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             let (
@@ -355,6 +373,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //check users coin
@@ -369,6 +388,7 @@ module turbos_clmm::position_manager_tests {
         // collect position
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
@@ -384,6 +404,7 @@ module turbos_clmm::position_manager_tests {
                 90,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             let (
@@ -429,6 +450,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //check users coin
@@ -444,6 +466,7 @@ module turbos_clmm::position_manager_tests {
         // decrease  all
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
@@ -459,6 +482,7 @@ module turbos_clmm::position_manager_tests {
                 0,
                 0,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             let (
@@ -504,11 +528,13 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
    
         // collect all
         test_scenario::next_tx(scenario, player);
         {
+            let clock = test_scenario::take_shared<Clock>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT<BTC, USDC, FEE500BPS>>(scenario);
@@ -524,6 +550,7 @@ module turbos_clmm::position_manager_tests {
                 1008,
                 player,
                 1,
+                &clock,
                 test_scenario::ctx(scenario),
             );
             let (
@@ -569,6 +596,7 @@ module turbos_clmm::position_manager_tests {
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
         };
 
         //burn

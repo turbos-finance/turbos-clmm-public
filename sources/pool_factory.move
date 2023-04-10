@@ -81,12 +81,12 @@ module turbos_clmm::pool_factory {
 		tick_lower_index_is_neg: bool,
         tick_upper_index: u32,
 		tick_upper_index_is_neg: bool,
-		amount_a_desired: u128,
-        amount_b_desired: u128,
+		amount_a_desired: u64,
+        amount_b_desired: u64,
         amount_a_min: u64,
         amount_b_min: u64,
         recipient: address,
-        deadline: u128,
+        deadline: u64,
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
@@ -128,6 +128,7 @@ module turbos_clmm::pool_factory {
 			amount_b_min,
 			recipient,
 			deadline,
+			clock,
 			ctx
 		);
 
