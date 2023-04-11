@@ -3,7 +3,7 @@
 
 /// Coin<ETH> is the mock token used to test in Turbos.
 /// It has 9 decimals
-module turbos_clmm::eth {
+module turbos_token::eth {
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
     use sui::coin::{Self};

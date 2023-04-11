@@ -3,7 +3,7 @@
 
 /// Coin<USDC> is the mock token used to test in Turbos.
 /// It has 9 decimals
-module turbos_clmm::trb {
+module turbos_token::trb {
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
     use sui::coin::{Self};
