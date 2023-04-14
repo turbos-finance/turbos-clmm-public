@@ -14,7 +14,7 @@ module turbos_clmm::position_nft {
 
 	friend turbos_clmm::position_manager;
 
-    struct TurbosPositionNFT<phantom CoinTypeA, phantom CoinTypeB, phantom FeeType> has key, store {
+    struct TurbosPositionNFT has key, store {
         id: UID,
         name: String,
         description: String,
@@ -23,7 +23,7 @@ module turbos_clmm::position_nft {
         position_id: ID,
     }
 
-    struct TURBOSNFT has drop {}
+    struct POSITION_NFT has drop {}
 
     struct MintNFTEvent has copy, drop {
         object_id: ID,
@@ -31,7 +31,7 @@ module turbos_clmm::position_nft {
         name: String,
     }
 
-    public fun init_once<CoinTypeA, CoinTypeB, FeeType>(nft: TURBOSNFT, ctx: &mut TxContext) {
+    fun init(nft: POSITION_NFT, ctx: &mut TxContext) {
         let display_keys = vector::empty();
         vector::push_back(&mut display_keys, utf8(b"name"));
         vector::push_back(&mut display_keys, utf8(b"description"));
@@ -47,24 +47,24 @@ module turbos_clmm::position_nft {
         vector::push_back(&mut display_values, utf8(b"Turbos Team"));
 
         let publisher = package::claim(nft, ctx);
-        let display = display::new<TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>>(&publisher, ctx);
+        let display = display::new<TurbosPositionNFT>(&publisher, ctx);
 
-        display::add_multiple<TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>>(&mut display, display_keys, display_values);
-        display::update_version<TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>>(&mut display);
+        display::add_multiple<TurbosPositionNFT>(&mut display, display_keys, display_values);
+        display::update_version<TurbosPositionNFT>(&mut display);
 
         transfer::public_transfer(publisher, tx_context::sender(ctx));
         transfer::public_transfer(display, tx_context::sender(ctx));
     }
 
     /// Create a new position_nft
-    public(friend) fun mint<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun mint(
         name: vector<u8>,
         description: vector<u8>,
         img_url: vector<u8>,
         pool_id: ID,
         position_id: ID,
         ctx: &mut TxContext
-    ): TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType> {
+    ): TurbosPositionNFT {
         let nft = TurbosPositionNFT {
             id: object::new(ctx),
             name: string::utf8(name),
@@ -84,8 +84,17 @@ module turbos_clmm::position_nft {
     }
 
     /// Permanently delete `nft`
-    public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(nft: TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>) {
+    public entry fun burn(nft: TurbosPositionNFT) {
         let TurbosPositionNFT { id, name: _, description: _, img_url: _, pool_id: _, position_id: _ } = nft;
         object::delete(id)
     }
+
+    public fun pool_id(nft: &TurbosPositionNFT): ID {
+        nft.pool_id
+    }
+
+    public fun position_id(nft: &TurbosPositionNFT): ID {
+        nft.pool_id
+    }
+
 }

@@ -5,6 +5,7 @@
 module turbos_clmm::tools_tests {
 	use sui::coin::{Coin};
     use std::vector;
+    use sui::object::{Self, ID};
     use sui::test_scenario::{Self, Scenario};
 	use sui::transfer;
     use turbos_clmm::btc::{Self, BTC};
@@ -17,6 +18,8 @@ module turbos_clmm::tools_tests {
     use turbos_clmm::pool_factory;
     use turbos_clmm::i32::{I32};
     use turbos_clmm::pool::{Self, Pool};
+    use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
+    use std::option::{Self, Option};
 
 	const MAX_TICK_INDEX: u32 = 443636;
 
@@ -182,6 +185,25 @@ module turbos_clmm::tools_tests {
         let (_,_,protocol_fees_a,protocol_fees_b,_,_,_,_,_,_,_,_,_,) = pool::get_pool_info(pool);
 
         (protocol_fees_a, protocol_fees_b)
+    }
+
+    public fun get_user_nft_id(
+        pool_id: ID,
+        scenario: &mut Scenario,
+    ): ID {
+        let nft_id: Option<ID> = option::none();
+        let nft_ids = test_scenario::ids_for_sender<TurbosPositionNFT>(scenario);
+
+        while (!vector::is_empty(&nft_ids)) {
+            let current_nft = test_scenario::take_from_sender_by_id<TurbosPositionNFT>(scenario, vector::pop_back(&mut nft_ids));
+            if (position_nft::pool_id(&current_nft) == pool_id) {
+                nft_id = option::some(object::id(&current_nft));
+                test_scenario::return_to_sender(scenario, current_nft);
+                break
+            };
+            test_scenario::return_to_sender(scenario, current_nft);
+        };
+        option::extract<ID>(&mut nft_id)
     }
 
 }

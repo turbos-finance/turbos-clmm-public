@@ -143,8 +143,7 @@ module turbos_clmm::math_liquidity {
             3556829366031005702047,
             10000000,
         );
-        //assert!(380164550184 == l, 1);
-        std::debug::print(&a);
-        std::debug::print(&b);
+        assert!(161 == a, 1);
+        assert!(17030769 == b, 1);
     }
 }

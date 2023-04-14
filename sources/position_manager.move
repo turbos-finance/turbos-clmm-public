@@ -29,6 +29,7 @@ module turbos_clmm::position_manager {
     const EPositionNotCleared: u64 = 6;
     const EInvildMintAmount: u64 = 7;
     const ETransactionToOld: u64 = 8;
+    const EInsufficientLiquidity: u64 = 9;
 
 	struct Position has key, store {
         id: UID,
@@ -120,7 +121,7 @@ module turbos_clmm::position_manager {
 
         let position_id = object::new(ctx);
 		//mint nft
-		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+		let nft_address = mint_nft(
             object::id(pool), 
             object::uid_to_inner(&position_id), 
             positions, 
@@ -153,7 +154,7 @@ module turbos_clmm::position_manager {
 
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
         positions: &mut Positions,
-        nft: TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
+        nft: TurbosPositionNFT,
         _ctx: &mut TxContext
     ) {
         let nft_address = object::id_address(&nft);
@@ -217,7 +218,7 @@ module turbos_clmm::position_manager {
 		positions: &mut Positions,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		coins_b: vector<Coin<CoinTypeB>>, 
-		nft: &mut TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
+		nft: &mut TurbosPositionNFT,
 		amount_a_desired: u64,
         amount_b_desired: u64,
         amount_a_min: u64,
@@ -270,7 +271,7 @@ module turbos_clmm::position_manager {
     public entry fun decrease_liquidity<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
-		nft: &mut TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
+		nft: &mut TurbosPositionNFT,
 		liquidity: u128,
         amount_a_min: u64,
         amount_b_min: u64,
@@ -282,6 +283,7 @@ module turbos_clmm::position_manager {
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
+        assert!(position.liquidity >= liquidity, EInsufficientLiquidity);
 
 		let (amount_a, amount_b) = pool::burn(
 			pool,
@@ -326,7 +328,7 @@ module turbos_clmm::position_manager {
     public entry fun collect<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
-		nft: &mut TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>,
+		nft: &mut TurbosPositionNFT,
         amount_a_max: u64,
         amount_b_max: u64,
         recipient: address,
@@ -395,17 +397,17 @@ module turbos_clmm::position_manager {
         });
     }
 
-	fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+	fun mint_nft(
         pool_id: ID,
         position_id: ID,
         positions: &mut Positions,
         recipient: address,
         ctx: &mut TxContext
     ): address {
-        let nft = position_nft::mint<CoinTypeA, CoinTypeB, FeeType>(
+        let nft = position_nft::mint(
             b"Turbos Position's NFT",
             b"An NFT created by Turbos CLMM",
-			b"ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png",
+			b"ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png",
             pool_id,
             position_id,
             ctx,
@@ -417,10 +419,10 @@ module turbos_clmm::position_manager {
 		nft_address
 	}
 
-	fun burn_nft<CoinTypeA, CoinTypeB, FeeType>(
-        nft: TurbosPositionNFT<CoinTypeA, CoinTypeB, FeeType>
+	fun burn_nft(
+        nft: TurbosPositionNFT
     ) {
-        position_nft::burn<CoinTypeA, CoinTypeB, FeeType>(nft);
+        position_nft::burn(nft);
 	}
 
     fun insert_user_position(
