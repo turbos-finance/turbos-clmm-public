@@ -122,4 +122,29 @@ module turbos_clmm::math_liquidity {
             Q64
         )
     }
+
+     #[test]
+    fun test_get_liquidity_for_amounts() {
+        let l = get_liquidity_for_amounts(
+            1832814330046721231834,
+            1353803200641628255991,
+            2466716266253144737284,
+            1000000000,
+            9871826150795
+        );
+        assert!(380164550184 == l, 1);
+    }
+
+     #[test]
+    fun test_get_amount_for_liquidity() {
+        let (a, b) = get_amount_for_liquidity(
+            3545820817480387689280,
+            3514404592553427687975,
+            3556829366031005702047,
+            10000000,
+        );
+        //assert!(380164550184 == l, 1);
+        std::debug::print(&a);
+        std::debug::print(&b);
+    }
 }

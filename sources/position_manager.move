@@ -118,11 +118,17 @@ module turbos_clmm::position_manager {
 		);
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
+        let position_id = object::new(ctx);
 		//mint nft
-		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(positions, recipient, ctx);
+		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+            object::id(pool), 
+            object::uid_to_inner(&position_id), 
+            positions, 
+            recipient, 
+            ctx
+        );
 		let position_key = pool::get_position_key(owner, tick_lower_index_i32, tick_upper_index_i32);
 		//create position
-        let position_id = object::new(ctx);
         let position_inner_id = object::uid_to_inner(&position_id);
 		let position_m = Position {
 			id: position_id,
@@ -390,6 +396,8 @@ module turbos_clmm::position_manager {
     }
 
 	fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+        pool_id: ID,
+        position_id: ID,
         positions: &mut Positions,
         recipient: address,
         ctx: &mut TxContext
@@ -398,10 +406,12 @@ module turbos_clmm::position_manager {
             b"Turbos Position's NFT",
             b"An NFT created by Turbos CLMM",
 			b"ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png",
+            pool_id,
+            position_id,
             ctx,
         );
 		positions.nft_minted = positions.nft_minted + 1;
-		let nft_address = position_nft::nft_address(&nft);
+		let nft_address = object::id_address(&nft);
 		transfer::public_transfer(nft, recipient);
 
 		nft_address
