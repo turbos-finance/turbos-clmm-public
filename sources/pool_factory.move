@@ -209,7 +209,7 @@ module turbos_clmm::pool_factory {
         let pool_config = PoolConfig {
 			id: object::new(ctx), 
 			fee_amount_tick_spacing: fee_amount_tick_spacing,
-			fee_protocol: 2500,
+			fee_protocol: 250000,
 			pools: vector::empty(),
 		};
 

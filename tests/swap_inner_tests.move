@@ -40,7 +40,7 @@ module turbos_clmm::swap_inner_tests {
             scenario
         );
 
-		// FEE10000BPS tick_spacing = 1, fee_protocol = 2500
+		// FEE10000BPS tick_spacing = 1, fee_protocol = 250000
         test_scenario::next_tx(scenario, admin);
 		{
             pool_factory::mock_init_for_testing(test_scenario::ctx(scenario));
@@ -73,7 +73,7 @@ module turbos_clmm::swap_inner_tests {
             test_scenario::return_immutable(fee_type);
         };
 
-		//pool with 2^64 liquidity, swap exactly 1e+12 tokenA to tokenB at tick 0 (p = 1) with 1.00%/2500 fee
+		//pool with 2^64 liquidity, swap exactly 1e+12 tokenA to tokenB at tick 0 (p = 1) with 1.00%/250000 fee
 		test_scenario::next_tx(scenario, player);
         {
 			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);

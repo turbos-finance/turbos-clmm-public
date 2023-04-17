@@ -382,7 +382,7 @@ module turbos_clmm::pool {
 			};
 
 			if (pool.fee_protocol > 0) {
-				let delta = step_fee_amount * (pool.fee_protocol as u128) / 10000;
+				let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
                 step_fee_amount = step_fee_amount - delta;
                 protocol_fee = protocol_fee + delta;
 			};
