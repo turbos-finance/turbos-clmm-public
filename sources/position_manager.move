@@ -407,7 +407,7 @@ module turbos_clmm::position_manager {
         let nft = position_nft::mint(
             b"Turbos Position's NFT",
             b"An NFT created by Turbos CLMM",
-			b"ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png",
+			b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png",
             pool_id,
             position_id,
             ctx,
