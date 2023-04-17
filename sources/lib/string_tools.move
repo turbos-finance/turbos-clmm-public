@@ -78,6 +78,9 @@ module turbos_clmm::string_tools {
     }
 
     public fun u64_to_string(number: u64): String {
+        if (number == 0) {
+            return string::utf8(b"0")
+        };
         let places = 20;
         let base = math::pow(10, 19);
         let i = places;
@@ -128,5 +131,10 @@ module turbos_clmm::string_tools {
         assert!(u64_to_hexstring(108) == string::utf8(b"6c"), 1);
         assert!(u64_to_hexstring(1) == string::utf8(b"01"), 1);
         assert!(u64_to_hexstring(0) == string::utf8(b"00"), 1);
+    }
+
+    #[test]
+    fun test_zero_string() {
+        assert!(u64_to_string(0) == string::utf8(b"0"), 0);
     }
 }
