@@ -657,7 +657,7 @@ module turbos_clmm::pool {
 		// round towards negative infinity
 		if (
 			i32::lt(tick_current_index, i32::zero()) && 
-			!i32::eq(i32::mod_euclidean(tick_current_index, i32::from(pool.tick_spacing)), i32::zero())
+			!i32::eq(i32::mod_euclidean(tick_current_index, pool.tick_spacing), i32::zero())
 		) {
  			compressed = i32::sub(compressed, i32::from(1));
 		};
@@ -721,10 +721,8 @@ module turbos_clmm::pool {
 	}
 
 	public fun position_tick(tick: I32): (I32, u8) {
-        //let word_pos = i32::div(tick, i32::from(256));
 		let word_pos = i32::shr(tick, 8);
-        let bit_pos = (i32::abs_u32(i32::mod_euclidean(tick, i32::from(256))) as u8);
-		//let bit_pos = ((i32::abs_u32(tick) % 256) as u8);
+        let bit_pos = (i32::abs_u32(i32::mod_euclidean(tick, 256)) as u8);
 
 		(word_pos, bit_pos)
     }
@@ -1063,7 +1061,7 @@ module turbos_clmm::pool {
         _ctx: &mut TxContext,
     ) {
 		// ensure that the tick is spaced
-		assert!(i32::eq(i32::mod_euclidean(tick_index, i32::from(pool.tick_spacing)), i32::zero()), EInvildTickIndex);
+		assert!(i32::eq(i32::mod_euclidean(tick_index, pool.tick_spacing), i32::zero()), EInvildTickIndex);
 		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
         let (word_pos, bit_pos) = position_tick(next);
         let mask: u256 = 1u256 << bit_pos;
