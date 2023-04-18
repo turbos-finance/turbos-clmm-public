@@ -385,7 +385,7 @@ module turbos_clmm::swap_router_tests {
 				&mut pool_a,
 				coins,
 				3, //amount_in 
-				1, //amount_out_min
+				10, //amount_out_min
 				MIN_SQRT_PRICE_X64 + 1,
                 false,
 				player,
