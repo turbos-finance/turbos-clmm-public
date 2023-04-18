@@ -7,6 +7,7 @@ module turbos_clmm::reward_manager {
     use turbos_clmm::pool::{Self, Pool, PoolRewardVault};
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Coin};
+    use sui::clock::{Clock};
 
     struct RewardManagerAdminCap has key, store { id: UID }
 
@@ -40,6 +41,7 @@ module turbos_clmm::reward_manager {
         reward_index: u64,
         coins: vector<Coin<RewardCoin>>,
         amount: u64,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         pool::add_reward(
@@ -48,6 +50,7 @@ module turbos_clmm::reward_manager {
             reward_index,
             pool::merge_coin<RewardCoin>(coins),
             amount,
+            clock,
             ctx,
         );
     }
@@ -58,6 +61,7 @@ module turbos_clmm::reward_manager {
         reward_index: u64,
         amount: u64,
         recipient: address,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         pool::remove_reward(
@@ -66,6 +70,7 @@ module turbos_clmm::reward_manager {
             reward_index,
             amount,
             recipient,
+            clock,
             ctx,
         );
     }
@@ -76,13 +81,20 @@ module turbos_clmm::reward_manager {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         reward_index: u64,
         emissions_per_second: u128,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         pool::update_reward_emissions(
             pool,
             reward_index,
             emissions_per_second,
+            clock,
             ctx,
         );
+    }
+
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init_(ctx);
     }
 }

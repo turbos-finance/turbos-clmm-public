@@ -5,16 +5,16 @@ module turbos_clmm::position_manager {
 	use std::vector;
     use sui::transfer;
     use sui::event;
+    use std::string::{String};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
 	use sui::coin::{Coin};
     use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self, I32};
-    use turbos_clmm::full_math_u128;
     use turbos_clmm::math_liquidity;
     use turbos_clmm::math_tick;
-    use turbos_clmm::pool::{Self, Pool};
+    use turbos_clmm::pool::{Self, Pool, PositionRewardInfo as PositionRewardInfoInPool, PoolRewardVault};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use sui::clock::{Self, Clock};
     
@@ -30,6 +30,12 @@ module turbos_clmm::position_manager {
     const EInvildMintAmount: u64 = 7;
     const ETransactionToOld: u64 = 8;
     const EInsufficientLiquidity: u64 = 9;
+    const EInvalidRewardIndex: u64 = 10;
+
+    struct PositionRewardInfo has store {
+        reward_growth_inside: u128,
+        amount_owed: u64,
+    }
 
 	struct Position has key, store {
         id: UID,
@@ -40,6 +46,7 @@ module turbos_clmm::position_manager {
         fee_growth_inside_b: u128,
         tokens_owed_a: u64,
         tokens_owed_b: u64,
+        reward_infos: vector<PositionRewardInfo>,
     }
 
 	struct Positions has key, store {
@@ -66,6 +73,14 @@ module turbos_clmm::position_manager {
         pool: ID,
         amount_a: u64,
         amount_b: u64,
+        recipient: address,
+    }
+
+    struct CollectRewardEvent has copy, drop {
+        pool: ID,
+        amount: u64,
+        vault: ID,
+        reward_index: u64,
         recipient: address,
     }
 
@@ -129,8 +144,8 @@ module turbos_clmm::position_manager {
             ctx
         );
 		let position_key = pool::get_position_key(owner, tick_lower_index_i32, tick_upper_index_i32);
-		//create position
         let position_inner_id = object::uid_to_inner(&position_id);
+
 		let position_m = Position {
 			id: position_id,
 			tick_lower_index: tick_lower_index_i32,
@@ -140,7 +155,9 @@ module turbos_clmm::position_manager {
         	fee_growth_inside_b: pool::get_position_fee_growth_inside_b(pool, position_key),
         	tokens_owed_a: 0,
         	tokens_owed_b: 0,
+            reward_infos: vector::empty<PositionRewardInfo>(),
 		};
+        copy_position(pool, position_key, &mut position_m);
 		dof::add<address, Position>(&mut positions.id, nft_address, position_m);
         insert_user_position(positions, position_inner_id, nft_address);
 
@@ -248,17 +265,7 @@ module turbos_clmm::position_manager {
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
 		let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);
-        let fee_growth_inside_a = pool::get_position_fee_growth_inside_a(pool, position_key);
-        let fee_growth_inside_b = pool::get_position_fee_growth_inside_b(pool, position_key);
-
-        let tokens_owed_a = (full_math_u128::mul_div_floor(fee_growth_inside_a - position.fee_growth_inside_a, position.liquidity, Q64) as u64);
-        let tokens_owed_b = (full_math_u128::mul_div_floor(fee_growth_inside_b - position.fee_growth_inside_b, position.liquidity, Q64) as u64);
-
-        position.tokens_owed_a = position.tokens_owed_a + tokens_owed_a;
-        position.tokens_owed_b = position.tokens_owed_b + tokens_owed_b;
-        position.fee_growth_inside_a = fee_growth_inside_a;
-        position.fee_growth_inside_b = fee_growth_inside_b;
-        position.liquidity = position.liquidity + liquidity_delta;
+        copy_position(pool, position_key, position);
 
         event::emit(IncreaseLiquidityEvent {
             pool: object::id(pool),
@@ -297,17 +304,7 @@ module turbos_clmm::position_manager {
         assert!(amount_a >= amount_a_min && amount_b_min >= amount_b_min, EPriceSlippageCheck);
 
 		let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);
-        let fee_growth_inside_a = pool::get_position_fee_growth_inside_a(pool, position_key);
-        let fee_growth_inside_b = pool::get_position_fee_growth_inside_b(pool, position_key);
-
-        let tokens_owed_a = (full_math_u128::mul_div_floor(fee_growth_inside_a - position.fee_growth_inside_a, position.liquidity, Q64) as u64);
-        let tokens_owed_b = (full_math_u128::mul_div_floor(fee_growth_inside_b - position.fee_growth_inside_b, position.liquidity, Q64) as u64);
-
-        position.tokens_owed_a = position.tokens_owed_a + tokens_owed_a;
-        position.tokens_owed_b = position.tokens_owed_b + tokens_owed_b;
-        position.fee_growth_inside_a = fee_growth_inside_a;
-        position.fee_growth_inside_b = fee_growth_inside_b;
-        position.liquidity = position.liquidity - liquidity;
+        copy_position(pool, position_key, position);
 
         pool::transfer_out(
             pool,
@@ -340,7 +337,6 @@ module turbos_clmm::position_manager {
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
-        let (tokens_owed_a, tokens_owed_b) = (position.tokens_owed_a, position.tokens_owed_b);
         if (position.liquidity > 0) {
             pool::burn(
 			    pool,
@@ -351,16 +347,9 @@ module turbos_clmm::position_manager {
 			    ctx,
 		    );
             let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);
-            let fee_growth_inside_a = pool::get_position_fee_growth_inside_a(pool, position_key);
-            let fee_growth_inside_b = pool::get_position_fee_growth_inside_b(pool, position_key);
-
-            tokens_owed_a = tokens_owed_a + (full_math_u128::mul_div_floor(fee_growth_inside_a - position.fee_growth_inside_a, position.liquidity, Q64) as u64);
-            tokens_owed_b = tokens_owed_b + (full_math_u128::mul_div_floor(fee_growth_inside_b - position.fee_growth_inside_b, position.liquidity, Q64) as u64);
-
-            position.fee_growth_inside_a = fee_growth_inside_a;
-            position.fee_growth_inside_b = fee_growth_inside_b;
-
+            copy_position(pool, position_key, position);
         };
+        let (tokens_owed_a, tokens_owed_b) = (position.tokens_owed_a, position.tokens_owed_b);
 
         let (amount_a_collect, amount_b_collect) =
         (
@@ -393,6 +382,61 @@ module turbos_clmm::position_manager {
             pool: object::id(pool),
             amount_a: amount_a,
             amount_b: amount_b,
+            recipient: recipient,
+        });
+    }
+
+    public entry fun collect_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		positions: &mut Positions,
+		nft: &mut TurbosPositionNFT,
+        vault: &mut PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        amount_max: u64,
+        recipient: address,
+        deadline: u64,
+        clock: &Clock,
+		ctx: &mut TxContext
+    ) {
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        let nft_address = object::id_address(nft);
+		let owner = tx_context::sender(ctx);
+        let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
+        if (position.liquidity > 0) {
+            pool::burn(
+			    pool,
+			    owner,
+			    position.tick_lower_index,
+			    position.tick_upper_index,
+			    0,
+			    ctx,
+		    );
+            let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);
+            copy_position(pool, position_key, position);
+        };
+
+        assert!(reward_index < vector::length(&position.reward_infos),EInvalidRewardIndex);
+        let reward_info = vector::borrow_mut(&mut position.reward_infos, reward_index);
+        let amount_collect = if (amount_max > reward_info.amount_owed) reward_info.amount_owed else amount_max;
+
+        let amount = pool::collect_reward(
+            pool,
+            vault,
+            recipient,
+            position.tick_lower_index,
+			position.tick_upper_index,
+            amount_collect,
+            reward_index,
+            ctx,
+        );
+
+        reward_info.amount_owed = reward_info.amount_owed - amount_collect;
+
+        event::emit(CollectRewardEvent {
+            pool: object::id(pool),
+            amount: amount,
+            vault: object::id(vault),
+            reward_index: reward_index,
             recipient: recipient,
         });
     }
@@ -441,6 +485,57 @@ module turbos_clmm::position_manager {
     ) {
         if (table::contains(&positions.user_position, nft_address)) {
             table::remove(&mut positions.user_position, nft_address);
+        }
+    }
+
+    fun copy_position<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        key: String,
+        position: &mut Position
+    ) {
+        let (
+            liquidity,
+            fee_growth_inside_a,
+            fee_growth_inside_b,
+            tokens_owed_a,
+            tokens_owed_b,
+            reward_infos,
+        ) = pool::get_position_base_info(pool, key);
+        position.liquidity = liquidity;
+        position.fee_growth_inside_a = fee_growth_inside_a;
+        position.fee_growth_inside_b = fee_growth_inside_b;
+        position.tokens_owed_a = tokens_owed_a;
+        position.tokens_owed_b = tokens_owed_b;
+        copy_reward_info(reward_infos, &mut position.reward_infos);
+    }
+
+    fun copy_reward_info(
+        reward_infos: &vector<PositionRewardInfoInPool>,
+        reward_infos_m: &mut vector<PositionRewardInfo>
+    ) {
+        let len = vector::length(reward_infos);
+        let i = 0;
+        while (i < len) {
+            let reward_info = vector::borrow(reward_infos, i);
+            let (reward_growth_inside, amount_owed) = pool::get_position_reward_info(reward_info);
+            try_init_reward_infos(reward_infos_m, i);
+            let reward_info_m = vector::borrow_mut(reward_infos_m, i);
+            reward_info_m.reward_growth_inside = reward_growth_inside;
+            reward_info_m.amount_owed = amount_owed;
+            i = i + 1;
+        };
+    }
+
+    fun try_init_reward_infos(
+        reward_infos: &mut vector<PositionRewardInfo>,
+        index: u64,
+    ) {
+        let len = vector::length(reward_infos);
+        if (index == len) {
+            vector::push_back(reward_infos, PositionRewardInfo {
+                reward_growth_inside: 0,
+                amount_owed: 0,
+            });
         }
     }
 
