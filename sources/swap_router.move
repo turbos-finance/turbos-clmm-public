@@ -7,6 +7,7 @@ module turbos_clmm::swap_router {
     use turbos_clmm::pool::{Self, Pool};
 	use sui::coin::{Coin};
     use sui::clock::{Self, Clock};
+    use turbos_clmm::i128::{I128};
 
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -111,14 +112,39 @@ module turbos_clmm::swap_router {
         }
     }
 
-    // swap a to b to c
+    fun get_next_input_amount(
+        is_exact_in: bool,
+        a_to_b: bool,
+        amount_a: I128, 
+        amount_b: I128, 
+    ): I128 {
+        if (is_exact_in) {
+            if (a_to_b) {
+                amount_b
+            } else {
+                amount_a
+            }
+        } else {
+            if (a_to_b) {
+                amount_a
+            } else {
+                amount_b
+            }
+        }
+    }
+
+    // such as: pool a: BTC/USDC, pool b: USDC/ETH
+    // if swap BTC to ETH
+    // exact in: step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (a to b)
+    // exact out: step one: swap ETH to USDC (b to a), step two: swap USDC to BTC (b to a)
     public entry fun swap_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u64,
         amount_threshold: u64,
-        sqrt_price_limit: u128,
+        sqrt_price_limit_one: u128,
+        sqrt_price_limit_two: u128,
         is_exact_in: bool,
         recipient: address,
         deadline: u64,
@@ -129,12 +155,14 @@ module turbos_clmm::swap_router {
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
+            let a_to_b_step_one = true;
+            let a_to_b_step_two = true;
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
-			    true,
+			    a_to_b_step_one,
 			    i128::from((amount as u128)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -142,9 +170,9 @@ module turbos_clmm::swap_router {
             let (_step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
-			    true,
+			    a_to_b_step_two,
 			    i128::abs(step1_out),
-			    MIN_SQRT_PRICE_X64 + 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
@@ -152,24 +180,26 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            //exact_out
-            let (step2_in, step2_out) = pool::swap(
+            let a_to_b_step_one = false;
+            let a_to_b_step_two = false;
+            let (step2_out, step2_in) = pool::swap(
 			    pool_b,
                 recipient,
-			    true,
+			    a_to_b_step_two,
 			    i128::neg_from((amount as u128)),
-			    MIN_SQRT_PRICE_X64 + 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            let (step1_in, step1_out) = pool::swap(
+            let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
-			    true,
+			    a_to_b_step_one,
 			    i128::neg_from(i128::as_u128(step2_in)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -177,9 +207,9 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
-        assert!(amount_c_64 >= amount_threshold, ETooLittleReceived);
         pool::swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -192,13 +222,18 @@ module turbos_clmm::swap_router {
         );
     }
 
+    // such as: pool a: BTC/USDC, pool b: ETH/USDC
+    // if swap BTC to ETH
+    // exact in: step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (b to a)
+    // exact out: step one: swap ETH to USDC (a to b), step two: swap USDC to BTC (b to a)
     public entry fun swap_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u64,
         amount_threshold: u64,
-        sqrt_price_limit: u128,
+        sqrt_price_limit_one: u128,
+        sqrt_price_limit_two: u128,
         is_exact_in: bool,
         recipient: address,
         deadline: u64,
@@ -209,37 +244,41 @@ module turbos_clmm::swap_router {
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
+            let a_to_b_step_one = true;
+            let a_to_b_step_two = false;
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
-			    true,
+			    a_to_b_step_one,
 			    i128::from((amount as u128)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            //c for b
             let (step2_out, _step2_in) = pool::swap(
 			    pool_b,
                 recipient,
-			    false,
+			    a_to_b_step_two,
 			    i128::abs(step1_out),
-			    MAX_SQRT_PRICE_X64 - 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
+            let a_to_b_step_one = true;
+            let a_to_b_step_two = false;
             //b for c, exact out
             let (step2_out, step2_in) = pool::swap(
 			    pool_b,
                 recipient,
-			    false,
+			    a_to_b_step_two,
 			    i128::neg_from((amount as u128)),
-			    MAX_SQRT_PRICE_X64 - 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
@@ -248,9 +287,9 @@ module turbos_clmm::swap_router {
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
-			    true,
+			    a_to_b_step_one,
 			    i128::neg_from(i128::abs_u128(step2_in)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -258,9 +297,9 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
-        assert!(amount_c_64 >= amount_threshold, ETooLittleReceived);
         pool::swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -273,13 +312,18 @@ module turbos_clmm::swap_router {
         );
     }
 
+    // such as: pool a: USDC/BTC, pool b: USDC/ETH
+    // if swap BTC to ETH
+    // exact in: step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (a to b)
+    // exact out: step one: swap ETH to USDC (b to a), step two: swap USDC to BTC (a to b)
     public entry fun swap_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u64,
         amount_threshold: u64,
-        sqrt_price_limit: u128,
+        sqrt_price_limit_one: u128,
+        sqrt_price_limit_two: u128,
         is_exact_in: bool,
         recipient: address,
         deadline: u64,
@@ -290,23 +334,24 @@ module turbos_clmm::swap_router {
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
+            let a_to_b_step_one = false;
+            let a_to_b_step_two = true;
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
-			    false,
+			    a_to_b_step_one,
 			    i128::from((amount as u128)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            //b for c
             let (_step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
-			    true,
+			    a_to_b_step_two,
 			    i128::abs(step1_out),
-			    MIN_SQRT_PRICE_X64 + 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
@@ -314,25 +359,26 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            //b for c, exact out
+            let a_to_b_step_one = false;
+            let a_to_b_step_two = true;
             let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
-			    true,
+			    a_to_b_step_two,
 			    i128::neg_from((amount as u128)),
-			    MIN_SQRT_PRICE_X64 + 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            //a for b, exact out
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
-			    false,
+			    a_to_b_step_one,
 			    i128::neg_from(i128::as_u128(step2_in)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -340,9 +386,10 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
+
         };
 
-        assert!(amount_c_64 >= amount_threshold, ETooLittleReceived);
         pool::swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -355,13 +402,18 @@ module turbos_clmm::swap_router {
         );
     }
 
+    // such as: pool a: USDC/BTC, pool b: ETH/USDC
+    // if swap BTC to ETH
+    // exact in: step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (b to a)
+    // exact out: step one: swap ETH to USDC (a to b), step two: swap USDC to BTC (a to b)
     public entry fun swap_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coins_a: vector<Coin<CoinTypeA>>, 
 		amount: u64,
         amount_threshold: u64,
-        sqrt_price_limit: u128,
+        sqrt_price_limit_one: u128,
+        sqrt_price_limit_two: u128,
         is_exact_in: bool,
         recipient: address,
         deadline: u64,
@@ -372,12 +424,14 @@ module turbos_clmm::swap_router {
         let (amount_a_64, amount_b_64, amount_c_64);
 
         if (is_exact_in) {
+            let a_to_b_step_one = false;
+            let a_to_b_step_two = false;
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
-			    false,
+			    a_to_b_step_one,
 			    i128::from((amount as u128)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -386,9 +440,9 @@ module turbos_clmm::swap_router {
             let (step2_out, _step2_in) = pool::swap(
 			    pool_b,
                 recipient,
-			    false,
+			    a_to_b_step_two,
 			    i128::abs(step1_out),
-			    MAX_SQRT_PRICE_X64 - 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
@@ -396,25 +450,26 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            //b for c, exact out
-            let (step2_out, step2_in) = pool::swap(
+            let a_to_b_step_one = true;
+            let a_to_b_step_two = true;
+            let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
-			    false,
+			    a_to_b_step_one,
 			    i128::neg_from((amount as u128)),
-			    MAX_SQRT_PRICE_X64 - 1,
+			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            //a for b, exact out
-            let (step1_out, step1_in) = pool::swap(
+            let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
-			    false,
+			    a_to_b_step_two,
 			    i128::neg_from(i128::as_u128(step2_in)),
-			    sqrt_price_limit,
+			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
@@ -422,9 +477,9 @@ module turbos_clmm::swap_router {
             amount_a_64 = (i128::abs_u128(step1_in) as u64);
             amount_b_64 = (i128::abs_u128(step1_out) as u64);
             amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
-        assert!(amount_c_64 >= amount_threshold, ETooLittleReceived);
         pool::swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,

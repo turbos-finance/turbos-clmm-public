@@ -49,6 +49,8 @@ module turbos_clmm::pool {
     const EInvalidRemoveRewardAmount: u64 = 16;
     const EInvalidRewardManager: u64 = 17;
     const EInsufficientBalanceRewardVault: u64 = 18;
+    const ESqrtPriceOutOfBounds: u64 = 19;
+    const EInvalidSqrtPriceLimitDirection: u64 = 20;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
@@ -335,11 +337,9 @@ module turbos_clmm::pool {
     ): (I128, I128) {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
-        if (a_to_b) {
-            assert!(sqrt_price_limit < pool.sqrt_price && sqrt_price_limit > MIN_SQRT_PRICE, ESwapLessThanMinSqrtPrice);
-        } else {
-            assert!(sqrt_price_limit > pool.sqrt_price && sqrt_price_limit < MAX_SQRT_PRICE, ESwapGatherThanMaxSqrtPrice);
-        };
+        if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > sqrt_price_limit) abort ESqrtPriceOutOfBounds;
+        if (a_to_b && sqrt_price_limit > pool.sqrt_price || !a_to_b && sqrt_price_limit < pool.sqrt_price) abort EInvalidSqrtPriceLimitDirection;
+
 		let exact_input = i128::gt(amount_specified, i128::zero());
         //reword
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
