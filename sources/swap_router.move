@@ -7,7 +7,6 @@ module turbos_clmm::swap_router {
     use turbos_clmm::pool::{Self, Pool};
 	use sui::coin::{Coin};
     use sui::clock::{Self, Clock};
-    use turbos_clmm::i128::{I128};
 
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -108,27 +107,6 @@ module turbos_clmm::swap_router {
                 || (!a_to_b && amount_threshold < amount_b))
             {
                 abort EAmountInAboveMaximum
-            }
-        }
-    }
-
-    fun get_next_input_amount(
-        is_exact_in: bool,
-        a_to_b: bool,
-        amount_a: I128, 
-        amount_b: I128, 
-    ): I128 {
-        if (is_exact_in) {
-            if (a_to_b) {
-                amount_b
-            } else {
-                amount_a
-            }
-        } else {
-            if (a_to_b) {
-                amount_a
-            } else {
-                amount_b
             }
         }
     }

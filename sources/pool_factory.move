@@ -9,10 +9,10 @@ module turbos_clmm::pool_factory {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
 	use sui::coin::{Coin};
-    use turbos_clmm::pool;
 	use turbos_clmm::position_manager::{Self, Positions};
     use turbos_clmm::fee::{Self, Fee};
 	use sui::clock::{Clock};
+	use turbos_clmm::pool::{Self, Pool};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -200,6 +200,23 @@ module turbos_clmm::pool_factory {
 		event::emit(SetFeeProtocolEvent {fee_protocol: fee_protocol});
 	}
 
+	public entry fun collect_protocol_fee<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		amount_a_requested: u64,
+		amount_b_requested: u64,
+		recipient: address,
+        ctx: &mut TxContext
+	) {
+		pool::collect_protocol_fee(
+			pool,
+			amount_a_requested,
+			amount_b_requested,
+			recipient,
+			ctx
+		);
+	}
+
 	#[test_only]
 	public fun mock_init_for_testing(ctx: &mut TxContext) {
 		let fee_amount_tick_spacing = vec_map::empty<u32, u32>();
@@ -209,7 +226,7 @@ module turbos_clmm::pool_factory {
         let pool_config = PoolConfig {
 			id: object::new(ctx), 
 			fee_amount_tick_spacing: fee_amount_tick_spacing,
-			fee_protocol: 250000,
+			fee_protocol: 250000, //25% or total fee
 			pools: vector::empty(),
 		};
 

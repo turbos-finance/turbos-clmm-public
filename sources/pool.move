@@ -165,6 +165,13 @@ module turbos_clmm::pool {
         amount_b: u64,
     }
 
+    struct CollectProtocolFeeEvent has copy, drop {
+        pool: ID,
+        recipient: address,
+        amount_a: u64,
+        amount_b: u64,
+    }
+
     struct CollectRewardEvent has copy, drop {
         pool: ID,
         recipient: address,
@@ -288,7 +295,7 @@ module turbos_clmm::pool {
         (amount_a_u64, amount_b_u64)
     }
 
-    public fun burn<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun burn<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
@@ -506,6 +513,39 @@ module turbos_clmm::pool {
 
         (amount_a, amount_b)
     }
+
+    public(friend) fun collect_protocol_fee<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		amount_a_requested: u64,
+		amount_b_requested: u64,
+		recipient: address,
+        ctx: &mut TxContext
+	) {
+        let amount_a = if (amount_a_requested > pool.protocol_fees_a) pool.protocol_fees_a else amount_a_requested;
+        let amount_b = if (amount_b_requested > pool.protocol_fees_b) pool.protocol_fees_b else amount_b_requested;
+
+        if (amount_a > 0) {
+            pool.protocol_fees_a = pool.protocol_fees_a - amount_a;
+        };
+        if (amount_b > 0) {
+            pool.protocol_fees_b = pool.protocol_fees_b - amount_b;
+        };
+  
+        transfer_out(
+            pool,
+            amount_a,
+            amount_b,
+            recipient,
+            ctx,
+        );
+
+		event::emit(CollectProtocolFeeEvent {
+            pool: object::id(pool),
+            recipient: recipient,
+            amount_a: amount_a,
+            amount_b: amount_b,
+        });
+	}
 
     public(friend) fun init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
