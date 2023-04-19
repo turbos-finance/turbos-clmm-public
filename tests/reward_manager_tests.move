@@ -17,11 +17,12 @@ module turbos_clmm::reward_manager_tests {
     use turbos_clmm::reward_manager::{Self, RewardManagerAdminCap};
     use sui::test_utils::{assert_eq};
     use sui::clock::{Self, Clock};
-    use turbos_clmm::tools_tests;
     use turbos_clmm::i32::{Self};
     use turbos_clmm::position_manager::{Self, Positions};
     use turbos_clmm::math_tick;
     use turbos_clmm::fee::{Fee};
+    use turbos_clmm::tools_tests;
+    use turbos_clmm::position_nft::{TurbosPositionNFT};
 
     public fun init_reward_manager(
 		player: address,
@@ -38,6 +39,7 @@ module turbos_clmm::reward_manager_tests {
 		{
             reward_manager::init_for_testing(test_scenario::ctx(scenario));
         };
+
 	}
 
     #[test]
@@ -51,6 +53,14 @@ module turbos_clmm::reward_manager_tests {
         let scenario = &mut scenario_val;
 
         pool_factory_tests::init_pools(admin, player, player2, scenario);
+
+        tools_tests::init_tests_coin(
+            admin,
+            player,
+            player2,
+            100000,
+            scenario
+        );
 
         //init pool position manager
         test_scenario::next_tx(scenario, player);
@@ -179,10 +189,11 @@ module turbos_clmm::reward_manager_tests {
                 &mut reward_vault,
                 0,
                 tools_tests::coin_to_vec(eth),
-                10000,
+                20000,
                 &clock,
                 test_scenario::ctx(scenario),
             );
+            assert_eq(balance::value(pool::get_reward_vault(&reward_vault)), 20000);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
@@ -222,9 +233,49 @@ module turbos_clmm::reward_manager_tests {
                 &clock,
                 test_scenario::ctx(scenario),
             );
+
+            assert_eq(balance::value(pool::get_reward_vault(&reward_vault)), 10000);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
+        };
+
+        //collect reward
+        let eth_amount_before;
+        test_scenario::next_tx(scenario, player);
+        {
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let positions = test_scenario::take_shared<Positions>(scenario);
+            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
+            let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            eth_amount_before =  tools_tests::get_user_coin_balance<ETH>(scenario);
+            
+            position_manager::collect_reward<BTC, USDC, FEE500BPS, ETH>(
+                &mut pool,
+                &mut positions,
+                &mut nft,
+                &mut reward_vault,
+                0,
+                10000,
+                player,
+                200000,
+                &clock,
+                test_scenario::ctx(scenario),
+            );
+
+            test_scenario::return_shared(positions);
+            test_scenario::return_to_sender(scenario, nft);
+            test_scenario::return_shared(clock);
+            test_scenario::return_shared(reward_vault);
+            test_scenario::return_shared(pool);
+        };
+
+        test_scenario::next_tx(scenario, player);
+        {
+            let eth_amount_after =  tools_tests::get_user_coin_balance<ETH>(scenario);
+            let eth_amount_diff = eth_amount_after - eth_amount_before;
+            assert_eq(eth_amount_diff, 10000);
         };
 
         test_scenario::end(scenario_val);
