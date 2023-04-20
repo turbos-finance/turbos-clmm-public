@@ -6,7 +6,7 @@ version = "0.0.1"
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir="crates/sui-framework/packages/sui-framework/", rev = "devnet" }
 
 [addresses]
-turbos_clmm = "_"
+turbos_clmm = "0x1"
 
 [dev-addresses]
 turbos_clmm = "0x0"
