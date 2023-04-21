@@ -20,6 +20,7 @@ module turbos_clmm::tools_tests {
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use std::option::{Self, Option};
+    use sui::clock::{Self};
 
 	const MAX_TICK_INDEX: u32 = 443636;
 
@@ -36,6 +37,18 @@ module turbos_clmm::tools_tests {
         test_scenario::next_tx(scenario, admin);
 		{
             pool_factory::init_for_testing(test_scenario::ctx(scenario));
+        };
+    }
+
+    public fun init_clock(
+        admin: address,
+        scenario: &mut Scenario,
+    ) {
+        // init clock
+        test_scenario::next_tx(scenario, admin);
+        {
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            clock::share_for_testing(clock);
         };
     }
 

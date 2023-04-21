@@ -17,7 +17,7 @@ module turbos_clmm::protocol_fee_tests {
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
 	use turbos_clmm::math_sqrt_price::{Self};
 	use turbos_clmm::i128::{Self};
-	use sui::clock::{Self, Clock};
+	use sui::clock::{Clock};
 	use turbos_clmm::position_manager::{Self, Positions};
 
 	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
@@ -54,11 +54,10 @@ module turbos_clmm::protocol_fee_tests {
             pool_factory::mock_init_for_testing(test_scenario::ctx(scenario));
         };
 
-		 // init clock
-        test_scenario::next_tx(scenario, player);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+		tools_tests::init_clock(
+            player,
+            scenario
+        );
 
         //init BTCUSDC pool
         test_scenario::next_tx(scenario, player);

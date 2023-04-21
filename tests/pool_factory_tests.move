@@ -15,7 +15,7 @@ module turbos_clmm::pool_factory_tests {
     use turbos_clmm::math_tick;
     use turbos_clmm::position_manager::{Self,Positions};
     use sui::coin::{Coin};
-    use sui::clock::{Self, Clock};
+    use sui::clock::{Clock};
 
 	public fun init_pools(
 		admin: address,
@@ -41,11 +41,10 @@ module turbos_clmm::pool_factory_tests {
             scenario
         );
 
-        // init clock
-        test_scenario::next_tx(scenario, player);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+        tools_tests::init_clock(
+            admin,
+            scenario
+        );
 
         //init BTCUSDC pool
         test_scenario::next_tx(scenario, admin);
@@ -139,11 +138,10 @@ module turbos_clmm::pool_factory_tests {
             position_manager::init_for_testing(test_scenario::ctx(scenario));
         };
         
-        // init clock
-        test_scenario::next_tx(scenario, player);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+        tools_tests::init_clock(
+            player,
+            scenario
+        );
 
         // init USDCBTC pool
         test_scenario::next_tx(scenario, player);

@@ -28,11 +28,10 @@ module turbos_clmm::reward_manager_tests {
 		player: address,
 		scenario: &mut Scenario,
 	) {
-        // init clock
-        test_scenario::next_tx(scenario, player);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+        tools_tests::init_clock(
+            player,
+            scenario
+        );
 
         //init reward manager
         test_scenario::next_tx(scenario, player);
@@ -59,6 +58,11 @@ module turbos_clmm::reward_manager_tests {
             player,
             player2,
             100000,
+            scenario
+        );
+
+        tools_tests::init_clock(
+            admin,
             scenario
         );
 

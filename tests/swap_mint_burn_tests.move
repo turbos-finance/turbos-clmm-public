@@ -15,7 +15,7 @@ module turbos_clmm::swap_mint_burn_tests {
     use turbos_clmm::fee::{Fee};
 	use turbos_clmm::i32::{Self};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
-	use sui::clock::{Self, Clock};
+	use sui::clock::{Clock};
 
 	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
@@ -44,11 +44,10 @@ module turbos_clmm::swap_mint_burn_tests {
             scenario
         );
 
-		// init clock
-        test_scenario::next_tx(scenario, player);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+		tools_tests::init_clock(
+            player,
+            scenario
+        );
 
         //init BTCUSDC pool
         test_scenario::next_tx(scenario, admin);

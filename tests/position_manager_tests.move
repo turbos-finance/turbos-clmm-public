@@ -18,17 +18,16 @@ module turbos_clmm::position_manager_tests {
     use turbos_clmm::math_liquidity;
     use sui::test_utils::{assert_eq};
     use turbos_clmm::fee::{Fee};
-    use sui::clock::{Self, Clock};
+    use sui::clock::{Clock};
 
     public fun init_pool_manager(
 		admin: address,
 		scenario: &mut Scenario,
 	) {
-        // init clock
-        test_scenario::next_tx(scenario, admin);
-        {
-            clock::create_for_testing(test_scenario::ctx(scenario));
-        };
+        tools_tests::init_clock(
+            admin,
+            scenario
+        );
 
         //init pool position manager
         test_scenario::next_tx(scenario, admin);
