@@ -28,7 +28,7 @@ module turbos_clmm::swap_router {
         deadline: u64,
         clock: &Clock,
 		ctx: &mut TxContext
-    ): (u64, u64) {
+    ) {
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a, amount_b) = pool::swap(
 			pool,
@@ -51,7 +51,6 @@ module turbos_clmm::swap_router {
             recipient,
 			ctx
 		);
-        (amount_a_64, amount_b_64)
     }
 
     public entry fun swap_b_a<CoinTypeA, CoinTypeB, FeeType>(

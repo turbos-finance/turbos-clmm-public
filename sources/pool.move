@@ -132,8 +132,9 @@ module turbos_clmm::pool {
         tick_current_index: I32,
         sqrt_price: u128,
         protocol_fee: u64,
-        fee_growth_global_delta: u64,
+        fee_amount: u64,
         a_to_b: bool,
+        is_exact_in: bool,
     }
 
     struct MintEvent has copy, drop {
@@ -361,7 +362,7 @@ module turbos_clmm::pool {
 		let fee_growth_global = if (a_to_b) pool.fee_growth_global_a else pool.fee_growth_global_b;
 		let protocol_fee = 0;
 		let liquidity = pool.liquidity;
-        let fee_growth_global_delta = 0;
+        let fee_amount = 0;
 
 		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=sqrt_price_limit) {
 			let step_sqrt_price_start = sqrt_price;
@@ -400,6 +401,7 @@ module turbos_clmm::pool {
 				amount_calculated = i128::add(amount_calculated, i128::from(step_amount_in + step_fee_amount));
 			};
 
+            fee_amount = fee_amount + step_fee_amount;
 			if (pool.fee_protocol > 0) {
 				let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
                 step_fee_amount = step_fee_amount - delta;
@@ -407,7 +409,7 @@ module turbos_clmm::pool {
 			};
 
 			if (liquidity > 0) {
-                fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
+                let fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
 				fee_growth_global = fee_growth_global + fee_growth_global_delta;
 			};
 
@@ -472,8 +474,9 @@ module turbos_clmm::pool {
             tick_current_index: tick_current_index,
             sqrt_price: sqrt_price,
             protocol_fee: (protocol_fee as u64),
-            fee_growth_global_delta: (fee_growth_global_delta as u64),
+            fee_amount: (fee_amount as u64),
             a_to_b: a_to_b,
+            is_exact_in: exact_input,
         });
        
 		(amount_a, amount_b)
