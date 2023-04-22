@@ -158,54 +158,6 @@ module turbos_clmm::math_sqrt_price {
         }
     }
 
-    /// @notice Gets the next sqrt price given an input amount of token0 or token1
-    /// @dev Throws if price or liquidity are 0, or if the next price is out of bounds
-    /// @param sqrt_price The starting price, i.e., before accounting for the input amount
-    /// @param liquidity The amount of usable liquidity
-    /// @param amountIn How much of token0, or token1, is being swapped in
-    /// @param a_to_b Whether the amount in is token0 or token1
-    /// @return sqrtQX96 The price after adding the input amount to token0 or token1
-    public fun get_next_sqrt_price_from_input(
-        sqrt_price: u128,
-        liquidity: u128,
-        amount_in: u128,
-        a_to_b: bool
-    ): u128 {
-        assert!(sqrt_price > 0, EInvildSqrtPrice);
-        assert!(liquidity > 0, ELiquidity);
-
-        // round to make sure that we don't pass the target price
-        if (a_to_b) {
-            get_next_sqrt_price_from_amount_a_rounding_up(sqrt_price, liquidity, amount_in, false)
-        } else {
-            get_next_sqrt_price_from_amount_b_rounding_down(sqrt_price, liquidity, amount_in, false)
-        }
-    }
-
-    /// @notice Gets the next sqrt price given an output amount of token0 or token1
-    /// @dev Throws if price or liquidity are 0 or the next price is out of bounds
-    /// @param sqrt_price The starting price before accounting for the output amount
-    /// @param liquidity The amount of usable liquidity
-    /// @param amount_out How much of token0, or token1, is being swapped out
-    /// @param a_to_b Whether the amount out is token0 or token1
-    /// @return sqrtQX96 The price after removing the output amount of token0 or token1
-    public fun get_next_sqrt_price_from_output(
-        sqrt_price: u128,
-        liquidity: u128,
-        amount_out: u128,
-         a_to_b: bool
-    ): u128 {
-        assert!(sqrt_price > 0, EInvildSqrtPrice);
-        assert!(liquidity > 0, ELiquidity);
-
-        // round to make sure that we pass the target price
-        if (a_to_b) {
-            get_next_sqrt_price_from_amount_b_rounding_down(sqrt_price, liquidity, amount_out, false)
-        } else {
-            get_next_sqrt_price_from_amount_a_rounding_up(sqrt_price, liquidity, amount_out, false)
-        }
-    }
-
     /// @notice Gets the next sqrt price given a delta of token0
     /// @dev Always rounds up, because in the exact output case (increasing price) we need to move the price at least
     /// far enough to get the desired output amount, and in the exact input case (decreasing price) we need to move the

@@ -3,6 +3,7 @@
 
 module turbos_clmm::pool_factory {
 	use std::vector;
+	use std::type_name;
 	use sui::event;
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
@@ -18,6 +19,7 @@ module turbos_clmm::pool_factory {
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
     const EFeeAlreadyExists: u64 = 3;
+	const ERepeatedType: u64 = 4;
 
 	struct PoolFactoryAdminCap has key, store { id: UID }
 
@@ -90,6 +92,7 @@ module turbos_clmm::pool_factory {
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
+		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
 		let fee = fee::get_fee(feeType);
         let key = fee;
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
@@ -150,6 +153,7 @@ module turbos_clmm::pool_factory {
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
+		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
 		let fee = fee::get_fee(feeType);
         let key = fee;
 		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);

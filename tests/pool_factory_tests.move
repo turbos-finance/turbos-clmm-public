@@ -92,6 +92,62 @@ module turbos_clmm::pool_factory_tests {
 	}
 
     #[test]
+    #[expected_failure(abort_code = pool_factory::ERepeatedType)]
+    public fun repeated_type_on_deploy_pool() {
+        let admin = @0x0;
+        let player = @0x1;
+		let player2 = @0x2;
+
+        let scenario_val = test_scenario::begin(admin);
+        let scenario = &mut scenario_val;
+
+        tools_tests::init_fee_type(
+            admin,
+            scenario
+        );
+
+        tools_tests::init_tests_coin(
+            admin,
+            player,
+            player2,
+            10000,
+            scenario
+        );
+
+        tools_tests::init_pool_factory(
+            admin,
+            scenario
+        );
+
+        tools_tests::init_clock(
+            admin,
+            scenario
+        );
+        //init BTCBTC pool
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            //price=1 1btc = 1usdc
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
+            pool_factory::deploy_pool<BTC, BTC, FEE500BPS>(
+                &mut pool_config,
+                &fee_type,
+                sqrt_price,
+                &clock,
+                test_scenario::ctx(scenario),
+            );
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(clock);
+            test_scenario::return_immutable(fee_type);
+        };
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     public fun test_deploy_pool() {
         let admin = @0x0;
         let player = @0x1;

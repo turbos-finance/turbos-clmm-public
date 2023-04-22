@@ -84,7 +84,7 @@ module turbos_clmm::position_nft {
     }
 
     /// Permanently delete `nft`
-    public entry fun burn(nft: TurbosPositionNFT) {
+    public(friend) entry fun burn(nft: TurbosPositionNFT) {
         let TurbosPositionNFT { id, name: _, description: _, img_url: _, pool_id: _, position_id: _ } = nft;
         object::delete(id)
     }
