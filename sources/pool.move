@@ -123,6 +123,19 @@ module turbos_clmm::pool {
         reward_last_updated_time_ms: u64,
     }
 
+    struct ComputeSwapState has copy, drop {
+        amount_a: I128,
+        amount_b: I128, 
+        amount_specified_remaining: I128,
+        amount_calculated: I128,
+        sqrt_price: u128,
+        tick_current_index: I32,
+        fee_growth_global: u128,
+        protocol_fee: u128,
+        liquidity: u128,
+        fee_amount: u128,
+    }
+
     struct SwapEvent has copy, drop {
         pool: ID,
         recipient: address,
@@ -343,6 +356,62 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (I128, I128) {
+        let exact_input = i128::gt(amount_specified, i128::zero());
+        let state = compute_swap_result(
+            pool,
+            a_to_b,
+            amount_specified,
+            sqrt_price_limit,
+            clock,
+            ctx
+        );
+        
+        if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
+            pool.sqrt_price = state.sqrt_price;
+            pool.tick_current_index = state.tick_current_index;
+        } else {
+		    pool.sqrt_price = state.sqrt_price;
+        };
+
+		if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
+
+		if (a_to_b) {
+			pool.fee_growth_global_a = state.fee_growth_global;
+			if (state.protocol_fee > 0) {
+				pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
+			};
+		} else {
+			pool.fee_growth_global_b = state.fee_growth_global;
+			if (state.protocol_fee > 0) {
+				pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
+			};
+		};
+
+        event::emit(SwapEvent {
+            pool: object::id(pool),
+            recipient: recipient,
+            amount_a: (i128::abs_u128(state.amount_a) as u64),
+            amount_b: (i128::abs_u128(state.amount_b) as u64),
+            liquidity: state.liquidity,
+            tick_current_index: state.tick_current_index,
+            sqrt_price: state.sqrt_price,
+            protocol_fee: (state.protocol_fee as u64),
+            fee_amount: (state.fee_amount as u64),
+            a_to_b: a_to_b,
+            is_exact_in: exact_input,
+        });
+       
+		(state.amount_a, state.amount_b)
+    }
+
+    public(friend) fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        a_to_b: bool,
+        amount_specified: I128,
+        sqrt_price_limit: u128,
+        clock: &Clock,
+        ctx: &mut TxContext,
+    ): ComputeSwapState {
         assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
         if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > sqrt_price_limit) abort ESqrtPriceOutOfBounds;
@@ -351,24 +420,27 @@ module turbos_clmm::pool {
 		let exact_input = i128::gt(amount_specified, i128::zero());
         //reword
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
-		//cache
-        let liquidity_start = pool.liquidity;
 
 		//state
-		let amount_specified_remaining = amount_specified;
-		let amount_calculated = i128::zero();
-		let sqrt_price = pool.sqrt_price;
-		let tick_current_index = pool.tick_current_index;
-		let fee_growth_global = if (a_to_b) pool.fee_growth_global_a else pool.fee_growth_global_b;
-		let protocol_fee = 0;
-		let liquidity = pool.liquidity;
-        let fee_amount = 0;
+        let s = ComputeSwapState {
+            amount_a: i128::zero(),
+            amount_b: i128::zero(),
+            amount_specified_remaining: amount_specified,
+            amount_calculated: i128::zero(),
+            sqrt_price: pool.sqrt_price,
+            tick_current_index: pool.tick_current_index,
+            fee_growth_global: if (a_to_b) pool.fee_growth_global_a else pool.fee_growth_global_b,
+            protocol_fee: 0,
+            liquidity: pool.liquidity,
+            fee_amount: 0,
+        };
+        let state = &mut s;
 
-		while (!i128::eq(amount_specified_remaining, i128::zero()) && sqrt_price !=sqrt_price_limit) {
-			let step_sqrt_price_start = sqrt_price;
+		while (!i128::eq(state.amount_specified_remaining, i128::zero()) && state.sqrt_price !=sqrt_price_limit) {
+			let step_sqrt_price_start = state.sqrt_price;
 			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
 				pool,
-				tick_current_index,
+				state.tick_current_index,
 				a_to_b
 			);
 
@@ -380,47 +452,49 @@ module turbos_clmm::pool {
 
 			let step_sqrt_price_next = math_tick::sqrt_price_from_tick_index(step_tick_next_index);
 			// compute values to swap to the target tick, price limit, or point where input/output amount is exhausted
+            let step_sqrt_price;
 			let step_amount_in;
 			let step_amount_out;
 			let step_fee_amount;
 			let limit = if (a_to_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
             let target = if (limit) sqrt_price_limit else step_sqrt_price_next;
-            (sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = math_swap::compute_swap(
-                sqrt_price,
+            (step_sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = math_swap::compute_swap(
+                state.sqrt_price,
                 target,
-                liquidity,
-                amount_specified_remaining,
+                state.liquidity,
+                state.amount_specified_remaining,
                 pool.fee
             );
+            state.sqrt_price = step_sqrt_price;
 
 			if (exact_input) {
-				amount_specified_remaining = i128::sub(amount_specified_remaining, i128::from(step_amount_in + step_fee_amount));
-				amount_calculated = i128::sub(amount_calculated, i128::from(step_amount_out));
+				state.amount_specified_remaining = i128::sub(state.amount_specified_remaining, i128::from(step_amount_in + step_fee_amount));
+				state.amount_calculated = i128::sub(state.amount_calculated, i128::from(step_amount_out));
 			} else {
-				amount_specified_remaining = i128::add(amount_specified_remaining, i128::from(step_amount_out));
-				amount_calculated = i128::add(amount_calculated, i128::from(step_amount_in + step_fee_amount));
+				state.amount_specified_remaining = i128::add(state.amount_specified_remaining, i128::from(step_amount_out));
+				state.amount_calculated = i128::add(state.amount_calculated, i128::from(step_amount_in + step_fee_amount));
 			};
 
-            fee_amount = fee_amount + step_fee_amount;
+            state.fee_amount = state.fee_amount + step_fee_amount;
 			if (pool.fee_protocol > 0) {
 				let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
                 step_fee_amount = step_fee_amount - delta;
-                protocol_fee = protocol_fee + delta;
+                state.protocol_fee = state.protocol_fee + delta;
 			};
 
-			if (liquidity > 0) {
-                let fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, liquidity);
-				fee_growth_global = fee_growth_global + fee_growth_global_delta;
+			if (state.liquidity > 0) {
+                let fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, state.liquidity);
+				state.fee_growth_global = state.fee_growth_global + fee_growth_global_delta;
 			};
 
-			if (sqrt_price == step_sqrt_price_next) {
+			if (state.sqrt_price == step_sqrt_price_next) {
 				if (step_initialized) {
 					let (fee_growth_global_a, fee_growth_global_b) = (pool.fee_growth_global_a, pool.fee_growth_global_b);
 					let liquidity_net = cross_tick(
 						pool,
                         step_tick_next_index,
-                        if(a_to_b) fee_growth_global else fee_growth_global_a,
-                        if(a_to_b) fee_growth_global_b else fee_growth_global,
+                        if(a_to_b) state.fee_growth_global else fee_growth_global_a,
+                        if(a_to_b) fee_growth_global_b else state.fee_growth_global,
                         &reward_growths,
 						ctx
                     );
@@ -430,56 +504,23 @@ module turbos_clmm::pool {
 						liquidity_net = i128::neg(liquidity_net);
 					};
 
-                    liquidity = math_liquidity::add_delta(liquidity, liquidity_net);
+                    state.liquidity = math_liquidity::add_delta(state.liquidity, liquidity_net);
 				};
-				tick_current_index = if (a_to_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
-			} else if (sqrt_price != step_sqrt_price_start) {
-				tick_current_index = math_tick::tick_index_from_sqrt_price(sqrt_price);
+				state.tick_current_index = if (a_to_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
+			} else if (state.sqrt_price != step_sqrt_price_start) {
+				state.tick_current_index = math_tick::tick_index_from_sqrt_price(state.sqrt_price);
 			};
 		};
         
-        if (!i32::eq(tick_current_index, pool.tick_current_index)) {
-            pool.sqrt_price = sqrt_price;
-            pool.tick_current_index = tick_current_index;
-        } else {
-		    pool.sqrt_price = sqrt_price;
-        };
-
-		if (liquidity_start != liquidity) pool.liquidity = liquidity;
-
-		if (a_to_b) {
-			pool.fee_growth_global_a = fee_growth_global;
-			if (protocol_fee > 0) {
-				pool.protocol_fees_a = pool.protocol_fees_a + (protocol_fee as u64);
-			};
-		} else {
-			pool.fee_growth_global_b = fee_growth_global;
-			if (protocol_fee > 0) {
-				pool.protocol_fees_b = pool.protocol_fees_b + (protocol_fee as u64);
-			};
-		};
-
 		let (amount_a, amount_b) = if (a_to_b == exact_input) {
-            (i128::sub(amount_specified, amount_specified_remaining), amount_calculated)
+            (i128::sub(amount_specified, state.amount_specified_remaining), state.amount_calculated)
 		} else {
-			(amount_calculated, i128::sub(amount_specified, amount_specified_remaining))
+			(state.amount_calculated, i128::sub(amount_specified, state.amount_specified_remaining))
 		};
+        state.amount_a = amount_a;
+        state.amount_b = amount_b;
 
-        event::emit(SwapEvent {
-            pool: object::id(pool),
-            recipient: recipient,
-            amount_a: (i128::abs_u128(amount_a) as u64),
-            amount_b: (i128::abs_u128(amount_b) as u64),
-            liquidity: liquidity,
-            tick_current_index: tick_current_index,
-            sqrt_price: sqrt_price,
-            protocol_fee: (protocol_fee as u64),
-            fee_amount: (fee_amount as u64),
-            a_to_b: a_to_b,
-            is_exact_in: exact_input,
-        });
-       
-		(amount_a, amount_b)
+		s
     }
 
 
