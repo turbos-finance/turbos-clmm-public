@@ -422,7 +422,7 @@ module turbos_clmm::pool {
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
 
 		//state
-        let s = ComputeSwapState {
+        let state = ComputeSwapState {
             amount_a: i128::zero(),
             amount_b: i128::zero(),
             amount_specified_remaining: amount_specified,
@@ -434,7 +434,6 @@ module turbos_clmm::pool {
             liquidity: pool.liquidity,
             fee_amount: 0,
         };
-        let state = &mut s;
 
 		while (!i128::eq(state.amount_specified_remaining, i128::zero()) && state.sqrt_price !=sqrt_price_limit) {
 			let step_sqrt_price_start = state.sqrt_price;
@@ -520,7 +519,7 @@ module turbos_clmm::pool {
         state.amount_a = amount_a;
         state.amount_b = amount_b;
 
-		s
+		state
     }
 
 
