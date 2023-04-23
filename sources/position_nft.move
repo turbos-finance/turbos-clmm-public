@@ -58,18 +58,18 @@ module turbos_clmm::position_nft {
 
     /// Create a new position_nft
     public(friend) fun mint(
-        name: vector<u8>,
-        description: vector<u8>,
-        img_url: vector<u8>,
+        name: String,
+        description: String,
+        img_url: String,
         pool_id: ID,
         position_id: ID,
         ctx: &mut TxContext
     ): TurbosPositionNFT {
         let nft = TurbosPositionNFT {
             id: object::new(ctx),
-            name: string::utf8(name),
-            description: string::utf8(description),
-            img_url: url::new_unsafe_from_bytes(img_url),
+            name: name,
+            description: description,
+            img_url: url::new_unsafe(string::to_ascii(img_url)),
             pool_id,
             position_id,
         };

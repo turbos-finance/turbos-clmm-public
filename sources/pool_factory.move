@@ -14,6 +14,7 @@ module turbos_clmm::pool_factory {
     use turbos_clmm::fee::{Self, Fee};
 	use sui::clock::{Clock};
 	use turbos_clmm::pool::{Self, Pool};
+	use std::string::{String};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -220,6 +221,42 @@ module turbos_clmm::pool_factory {
 			ctx
 		);
 	}
+
+	public entry fun update_nft_name(
+		_: &PoolFactoryAdminCap,
+        positions: &mut Positions,
+        name: String,
+        _ctx: &mut TxContext
+    ) {
+        position_manager::update_nft_name(
+			positions,
+			name,
+		);
+    }
+
+    public entry fun update_nft_description(
+		_: &PoolFactoryAdminCap,
+        positions: &mut Positions,
+        nft_description: String,
+        _ctx: &mut TxContext
+    ) {
+        position_manager::update_nft_description(
+			positions,
+			nft_description,
+		);
+    }
+
+    public entry fun update_nft_img_url(
+		_: &PoolFactoryAdminCap,
+        positions: &mut Positions,
+        nft_img_url: String,
+        _ctx: &mut TxContext
+    ) {
+        position_manager::update_nft_img_url(
+			positions,
+			nft_img_url,
+		);
+    }
 
 	#[test_only]
 	public fun mock_init_for_testing(ctx: &mut TxContext) {

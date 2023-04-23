@@ -5,7 +5,7 @@ module turbos_clmm::position_manager {
 	use std::vector;
     use sui::transfer;
     use sui::event;
-    use std::string::{String};
+    use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
@@ -18,8 +18,8 @@ module turbos_clmm::position_manager {
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use sui::clock::{Self, Clock};
     
-    const Q64: u128 = 0x10000000000000000;
-    
+    friend turbos_clmm::pool_factory;
+
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
@@ -53,6 +53,9 @@ module turbos_clmm::position_manager {
         id: UID,
 		nft_minted: u64,
         user_position: Table<address, ID>,
+        nft_name: String,
+        nft_description: String,
+        nft_img_url: String,
     }
 
     struct IncreaseLiquidityEvent has copy, drop {
@@ -93,6 +96,9 @@ module turbos_clmm::position_manager {
 			id: object::new(ctx),
 			nft_minted: 0,
             user_position: table::new(ctx),
+            nft_name: string::utf8(b"Turbos Position's NFT"),
+            nft_description: string::utf8(b"An NFT created by Turbos CLMM"),
+			nft_img_url: string::utf8(b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png"),
 		});
     }
 
@@ -441,6 +447,27 @@ module turbos_clmm::position_manager {
         });
     }
 
+    public(friend) fun update_nft_name(
+        positions: &mut Positions,
+        nft_name: String,
+    ) {
+        positions.nft_name = nft_name;
+    }
+
+    public(friend) fun update_nft_description(
+        positions: &mut Positions,
+        nft_description: String,
+    ) {
+        positions.nft_description = nft_description;
+    }
+
+    public(friend) fun update_nft_img_url(
+        positions: &mut Positions,
+        nft_img_url: String,
+    ) {
+        positions.nft_img_url = nft_img_url;
+    }
+
 	fun mint_nft(
         pool_id: ID,
         position_id: ID,
@@ -449,9 +476,9 @@ module turbos_clmm::position_manager {
         ctx: &mut TxContext
     ): address {
         let nft = position_nft::mint(
-            b"Turbos Position's NFT",
-            b"An NFT created by Turbos CLMM",
-			b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png",
+            positions.nft_name,
+            positions.nft_description,
+			positions.nft_img_url,
             pool_id,
             position_id,
             ctx,
