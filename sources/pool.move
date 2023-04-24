@@ -364,6 +364,7 @@ module turbos_clmm::pool {
             amount_specified_is_input,
             sqrt_price_limit,
             clock,
+            false,
             ctx
         );
         
@@ -412,6 +413,7 @@ module turbos_clmm::pool {
         amount_specified_is_input: bool,
         sqrt_price_limit: u128,
         clock: &Clock,
+        dry_run: bool,
         ctx: &mut TxContext,
     ): ComputeSwapState {
         assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
@@ -497,6 +499,7 @@ module turbos_clmm::pool {
                         if(a_to_b) state.fee_growth_global else fee_growth_global_a,
                         if(a_to_b) fee_growth_global_b else state.fee_growth_global,
                         &reward_growths,
+                        dry_run,
 						ctx
                     );
                     // if we're moving leftward, we interpret liquidity_net as the opposite sign
@@ -1152,6 +1155,7 @@ module turbos_clmm::pool {
         fee_growth_global_a: u128,
 		fee_growth_global_b: u128,
         reward_growth_global: &vector<u128>,
+        dry_run: bool,
         ctx: &mut TxContext,
     ): I128 {
 		let tick;
@@ -1161,16 +1165,18 @@ module turbos_clmm::pool {
 			tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
 		};
 
-		tick.fee_growth_outside_a = fee_growth_global_a - tick.fee_growth_outside_a;
-        tick.fee_growth_outside_b = fee_growth_global_b - tick.fee_growth_outside_b;
+        if (!dry_run) {
+		    tick.fee_growth_outside_a = fee_growth_global_a - tick.fee_growth_outside_a;
+            tick.fee_growth_outside_b = fee_growth_global_b - tick.fee_growth_outside_b;
 
-        let i = 0;
-        let len = vector::length(reward_growth_global);
-        while (i < len) {
-            let reward_new = vector::borrow(reward_growth_global, i);
-            let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
-            *reward = *reward_new - *reward;
-            i = i + 1;
+            let i = 0;
+            let len = vector::length(reward_growth_global);
+            while (i < len) {
+                let reward_new = vector::borrow(reward_growth_global, i);
+                let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
+                *reward = *reward_new - *reward;
+                i = i + 1;
+            };
         };
 
         tick.liquidity_net
