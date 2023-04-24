@@ -3,7 +3,6 @@
 
 module turbos_clmm::math_swap {
     use turbos_clmm::full_math_u128;
-    use turbos_clmm::i128::{Self, I128};
     use turbos_clmm::math_sqrt_price;
 
     const EInvildSqrtPrice: u64 = 0;
@@ -20,12 +19,11 @@ module turbos_clmm::math_swap {
         sqrt_price_current: u128,
         sqrt_price_target: u128,
         liquidity: u128,
-        amount_remaining_i128: I128,
+        amount_remaining: u128,
+        amount_specified_is_input: bool,
         fee_rate: u32,
     ): (u128, u128, u128, u128) {
         let a_to_b = sqrt_price_current >= sqrt_price_target;
-        let amount_specified_is_input = i128::gte(amount_remaining_i128, i128::zero());
-        let amount_remaining = i128::abs_u128(amount_remaining_i128);
         let fee_amount;
 
         let amount_fixed_delta = get_amount_fixed_delta(

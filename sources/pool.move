@@ -126,8 +126,8 @@ module turbos_clmm::pool {
     struct ComputeSwapState has copy, drop {
         amount_a: I128,
         amount_b: I128, 
-        amount_specified_remaining: I128,
-        amount_calculated: I128,
+        amount_specified_remaining: u128,
+        amount_calculated: u128,
         sqrt_price: u128,
         tick_current_index: I32,
         fee_growth_global: u128,
@@ -356,11 +356,12 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (I128, I128) {
-        let exact_input = i128::gt(amount_specified, i128::zero());
+        let amount_specified_is_input = i128::gt(amount_specified, i128::zero());
         let state = compute_swap_result(
             pool,
             a_to_b,
-            amount_specified,
+            i128::abs_u128(amount_specified),
+            amount_specified_is_input,
             sqrt_price_limit,
             clock,
             ctx
@@ -398,7 +399,7 @@ module turbos_clmm::pool {
             protocol_fee: (state.protocol_fee as u64),
             fee_amount: (state.fee_amount as u64),
             a_to_b: a_to_b,
-            is_exact_in: exact_input,
+            is_exact_in: amount_specified_is_input,
         });
        
 		(state.amount_a, state.amount_b)
@@ -407,17 +408,17 @@ module turbos_clmm::pool {
     public(friend) fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         a_to_b: bool,
-        amount_specified: I128,
+        amount_specified: u128,
+        amount_specified_is_input: bool,
         sqrt_price_limit: u128,
         clock: &Clock,
         ctx: &mut TxContext,
     ): ComputeSwapState {
-        assert!(!i128::eq(amount_specified, i128::zero()), ESwapAmountSpecifiedZero);
+        assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
         if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > sqrt_price_limit) abort ESqrtPriceOutOfBounds;
         if (a_to_b && sqrt_price_limit > pool.sqrt_price || !a_to_b && sqrt_price_limit < pool.sqrt_price) abort EInvalidSqrtPriceLimitDirection;
 
-		let exact_input = i128::gt(amount_specified, i128::zero());
         //reword
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
 
@@ -426,7 +427,7 @@ module turbos_clmm::pool {
             amount_a: i128::zero(),
             amount_b: i128::zero(),
             amount_specified_remaining: amount_specified,
-            amount_calculated: i128::zero(),
+            amount_calculated: 0,
             sqrt_price: pool.sqrt_price,
             tick_current_index: pool.tick_current_index,
             fee_growth_global: if (a_to_b) pool.fee_growth_global_a else pool.fee_growth_global_b,
@@ -435,7 +436,7 @@ module turbos_clmm::pool {
             fee_amount: 0,
         };
 
-		while (!i128::eq(state.amount_specified_remaining, i128::zero()) && state.sqrt_price !=sqrt_price_limit) {
+		while (state.amount_specified_remaining > 0 && state.sqrt_price !=sqrt_price_limit) {
 			let step_sqrt_price_start = state.sqrt_price;
 			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
 				pool,
@@ -462,16 +463,17 @@ module turbos_clmm::pool {
                 target,
                 state.liquidity,
                 state.amount_specified_remaining,
+                amount_specified_is_input,
                 pool.fee
             );
             state.sqrt_price = step_sqrt_price;
 
-			if (exact_input) {
-				state.amount_specified_remaining = i128::sub(state.amount_specified_remaining, i128::from(step_amount_in + step_fee_amount));
-				state.amount_calculated = i128::sub(state.amount_calculated, i128::from(step_amount_out));
+			if (amount_specified_is_input) {
+                state.amount_specified_remaining = state.amount_specified_remaining - step_amount_in - step_fee_amount;
+				state.amount_calculated = state.amount_calculated + step_amount_out;
 			} else {
-				state.amount_specified_remaining = i128::add(state.amount_specified_remaining, i128::from(step_amount_out));
-				state.amount_calculated = i128::add(state.amount_calculated, i128::from(step_amount_in + step_fee_amount));
+                state.amount_specified_remaining = state.amount_specified_remaining - step_amount_out;
+				state.amount_calculated = state.amount_calculated + step_amount_in + step_fee_amount;
 			};
 
             state.fee_amount = state.fee_amount + step_fee_amount;
@@ -511,13 +513,13 @@ module turbos_clmm::pool {
 			};
 		};
         
-		let (amount_a, amount_b) = if (a_to_b == exact_input) {
-            (i128::sub(amount_specified, state.amount_specified_remaining), state.amount_calculated)
+		let (amount_a, amount_b) = if (a_to_b == amount_specified_is_input) {
+            (amount_specified - state.amount_specified_remaining, state.amount_calculated)
 		} else {
-			(state.amount_calculated, i128::sub(amount_specified, state.amount_specified_remaining))
+			(state.amount_calculated, amount_specified - state.amount_specified_remaining)
 		};
-        state.amount_a = amount_a;
-        state.amount_b = amount_b;
+        state.amount_a = i128::from(amount_a);
+        state.amount_b = i128::from(amount_b);
 
 		state
     }
