@@ -16,7 +16,6 @@ module turbos_clmm::protocol_fee_tests {
 	use turbos_clmm::i32::{Self};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
 	use turbos_clmm::math_sqrt_price::{Self};
-	use turbos_clmm::i128::{Self};
 	use sui::clock::{Clock};
 	use turbos_clmm::position_manager::{Self, Positions};
 
@@ -132,7 +131,8 @@ module turbos_clmm::protocol_fee_tests {
 				&mut pool,
 				player,
 				true,
-				i128::from(1000000), //amount_in 
+				1000000, //amount_in 
+				true,
 				MIN_SQRT_PRICE_X64 + 1,
 				&clock,
 				test_scenario::ctx(scenario),
@@ -145,7 +145,8 @@ module turbos_clmm::protocol_fee_tests {
 				&mut pool,
 				player,
 				false,
-				i128::from(1000000), //amount_in 
+				1000000, //amount_in 
+				true,
 				MAX_SQRT_PRICE_X64 - 1,
 				&clock,
 				test_scenario::ctx(scenario),

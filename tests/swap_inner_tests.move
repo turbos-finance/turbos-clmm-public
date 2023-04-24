@@ -15,7 +15,6 @@ module turbos_clmm::swap_inner_tests {
 	use turbos_clmm::i32::{Self};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
 	use turbos_clmm::math_sqrt_price::{Self};
-	use turbos_clmm::i128::{Self};
 	use sui::clock::{Clock};
 
 	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
@@ -113,13 +112,14 @@ module turbos_clmm::swap_inner_tests {
 				&mut pool,
 				player,
 				true,
-				i128::from(1000000000000), //amount_in 
+				1000000000000, //amount_in 
+				true,
 				MIN_SQRT_PRICE_X64 + 1,
 				&clock,
 				test_scenario::ctx(scenario),
 			);
-			assert_eq(i128::abs_u128(amount_a), 1000000000000);
-			assert_eq(i128::abs_u128(amount_b), 989999946868);
+			assert_eq(amount_a, 1000000000000);
+			assert_eq(amount_b, 989999946868);
 			assert_eq(tools_tests::get_pool_tick_index(&pool), i32::neg_from(1));
 			assert_eq(tools_tests::get_pool_sqrt_price(&pool), 18446743083709604748);
 			let (fee_growth_global_a, fee_growth_global_b) = tools_tests::get_pool_fee_growth_global(&pool);
@@ -167,13 +167,14 @@ module turbos_clmm::swap_inner_tests {
 				&mut pool,
 				player,
 				false,
-				i128::from(1000000000000), //amount_in 
+				1000000000000, //amount_in 
+				true,
 				MAX_SQRT_PRICE_X64 - 1,
 				&clock,
 				test_scenario::ctx(scenario),
 			);
-			assert_eq(i128::abs_u128(amount_a), 989999946868);
-			assert_eq(i128::abs_u128(amount_b), 1000000000000);
+			assert_eq(amount_a, 989999946868);
+			assert_eq(amount_b, 1000000000000);
 			assert_eq(tools_tests::get_pool_tick_index(&pool), i32::zero());
 			assert_eq(tools_tests::get_pool_sqrt_price(&pool), 18446745063709551616);
 			let (fee_growth_global_a, fee_growth_global_b) = tools_tests::get_pool_fee_growth_global(&pool);
@@ -204,13 +205,14 @@ module turbos_clmm::swap_inner_tests {
 				&mut pool,
 				player,
 				true,
-				i128::neg_from(1000000000000), //amount_in 
+				1000000000000, //amount_in 
+				false,
 				MIN_SQRT_PRICE_X64 + 1,
 				&clock,
 				test_scenario::ctx(scenario),
 			);
-			assert_eq(i128::abs_u128(amount_a), 1010101064860);
-			assert_eq(i128::abs_u128(amount_b), 1000000000000);
+			assert_eq(amount_a, 1010101064860);
+			assert_eq(amount_b, 1000000000000);
 			assert_eq(tools_tests::get_pool_tick_index(&pool), i32::neg_from(1));
 			assert_eq(tools_tests::get_pool_sqrt_price(&pool), 18446743073709551616);
 			let (fee_growth_global_a, fee_growth_global_b) = tools_tests::get_pool_fee_growth_global(&pool);
@@ -241,13 +243,14 @@ module turbos_clmm::swap_inner_tests {
 				&mut pool,
 				player,
 				false,
-				i128::neg_from(1000000000000), //amount_in 
+				1000000000000, //amount_in 
+				false,
 				MAX_SQRT_PRICE_X64 - 1,
 				&clock,
 				test_scenario::ctx(scenario),
 			);
-			assert_eq(i128::abs_u128(amount_a), 1000000000000);
-			assert_eq(i128::abs_u128(amount_b), 1010101064860);
+			assert_eq(amount_a, 1000000000000);
+			assert_eq(amount_b, 1010101064860);
 			assert_eq(tools_tests::get_pool_tick_index(&pool), i32::zero());
 			assert_eq(tools_tests::get_pool_sqrt_price(&pool), 18446745073709605827);
 			let (fee_growth_global_a, fee_growth_global_b) = tools_tests::get_pool_fee_growth_global(&pool);

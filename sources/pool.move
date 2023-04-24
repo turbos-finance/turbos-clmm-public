@@ -124,8 +124,8 @@ module turbos_clmm::pool {
     }
 
     struct ComputeSwapState has copy, drop {
-        amount_a: I128,
-        amount_b: I128, 
+        amount_a: u128,
+        amount_b: u128, 
         amount_specified_remaining: u128,
         amount_calculated: u128,
         sqrt_price: u128,
@@ -351,16 +351,16 @@ module turbos_clmm::pool {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
         a_to_b: bool,
-        amount_specified: I128,
+        amount_specified: u128,
+        amount_specified_is_input: bool,
         sqrt_price_limit: u128,
         clock: &Clock,
         ctx: &mut TxContext,
-    ): (I128, I128) {
-        let amount_specified_is_input = i128::gt(amount_specified, i128::zero());
+    ): (u128, u128) {
         let state = compute_swap_result(
             pool,
             a_to_b,
-            i128::abs_u128(amount_specified),
+            amount_specified,
             amount_specified_is_input,
             sqrt_price_limit,
             clock,
@@ -391,8 +391,8 @@ module turbos_clmm::pool {
         event::emit(SwapEvent {
             pool: object::id(pool),
             recipient: recipient,
-            amount_a: (i128::abs_u128(state.amount_a) as u64),
-            amount_b: (i128::abs_u128(state.amount_b) as u64),
+            amount_a: (state.amount_a as u64),
+            amount_b: (state.amount_b as u64),
             liquidity: state.liquidity,
             tick_current_index: state.tick_current_index,
             sqrt_price: state.sqrt_price,
@@ -424,8 +424,8 @@ module turbos_clmm::pool {
 
 		//state
         let state = ComputeSwapState {
-            amount_a: i128::zero(),
-            amount_b: i128::zero(),
+            amount_a: 0,
+            amount_b: 0,
             amount_specified_remaining: amount_specified,
             amount_calculated: 0,
             sqrt_price: pool.sqrt_price,
@@ -518,8 +518,8 @@ module turbos_clmm::pool {
 		} else {
 			(state.amount_calculated, amount_specified - state.amount_specified_remaining)
 		};
-        state.amount_a = i128::from(amount_a);
-        state.amount_b = i128::from(amount_b);
+        state.amount_a = amount_a;
+        state.amount_b = amount_b;
 
 		state
     }
@@ -1864,16 +1864,18 @@ module turbos_clmm::pool {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
         a_to_b: bool,
-        amount_specified: I128,
+        amount_specified: u128,
+        is_exact_input: bool,
         sqrt_price_limit: u128,
         clock: &Clock,
         ctx: &mut TxContext
-    ): (I128, I128) {
+    ): (u128, u128) {
         swap(
             pool,
             recipient,
             a_to_b,
             amount_specified,
+            is_exact_input,
             sqrt_price_limit,
             clock,
             ctx

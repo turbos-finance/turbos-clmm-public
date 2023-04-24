@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::swap_router {
-    use turbos_clmm::i128;
     use sui::tx_context::{TxContext};
     use turbos_clmm::pool::{Self, Pool};
 	use sui::coin::{Coin};
@@ -34,13 +33,14 @@ module turbos_clmm::swap_router {
 			pool,
             recipient,
 			true,
-			if(is_exact_in) i128::from((amount as u128)) else i128::neg_from((amount as u128)),
+			(amount as u128),
+            is_exact_in,
 			sqrt_price_limit,
             clock,
 			ctx
 		);
-        let amount_a_64 = (i128::abs_u128(amount_a) as u64);
-        let amount_b_64 = (i128::abs_u128(amount_b) as u64);
+        let amount_a_64 = (amount_a as u64);
+        let amount_b_64 = (amount_b as u64);
         check_amount_threshold(is_exact_in, true, amount_a_64, amount_b_64, amount_threshold);
 
 		pool::swap_coin_a_b(
@@ -70,13 +70,14 @@ module turbos_clmm::swap_router {
 			pool,
             recipient,
 			false,
-			if(is_exact_in) i128::from((amount as u128)) else i128::neg_from((amount as u128)),
+			(amount as u128),
+            is_exact_in,
 			sqrt_price_limit,
             clock,
 			ctx
 		);
-        let amount_a_64 = (i128::abs_u128(amount_a) as u64);
-        let amount_b_64 = (i128::abs_u128(amount_b) as u64);
+        let amount_a_64 = (amount_a as u64);
+        let amount_b_64 = (amount_b as u64);
         check_amount_threshold(is_exact_in, false, amount_a_64, amount_b_64, amount_threshold);
 
 		pool::swap_coin_b_a(
@@ -139,7 +140,8 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
@@ -149,15 +151,16 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::abs(step1_out),
+			    step1_out,
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
             let a_to_b_step_one = false;
@@ -166,7 +169,8 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::neg_from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
@@ -176,15 +180,16 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::neg_from(i128::as_u128(step2_in)),
+			    step2_in,
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
@@ -228,7 +233,8 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
@@ -238,14 +244,15 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::abs(step1_out),
+			    step1_out,
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
             let a_to_b_step_one = true;
@@ -255,7 +262,8 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::neg_from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
@@ -266,15 +274,16 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::neg_from(i128::abs_u128(step2_in)),
+			    step2_in,
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
@@ -318,7 +327,8 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
@@ -328,15 +338,16 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::abs(step1_out),
+			    step1_out,
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
             let a_to_b_step_one = false;
@@ -345,7 +356,8 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::neg_from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
@@ -355,15 +367,16 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::neg_from(i128::as_u128(step2_in)),
+			    step2_in,
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
 
         };
@@ -408,7 +421,8 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
-			    i128::from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
@@ -419,15 +433,16 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
-			    i128::abs(step1_out),
+			    step1_out,
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
             let a_to_b_step_one = true;
@@ -436,7 +451,8 @@ module turbos_clmm::swap_router {
 			    pool_b,
                 recipient,
 			    a_to_b_step_one,
-			    i128::neg_from((amount as u128)),
+			    (amount as u128),
+                is_exact_in,
 			    sqrt_price_limit_two,
                 clock,
 			    ctx
@@ -446,15 +462,16 @@ module turbos_clmm::swap_router {
 			    pool_a,
                 recipient,
 			    a_to_b_step_two,
-			    i128::neg_from(i128::as_u128(step2_in)),
+			    step2_in,
+                is_exact_in,
 			    sqrt_price_limit_one,
                 clock,
 			    ctx
 		    );
 
-            amount_a_64 = (i128::abs_u128(step1_in) as u64);
-            amount_b_64 = (i128::abs_u128(step1_out) as u64);
-            amount_c_64 = (i128::abs_u128(step2_out) as u64);
+            amount_a_64 = (step1_in as u64);
+            amount_b_64 = (step1_out as u64);
+            amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
