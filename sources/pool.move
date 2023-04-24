@@ -29,6 +29,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::pool_factory;
     friend turbos_clmm::swap_router;
     friend turbos_clmm::reward_manager;
+    friend turbos_clmm::pool_fetcher;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -363,32 +364,11 @@ module turbos_clmm::pool {
             amount_specified,
             amount_specified_is_input,
             sqrt_price_limit,
-            clock,
             false,
+            clock,
             ctx
         );
         
-        if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
-            pool.sqrt_price = state.sqrt_price;
-            pool.tick_current_index = state.tick_current_index;
-        } else {
-		    pool.sqrt_price = state.sqrt_price;
-        };
-
-		if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
-
-		if (a_to_b) {
-			pool.fee_growth_global_a = state.fee_growth_global;
-			if (state.protocol_fee > 0) {
-				pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
-			};
-		} else {
-			pool.fee_growth_global_b = state.fee_growth_global;
-			if (state.protocol_fee > 0) {
-				pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
-			};
-		};
-
         event::emit(SwapEvent {
             pool: object::id(pool),
             recipient: recipient,
@@ -412,8 +392,8 @@ module turbos_clmm::pool {
         amount_specified: u128,
         amount_specified_is_input: bool,
         sqrt_price_limit: u128,
-        clock: &Clock,
         dry_run: bool,
+        clock: &Clock,
         ctx: &mut TxContext,
     ): ComputeSwapState {
         assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
@@ -516,6 +496,29 @@ module turbos_clmm::pool {
 			};
 		};
         
+        if (!dry_run) {
+            if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
+                pool.sqrt_price = state.sqrt_price;
+                pool.tick_current_index = state.tick_current_index;
+            } else {
+		        pool.sqrt_price = state.sqrt_price;
+            };
+
+		    if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
+
+		    if (a_to_b) {
+			    pool.fee_growth_global_a = state.fee_growth_global;
+			    if (state.protocol_fee > 0) {
+				    pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
+			    };
+		    } else {
+			    pool.fee_growth_global_b = state.fee_growth_global;
+			    if (state.protocol_fee > 0) {
+				    pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
+			    };
+		    };
+        };
+
 		let (amount_a, amount_b) = if (a_to_b == amount_specified_is_input) {
             (amount_specified - state.amount_specified_remaining, state.amount_calculated)
 		} else {
