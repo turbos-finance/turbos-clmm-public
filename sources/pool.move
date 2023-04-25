@@ -52,6 +52,7 @@ module turbos_clmm::pool {
     const EInsufficientBalanceRewardVault: u64 = 18;
     const ESqrtPriceOutOfBounds: u64 = 19;
     const EInvalidSqrtPriceLimitDirection: u64 = 20;
+    const EInvildCoins: u64 = 21;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
@@ -1449,6 +1450,7 @@ module turbos_clmm::pool {
 	public(friend) fun merge_coin<CoinType>(
         coins: vector<Coin<CoinType>>, 
     ): Coin<CoinType> {
+        assert!(vector::length(&coins) > 0, EInvildCoins);
         let self = vector::pop_back(&mut coins);
         pay::join_vec(&mut self, coins);
         
