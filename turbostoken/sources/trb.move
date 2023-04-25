@@ -16,8 +16,8 @@ module turbos_token::trb {
         let (treasury, metadata) = coin::create_currency(
             witness, 
             9, 
-            b"TRB",  // symbols
-            b"Trb",  // name
+            b"TURBOS",  // symbols
+            b"Turbos",  // name
             b"Turbos Finance Token", // description
             option::some(url::new_unsafe_from_bytes(b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png")), 
             ctx

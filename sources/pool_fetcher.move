@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::pool_fetcher {
-	use sui::tx_context::{TxContext};
+	use sui::tx_context::{Self, TxContext};
 	use sui::clock::{Clock};
 	use turbos_clmm::pool::{Self, Pool, ComputeSwapState};
-    
+
     public entry fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         a_to_b: bool,
@@ -17,6 +17,7 @@ module turbos_clmm::pool_fetcher {
     ): ComputeSwapState {
 		pool::compute_swap_result(
 			pool,
+			tx_context::sender(ctx),
 			a_to_b,
 			amount_specified,
 			amount_specified_is_input,

@@ -360,6 +360,7 @@ module turbos_clmm::pool {
     ): (u128, u128) {
         let state = compute_swap_result(
             pool,
+            recipient,
             a_to_b,
             amount_specified,
             amount_specified_is_input,
@@ -369,25 +370,12 @@ module turbos_clmm::pool {
             ctx
         );
         
-        event::emit(SwapEvent {
-            pool: object::id(pool),
-            recipient: recipient,
-            amount_a: (state.amount_a as u64),
-            amount_b: (state.amount_b as u64),
-            liquidity: state.liquidity,
-            tick_current_index: state.tick_current_index,
-            sqrt_price: state.sqrt_price,
-            protocol_fee: (state.protocol_fee as u64),
-            fee_amount: (state.fee_amount as u64),
-            a_to_b: a_to_b,
-            is_exact_in: amount_specified_is_input,
-        });
-       
 		(state.amount_a, state.amount_b)
     }
 
     public(friend) fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
         a_to_b: bool,
         amount_specified: u128,
         amount_specified_is_input: bool,
@@ -526,6 +514,20 @@ module turbos_clmm::pool {
 		};
         state.amount_a = amount_a;
         state.amount_b = amount_b;
+
+        event::emit(SwapEvent {
+            pool: object::id(pool),
+            recipient: recipient,
+            amount_a: (state.amount_a as u64),
+            amount_b: (state.amount_b as u64),
+            liquidity: state.liquidity,
+            tick_current_index: state.tick_current_index,
+            sqrt_price: state.sqrt_price,
+            protocol_fee: (state.protocol_fee as u64),
+            fee_amount: (state.fee_amount as u64),
+            a_to_b: a_to_b,
+            is_exact_in: amount_specified_is_input,
+        });
 
 		state
     }
