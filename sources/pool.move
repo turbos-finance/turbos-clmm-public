@@ -3,10 +3,11 @@
 
 module turbos_clmm::pool {
 	use std::vector;
+    use std::type_name;
 	use sui::pay;
     use sui::event;
     use sui::transfer;
-    use std::string::{String};
+    use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
@@ -98,6 +99,7 @@ module turbos_clmm::pool {
     struct PoolRewardInfo has key, store {
         id: UID,
         vault: address,
+        vault_coin_type: String,
         emissions_per_second: u128,
         growth_global: u128,
         manager: address,
@@ -617,6 +619,7 @@ module turbos_clmm::pool {
         vector::insert(&mut pool.reward_infos, PoolRewardInfo {
             id: object::new(ctx), 
             vault: object::id_address(&vault),
+            vault_coin_type: string::from_ascii(type_name::into_string(type_name::get<RewardCoin>())),
             emissions_per_second: 0,
             growth_global: 0,
             manager: manager,
