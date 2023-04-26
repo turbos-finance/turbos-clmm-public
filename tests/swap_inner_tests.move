@@ -78,6 +78,8 @@ module turbos_clmm::swap_inner_tests {
 			let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(1);
             let max_tick_index = math_tick::get_max_tick(1);
+			let clock = test_scenario::take_shared<Clock>(scenario);
+
 
             let (amount_a, amount_b) = pool::mint_for_testing(
 				&mut pool,
@@ -85,6 +87,7 @@ module turbos_clmm::swap_inner_tests {
 				min_tick_index,
 				max_tick_index,
 				18446744073709551616,
+				&clock,
 				test_scenario::ctx(scenario),
 			);
 			let tick = tools_tests::get_pool_tick_index(&mut pool);
@@ -92,6 +95,7 @@ module turbos_clmm::swap_inner_tests {
 			assert_eq(amount_a, 18446744069414503600);
 			assert_eq(amount_b, 18446744069414503600);
 
+			test_scenario::return_shared(clock);
             test_scenario::return_shared(pool);
 			test_scenario::return_immutable(fee_type);
 		};
@@ -131,7 +135,7 @@ module turbos_clmm::swap_inner_tests {
 			// test 
 			let min_tick_index = math_tick::get_min_tick(1);
             let max_tick_index = math_tick::get_max_tick(1);
-			pool::burn_for_testing(&mut pool, player, min_tick_index, max_tick_index, 0, test_scenario::ctx(scenario));
+			pool::burn_for_testing(&mut pool, player, min_tick_index, max_tick_index, 0, &clock, test_scenario::ctx(scenario));
 			let (
 				liquidity,
 				fee_growth_inside_a,

@@ -136,6 +136,7 @@ module turbos_clmm::position_manager {
 			tick_upper_index_i32,
 			amount_a_desired,
 			amount_b_desired,
+            clock,
 			ctx,
 		);
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
@@ -196,6 +197,7 @@ module turbos_clmm::position_manager {
         tick_upper_index: I32,
         amount_a_desired: u64,
         amount_b_desired: u64,
+        clock: &Clock,
         ctx: &mut TxContext,
     ): (u128, u64, u64) {
         let sqrt_price_a = math_tick::sqrt_price_from_tick_index(tick_lower_index);
@@ -216,6 +218,7 @@ module turbos_clmm::position_manager {
             tick_lower_index,
             tick_upper_index,
             liquidity_delta,
+            clock,
             ctx,
         );
 
@@ -266,6 +269,7 @@ module turbos_clmm::position_manager {
 			position.tick_upper_index,
 			amount_a_desired,
 			amount_b_desired,
+            clock,
 			ctx,
 		);
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
@@ -304,6 +308,7 @@ module turbos_clmm::position_manager {
 			position.tick_lower_index,
 			position.tick_upper_index,
 			liquidity,
+            clock,
 			ctx,
 		);
 
@@ -350,6 +355,7 @@ module turbos_clmm::position_manager {
 			    position.tick_lower_index,
 			    position.tick_upper_index,
 			    0,
+                clock,
 			    ctx,
 		    );
             let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);
@@ -415,6 +421,7 @@ module turbos_clmm::position_manager {
 			    position.tick_lower_index,
 			    position.tick_upper_index,
 			    0,
+                clock,
 			    ctx,
 		    );
             let position_key = pool::get_position_key(owner, position.tick_lower_index, position.tick_upper_index);

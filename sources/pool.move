@@ -276,6 +276,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: u128,
+        clock: &Clock,
         ctx: &mut TxContext,
     ): (u64, u64) {
         assert!(liquidity_delta > 0, EInvildAmount);
@@ -294,6 +295,7 @@ module turbos_clmm::pool {
             tick_lower_index,
             tick_upper_index,
             i128::from(liquidity_delta),
+            clock,
             ctx
         );
 
@@ -319,6 +321,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: u128,
+        clock: &Clock,
         ctx: &mut TxContext
     ): (u64, u64) {
         let (amount_a, amount_b) = modify_position(
@@ -327,6 +330,7 @@ module turbos_clmm::pool {
             tick_lower_index,
             tick_upper_index,
             i128::neg_from(liquidity_delta),
+            clock,
             ctx
         );
 
@@ -773,7 +777,6 @@ module turbos_clmm::pool {
         assert!(next_time_ms >= curr_time_ms, EInvalidTimestamp);
 
         let growth_global_vector = vector::empty<u128>();
-
         // Calculate new global reward growth
         let time_delta = (next_time_ms - curr_time_ms) / 1000;
         let len = vector::length(&pool.reward_infos);
@@ -797,6 +800,13 @@ module turbos_clmm::pool {
 
             i = i + 1;
         };
+
+        let i = vector::length(&growth_global_vector);
+        while (i < NUM_REWARDS) {
+            vector::push_back(&mut growth_global_vector, 0);
+            i = i + 1;
+        };
+
         pool.reward_last_updated_time_ms = next_time_ms;
 
         growth_global_vector
@@ -913,6 +923,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: I128,
+        clock: &Clock,
         ctx: &mut TxContext,
     ): (I128, I128){
         check_ticks(tick_lower_index, tick_upper_index);
@@ -923,6 +934,7 @@ module turbos_clmm::pool {
             tick_lower_index,
             tick_upper_index,
             liquidity_delta,
+            clock,
             ctx,
         );
         let amount_a = i128::zero();
@@ -999,6 +1011,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: I128,
+        clock: &Clock,
         ctx: &mut TxContext,
     ) {
         let tick_current_index = pool.tick_current_index;
@@ -1007,12 +1020,15 @@ module turbos_clmm::pool {
         let flipped_lower = false;
         let flipped_upper = false;
         if (!i128::eq(liquidity_delta, i128::zero())) {
+            let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
+
             flipped_lower = update_tick(
                 pool,
                 tick_lower_index,
                 tick_current_index,
                 liquidity_delta,
                 false,
+                reward_growths,
                 ctx,
             );
             flipped_upper = update_tick(
@@ -1021,6 +1037,7 @@ module turbos_clmm::pool {
                 tick_current_index,
                 liquidity_delta,
                 true,
+                reward_growths,
                 ctx,
             );
 
@@ -1084,6 +1101,7 @@ module turbos_clmm::pool {
         tick_current_index: I32,
         liquidity_delta: I128,
         is_upper: bool,
+        reward_infos: vector<u128>,
         ctx: &mut TxContext,
     ): bool {
         let tick;
@@ -1108,6 +1126,7 @@ module turbos_clmm::pool {
             if (i32::lte(tick_index, tick_current_index)) {
                 tick.fee_growth_outside_a = fee_growth_global_a;
                 tick.fee_growth_outside_b = fee_growth_global_b;
+                tick.reward_growths_outside = reward_infos;
             };
             tick.initialized = true;
         };
@@ -1264,12 +1283,12 @@ module turbos_clmm::pool {
         _ctx: &mut TxContext,
     ): vector<u128> {
         let reward_growths_inside = vector::empty();
+        let tick_lower = get_tick(pool, tick_lower_index);
+        let tick_upper = get_tick(pool, tick_upper_index);
 
         let i = 0;
         let len = vector::length(&pool.reward_infos);
         while (i < len) {
-            let tick_lower = get_tick(pool, tick_lower_index);
-            let tick_upper = get_tick(pool, tick_upper_index);
             let reward_info = vector::borrow(&pool.reward_infos, i);
             let reward_growths_outside_lower = *vector::borrow(&tick_lower.reward_growths_outside, i);
             let reward_growths_outside_upper = *vector::borrow(&tick_upper.reward_growths_outside, i);
@@ -1844,6 +1863,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: u128,
+        clock: &Clock,
         ctx: &mut TxContext,
     ): (u64, u64) {
         mint(
@@ -1852,6 +1872,7 @@ module turbos_clmm::pool {
             tick_lower_index,
             tick_upper_index,
             liquidity_delta,
+            clock,
             ctx
         )
     }
@@ -1863,6 +1884,7 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
         liquidity_delta: u128,
+        clock: &Clock,
         ctx: &mut TxContext
     ): (u64, u64) {
         burn(
@@ -1871,6 +1893,7 @@ module turbos_clmm::pool {
             tick_lower_index,
             tick_upper_index,
             liquidity_delta,
+            clock,
             ctx
         )
     }
