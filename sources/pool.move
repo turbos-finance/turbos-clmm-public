@@ -21,7 +21,9 @@ module turbos_clmm::pool {
 	use turbos_clmm::i128::{Self, I128};
 	use turbos_clmm::math_liquidity;
 	use turbos_clmm::math_sqrt_price;
+    use turbos_clmm::math_u64;
     use turbos_clmm::full_math_u128;
+    use turbos_clmm::math_u128;
 	use turbos_clmm::math_bit;
     use sui::table::{Self, Table};
     use sui::clock::{Self, Clock};
@@ -463,12 +465,12 @@ module turbos_clmm::pool {
 			if (pool.fee_protocol > 0) {
 				let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
                 step_fee_amount = step_fee_amount - delta;
-                state.protocol_fee = state.protocol_fee + delta;
+                state.protocol_fee = math_u128::wrapping_add(state.protocol_fee, delta);
 			};
 
 			if (state.liquidity > 0) {
                 let fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, state.liquidity);
-				state.fee_growth_global = state.fee_growth_global + fee_growth_global_delta;
+				state.fee_growth_global = math_u128::wrapping_add(state.fee_growth_global, fee_growth_global_delta);
 			};
 
 			if (state.sqrt_price == step_sqrt_price_next) {
@@ -811,7 +813,7 @@ module turbos_clmm::pool {
                 );
 
                 let curr_growth_global = reward_info.growth_global;
-                reward_info.growth_global = curr_growth_global + reward_growth_delta;
+                reward_info.growth_global = math_u128::wrapping_add(curr_growth_global, reward_growth_delta);
                 vector::insert(&mut growth_global_vector, reward_info.growth_global, i);
             };
 
@@ -1066,7 +1068,7 @@ module turbos_clmm::pool {
             };
         };
 
-        let (fee_growth_inside_a, fee_growth_inside_b) = get_fee_growth_inside(
+        let (fee_growth_inside_a, fee_growth_inside_b) = next_fee_growth_inside(
             pool,
             tick_lower_index,
             tick_upper_index,
@@ -1211,15 +1213,15 @@ module turbos_clmm::pool {
 		};
 
         if (!dry_run) {
-		    tick.fee_growth_outside_a = fee_growth_global_a - tick.fee_growth_outside_a;
-            tick.fee_growth_outside_b = fee_growth_global_b - tick.fee_growth_outside_b;
+		    tick.fee_growth_outside_a = math_u128::wrapping_sub(fee_growth_global_a, tick.fee_growth_outside_a);
+            tick.fee_growth_outside_b = math_u128::wrapping_sub(fee_growth_global_b, tick.fee_growth_outside_b);
 
             let i = 0;
             let len = vector::length(reward_growth_global);
             while (i < len) {
                 let reward_new = vector::borrow(reward_growth_global, i);
                 let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
-                *reward = *reward_new - *reward;
+                *reward = math_u128::wrapping_sub(*reward_new, *reward);
                 i = i + 1;
             };
         };
@@ -1255,7 +1257,7 @@ module turbos_clmm::pool {
         *word = *word^mask;
     }
 
-    fun get_fee_growth_inside<CoinTypeA, CoinTypeB, FeeType>(
+    fun next_fee_growth_inside<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -1271,8 +1273,8 @@ module turbos_clmm::pool {
             fee_growth_below_a = tick_lower.fee_growth_outside_a;
             fee_growth_below_b = tick_lower.fee_growth_outside_b;
         } else {
-            fee_growth_below_a = pool.fee_growth_global_a - tick_lower.fee_growth_outside_a;
-            fee_growth_below_b = pool.fee_growth_global_b - tick_lower.fee_growth_outside_b;
+            fee_growth_below_a = math_u128::wrapping_sub(pool.fee_growth_global_a, tick_lower.fee_growth_outside_a);
+            fee_growth_below_b = math_u128::wrapping_sub(pool.fee_growth_global_b, tick_lower.fee_growth_outside_b);
         };
 
         // calculate fee growth above
@@ -1282,12 +1284,16 @@ module turbos_clmm::pool {
             fee_growth_above_a = tick_upper.fee_growth_outside_a;
             fee_growth_above_b = tick_upper.fee_growth_outside_b;
         } else {
-            fee_growth_above_a = pool.fee_growth_global_a - tick_upper.fee_growth_outside_a;
-            fee_growth_above_b = pool.fee_growth_global_b - tick_upper.fee_growth_outside_b;
+            fee_growth_above_a = math_u128::wrapping_sub(pool.fee_growth_global_a, tick_upper.fee_growth_outside_a);
+            fee_growth_above_b = math_u128::wrapping_sub(pool.fee_growth_global_b, tick_upper.fee_growth_outside_b);
         };
 
-        let fee_growth_inside_a = pool.fee_growth_global_a - fee_growth_below_a - fee_growth_above_a;
-        let fee_growth_inside_b = pool.fee_growth_global_b - fee_growth_below_b - fee_growth_above_b;
+        let fee_growth_inside_a = math_u128::wrapping_sub(
+            math_u128::wrapping_sub(pool.fee_growth_global_a, fee_growth_below_a), fee_growth_above_a
+        );
+        let fee_growth_inside_b = math_u128::wrapping_sub(
+            math_u128::wrapping_sub(pool.fee_growth_global_b, fee_growth_below_b), fee_growth_above_b
+        );
 
 		(fee_growth_inside_a, fee_growth_inside_b)
     }
@@ -1315,7 +1321,7 @@ module turbos_clmm::pool {
             if (i32::gte(tick_current_index, tick_lower_index)) {
                 reward_growth_below = reward_growths_outside_lower;
             } else {
-                reward_growth_below = reward_info.growth_global - reward_growths_outside_lower;
+                reward_growth_below = math_u128::wrapping_sub(reward_info.growth_global, reward_growths_outside_lower);
             };
 
             // calculate reword growth above
@@ -1323,10 +1329,17 @@ module turbos_clmm::pool {
             if (i32::lt(tick_current_index, tick_upper_index)) {
                 reward_growth_above = reward_growths_outside_upper;
             } else {
-                reward_growth_above = reward_info.growth_global - reward_growths_outside_upper;
+                reward_growth_above = math_u128::wrapping_sub(reward_info.growth_global, reward_growths_outside_upper);
             };
 
-            vector::insert(&mut reward_growths_inside, reward_info.growth_global - reward_growth_below - reward_growth_above, i);
+            vector::insert(
+                &mut reward_growths_inside,
+                math_u128::wrapping_sub(
+                    math_u128::wrapping_sub(reward_info.growth_global, reward_growth_below), 
+                    reward_growth_above
+                ),
+                i
+            );
             i = i + 1;
         };
 
@@ -1354,8 +1367,11 @@ module turbos_clmm::pool {
         };
 
         // calculate accumulated fees
-        let tokens_owed_a = (full_math_u128::mul_div_floor(fee_growth_inside_a - position.fee_growth_inside_a, position.liquidity, Q64) as u64);
-        let tokens_owed_b = (full_math_u128::mul_div_floor(fee_growth_inside_b - position.fee_growth_inside_b, position.liquidity, Q64) as u64);
+        let growth_delta_a = math_u128::wrapping_sub(fee_growth_inside_a, position.fee_growth_inside_a);
+        let tokens_owed_a = (full_math_u128::mul_div_floor(growth_delta_a, position.liquidity, Q64) as u64);
+
+        let growth_delta_b = math_u128::wrapping_sub(fee_growth_inside_b, position.fee_growth_inside_b);
+        let tokens_owed_b = (full_math_u128::mul_div_floor(growth_delta_b, position.liquidity, Q64) as u64);
 
         // update the position
         if (!i128::eq(liquidity_delta, i128::zero())) {
@@ -1365,17 +1381,19 @@ module turbos_clmm::pool {
         position.fee_growth_inside_b = fee_growth_inside_b;
         if (tokens_owed_a > 0 || tokens_owed_b > 0) {
             // overflow is acceptable, have to withdraw before you hit type(uint128).max fees
-            position.tokens_owed_a = position.tokens_owed_a + tokens_owed_a;
-            position.tokens_owed_b = position.tokens_owed_b + tokens_owed_b;
+            position.tokens_owed_a = math_u64::wrapping_add(position.tokens_owed_a, tokens_owed_a);
+            position.tokens_owed_b = math_u64::wrapping_add(position.tokens_owed_b, tokens_owed_b);
         };
 
         let i = 0;
         while (i < reward_infos_len) {
             let reward_growth_inside = *vector::borrow(&reward_growths_inside, i);
             let curr_reward_info = vector::borrow_mut(&mut position.reward_infos, i);
-            let amount_owed_delta = (full_math_u128::mul_div_floor(reward_growth_inside - curr_reward_info.reward_growth_inside, position.liquidity, Q64) as u64);
+
+            let reward_growth_delta = math_u128::wrapping_sub(reward_growth_inside, curr_reward_info.reward_growth_inside); 
+            let amount_owed_delta = (full_math_u128::mul_div_floor(reward_growth_delta, position.liquidity, Q64) as u64);
             curr_reward_info.reward_growth_inside = reward_growth_inside;
-            curr_reward_info.amount_owed = curr_reward_info.amount_owed + amount_owed_delta;
+            curr_reward_info.amount_owed = math_u64::wrapping_add(curr_reward_info.amount_owed, amount_owed_delta);
 
             i = i + 1;
         };
