@@ -12,10 +12,12 @@ module turbos_clmm::tools_tests {
 	use turbos_clmm::usdc::{Self, USDC};
     use turbos_clmm::eth::{Self, ETH};
     use sui::coin::{Self, TreasuryCap};
-    use turbos_clmm::fee500bps::{Self};
-    use turbos_clmm::fee3000bps::{Self};
-    use turbos_clmm::fee10000bps::{Self};
-    use turbos_clmm::pool_factory;
+    use turbos_clmm::fee500bps::{Self, FEE500BPS};
+    use turbos_clmm::fee3000bps::{Self, FEE3000BPS};
+    use turbos_clmm::fee10000bps::{Self, FEE10000BPS};
+    use turbos_clmm::feemock10000bps::{Self, FEEMOCK10000BPS};
+    use turbos_clmm::fee::{Fee};
+    use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
     use turbos_clmm::i32::{I32};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
@@ -117,12 +119,97 @@ module turbos_clmm::tools_tests {
 
         test_scenario::next_tx(scenario, admin);
         {
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            pool_factory::enable_fee_amount(
+                &admin_cap,
+                &mut pool_config,
+                &fee_type
+            );
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
             fee3000bps::init_for_testing(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, admin);
         {
+            let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            pool_factory::enable_fee_amount(
+                &admin_cap,
+                &mut pool_config,
+                &fee_type
+            );
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
             fee10000bps::init_for_testing(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            pool_factory::enable_fee_amount(
+                &admin_cap,
+                &mut pool_config,
+                &fee_type
+            );
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            feemock10000bps::init_for_testing(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            pool_factory::enable_fee_amount(
+                &admin_cap,
+                &mut pool_config,
+                &fee_type
+            );
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+        };
+
+    }
+
+    public fun set_fee_protocol(
+        admin: address,
+        fee_protocol: u32,
+        scenario: &mut Scenario,
+    ) {
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            pool_factory::set_fee_protocol(
+                &admin_cap,
+                &mut pool_config,
+                fee_protocol
+            );
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
         };
     }
 

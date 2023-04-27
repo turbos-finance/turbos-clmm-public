@@ -24,11 +24,6 @@ module turbos_clmm::pool_factory_tests {
 		player2: address, 
 		scenario: &mut Scenario,
 	) {
-        tools_tests::init_fee_type(
-            admin,
-            scenario
-        );
-
         tools_tests::init_tests_coin(
             admin,
             player,
@@ -38,6 +33,11 @@ module turbos_clmm::pool_factory_tests {
         );
 
         tools_tests::init_pool_factory(
+            admin,
+            scenario
+        );
+
+        tools_tests::init_fee_type(
             admin,
             scenario
         );
@@ -102,11 +102,6 @@ module turbos_clmm::pool_factory_tests {
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-        tools_tests::init_fee_type(
-            admin,
-            scenario
-        );
-
         tools_tests::init_tests_coin(
             admin,
             player,
@@ -119,6 +114,12 @@ module turbos_clmm::pool_factory_tests {
             admin,
             scenario
         );
+
+        tools_tests::init_fee_type(
+            admin,
+            scenario
+        );
+
 
         tools_tests::init_clock(
             admin,
@@ -171,11 +172,6 @@ module turbos_clmm::pool_factory_tests {
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-        tools_tests::init_fee_type(
-            admin,
-            scenario
-        );
-
         tools_tests::init_tests_coin(
             admin,
             player,
@@ -185,6 +181,11 @@ module turbos_clmm::pool_factory_tests {
         );
 
         tools_tests::init_pool_factory(
+            player,
+            scenario
+        );
+
+        tools_tests::init_fee_type(
             player,
             scenario
         );

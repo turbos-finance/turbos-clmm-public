@@ -31,11 +31,6 @@ module turbos_clmm::swap_router_tests {
 		player2: address, 
 		scenario: &mut Scenario,
     ) {
-        tools_tests::init_fee_type(
-            admin,
-            scenario
-        );
-
         tools_tests::init_tests_coin(
             admin,
             player,
@@ -45,6 +40,11 @@ module turbos_clmm::swap_router_tests {
         );
 
         tools_tests::init_pool_factory(
+            admin,
+            scenario
+        );
+
+        tools_tests::init_fee_type(
             admin,
             scenario
         );

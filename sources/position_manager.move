@@ -183,7 +183,7 @@ module turbos_clmm::position_manager {
     ) {
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
-        assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_a == 0, EPositionNotCleared);
+        assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_b == 0, EPositionNotCleared);
         delete_user_position(positions, nft_address);
         burn_nft(nft);
     }

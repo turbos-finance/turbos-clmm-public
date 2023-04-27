@@ -7,7 +7,7 @@ module turbos_clmm::swap_inner_tests {
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::btc::{BTC};
 	use turbos_clmm::usdc::{USDC};
-    use turbos_clmm::fee10000bps::{FEE10000BPS};
+    use turbos_clmm::feemock10000bps::{FEEMOCK10000BPS};
     use turbos_clmm::pool::{Self, Pool};
     use turbos_clmm::tools_tests;
     use turbos_clmm::math_tick;
@@ -26,11 +26,6 @@ module turbos_clmm::swap_inner_tests {
 		player2: address, 
 		scenario: &mut Scenario,
     ) {
-        tools_tests::init_fee_type(
-            admin,
-            scenario
-        );
-
         tools_tests::init_tests_coin(
             admin,
             player,
@@ -39,11 +34,21 @@ module turbos_clmm::swap_inner_tests {
             scenario
         );
 
-		// FEE10000BPS tick_spacing = 1, fee_protocol = 250000
-        test_scenario::next_tx(scenario, admin);
-		{
-            pool_factory::mock_init_for_testing(test_scenario::ctx(scenario));
-        };
+		tools_tests::init_pool_factory(
+			admin,
+			scenario
+		);
+
+		tools_tests::init_fee_type(
+			admin,
+			scenario
+		);
+
+		tools_tests::set_fee_protocol(
+			admin,
+			250000,
+			scenario
+		);
 
 		tools_tests::init_clock(
             admin,
@@ -55,10 +60,10 @@ module turbos_clmm::swap_inner_tests {
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
-            let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
 			let clock = test_scenario::take_shared<Clock>(scenario);
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
-            pool_factory::deploy_pool<BTC, USDC, FEE10000BPS>(
+            pool_factory::deploy_pool<BTC, USDC, FEEMOCK10000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
@@ -74,8 +79,8 @@ module turbos_clmm::swap_inner_tests {
 		//pool with 2^64 liquidity, swap exactly 1e+12 tokenA to tokenB at tick 0 (p = 1) with 1.00%/250000 fee
 		test_scenario::next_tx(scenario, player);
         {
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
-			let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
+			let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(1);
             let max_tick_index = math_tick::get_max_tick(1);
 			let clock = test_scenario::take_shared<Clock>(scenario);
@@ -111,7 +116,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let clock = test_scenario::take_shared<Clock>(scenario);
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				player,
@@ -166,7 +171,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let clock = test_scenario::take_shared<Clock>(scenario);
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				player,
@@ -204,7 +209,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let clock = test_scenario::take_shared<Clock>(scenario);
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				player,
@@ -242,7 +247,7 @@ module turbos_clmm::swap_inner_tests {
 		test_scenario::next_tx(scenario, player);
         {
 			let clock = test_scenario::take_shared<Clock>(scenario);
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE10000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
 			let (amount_a, amount_b) = pool::swap_for_testing(
 				&mut pool,
 				player,

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::fee3000bps {
-
 	use sui::transfer;
 	use sui::tx_context::{TxContext};
 	use turbos_clmm::fee::{Self};
@@ -13,6 +12,7 @@ module turbos_clmm::fee3000bps {
 		let fee = fee::create_fee(
 			witness,
 			3000,
+            60,
 			ctx
 		);
 

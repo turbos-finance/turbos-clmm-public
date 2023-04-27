@@ -14,7 +14,7 @@ module turbos_clmm::pool_factory {
     use turbos_clmm::fee::{Self, Fee};
 	use sui::clock::{Clock};
 	use turbos_clmm::pool::{Self, Pool};
-	use std::string::{String};
+	use std::string::{Self, String};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -26,7 +26,7 @@ module turbos_clmm::pool_factory {
 
     struct PoolConfig has key, store {
         id: UID,
-        fee_amount_tick_spacing: VecMap<u32, u32>,
+        fee_map: VecMap<String, ID>,
 		fee_protocol: u32,
 		pools: vector<ID>,
     }
@@ -54,17 +54,9 @@ module turbos_clmm::pool_factory {
     }
 
 	fun init_(ctx: &mut TxContext) {
-		let fee_amount_tick_spacing = vec_map::empty<u32, u32>();
-		vec_map::insert(&mut fee_amount_tick_spacing, 500, 10);
-		event::emit(FeeAmountEnabledEvent {fee: 500, tick_spacing: 10});
-		vec_map::insert(&mut fee_amount_tick_spacing, 3000, 60);
-		event::emit(FeeAmountEnabledEvent {fee: 3000, tick_spacing: 60});
-		vec_map::insert(&mut fee_amount_tick_spacing, 10000, 200);
-		event::emit(FeeAmountEnabledEvent {fee: 10000, tick_spacing: 200});
-
         let pool_config = PoolConfig {
 			id: object::new(ctx), 
-			fee_amount_tick_spacing: fee_amount_tick_spacing,
+			fee_map: vec_map::empty(),
 			fee_protocol: 0,
 			pools: vector::empty(),
 		};
@@ -94,10 +86,11 @@ module turbos_clmm::pool_factory {
 		ctx: &mut TxContext
     ) {
 		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
+
+        let fee_type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
+		assert!(vec_map::contains(&pool_config.fee_map, &fee_type), EFeeNotExists);
 		let fee = fee::get_fee(feeType);
-        let key = fee;
-		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
-		let tick_spacing = *vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
+        let tick_spacing = fee::get_tick_spacing(feeType);
 
 		let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
             fee,
@@ -155,10 +148,10 @@ module turbos_clmm::pool_factory {
 		ctx: &mut TxContext
     ) {
 		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
+		let fee_type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
+		assert!(vec_map::contains(&pool_config.fee_map, &fee_type), EFeeNotExists);
 		let fee = fee::get_fee(feeType);
-        let key = fee;
-		assert!(vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeNotExists);
-		let tick_spacing = *vec_map::get(&pool_config.fee_amount_tick_spacing, &key);
+        let tick_spacing = fee::get_tick_spacing(feeType);
 
 		let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
             fee,
@@ -181,17 +174,20 @@ module turbos_clmm::pool_factory {
         transfer::public_share_object(pool);
     }
 
-	public entry fun enable_fee_amount(
+	public entry fun enable_fee_amount<FeeType>(
 		_: &PoolFactoryAdminCap,
 		pool_config: &mut PoolConfig,
-		fee: u32,
-		tick_spacing: u32,
+        feeType: &Fee<FeeType>,
 	) {
-		let key = fee;
+        let type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
+		assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists);
+
+        let fee = fee::get_fee(feeType);
+		let tick_spacing = fee::get_tick_spacing(feeType);
 		assert!(fee < 1000000, EInvalidFee);
 		assert!(tick_spacing > 0 && tick_spacing < 16384, EInvalidTicKSpacing);
-		assert!(!vec_map::contains(&pool_config.fee_amount_tick_spacing, &key), EFeeAlreadyExists);
-		vec_map::insert(&mut pool_config.fee_amount_tick_spacing, fee, tick_spacing);
+
+		vec_map::insert(&mut pool_config.fee_map, type, object::id(feeType));
 		event::emit(FeeAmountEnabledEvent {fee: fee, tick_spacing: tick_spacing});
 	}
 
@@ -264,23 +260,6 @@ module turbos_clmm::pool_factory {
 			positions,
 			nft_img_url,
 		);
-    }
-
-	#[test_only]
-	public fun mock_init_for_testing(ctx: &mut TxContext) {
-		let fee_amount_tick_spacing = vec_map::empty<u32, u32>();
-		vec_map::insert(&mut fee_amount_tick_spacing, 500, 10);
-		vec_map::insert(&mut fee_amount_tick_spacing, 3000, 60);
-		vec_map::insert(&mut fee_amount_tick_spacing, 10000, 1);
-        let pool_config = PoolConfig {
-			id: object::new(ctx), 
-			fee_amount_tick_spacing: fee_amount_tick_spacing,
-			fee_protocol: 250000, //25% or total fee
-			pools: vector::empty(),
-		};
-
-		transfer::share_object(pool_config);
-		transfer::transfer(PoolFactoryAdminCap { id: object::new(ctx) }, tx_context::sender(ctx));
     }
 
     #[test_only]

@@ -10,7 +10,8 @@ module turbos_clmm::fee {
 	
 	struct Fee<phantom T> has key, store {
         id: UID,
-        fee: u32
+        fee: u32,
+        tick_spacing: u32,
     }
 
 	fun init(_ctx: &mut TxContext) {
@@ -19,6 +20,7 @@ module turbos_clmm::fee {
 	public fun create_fee<T: drop>(
         witness: T,
         fee: u32,
+        tick_spacing: u32,
         ctx: &mut TxContext
     ): Fee<T> {
         // Make sure there's only one instance of the type T
@@ -26,11 +28,16 @@ module turbos_clmm::fee {
 
         Fee {
 			id: object::new(ctx),
-			fee: fee
+			fee: fee,
+            tick_spacing: tick_spacing,
 		}
     }
 
 	public fun get_fee<T>(self: &Fee<T>): u32 {
         self.fee
+    }
+
+    public fun get_tick_spacing<T>(self: &Fee<T>): u32 {
+        self.tick_spacing
     }
 }
