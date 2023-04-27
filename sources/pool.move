@@ -174,6 +174,10 @@ module turbos_clmm::pool {
         liquidity_delta: u128,
     }
 
+    struct LockPoolEvent has copy, drop {
+        pool: ID,
+    }
+
     struct CollectEvent has copy, drop {
         pool: ID,
         recipient: address,
@@ -279,6 +283,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (u64, u64) {
+        assert!(pool.unlocked, EPoolLocked);
         assert!(liquidity_delta > 0, EInvildAmount);
 
 		try_init_position(
@@ -324,6 +329,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ): (u64, u64) {
+        assert!(pool.unlocked, EPoolLocked);
         let (amount_a, amount_b) = modify_position(
             pool,
             owner,
@@ -391,8 +397,8 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): ComputeSwapState {
-        assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
         assert!(pool.unlocked, EPoolLocked);
+        assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
         if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > sqrt_price_limit) abort ESqrtPriceOutOfBounds;
         if (a_to_b && sqrt_price_limit > pool.sqrt_price || !a_to_b && sqrt_price_limit < pool.sqrt_price) abort EInvalidSqrtPriceLimitDirection;
 
@@ -537,6 +543,17 @@ module turbos_clmm::pool {
         });
 
 		state
+    }
+
+    public(friend) fun lock_pool<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        _ctx: &mut TxContext,
+    ) {
+        pool.unlocked = false;
+
+        event::emit(LockPoolEvent {
+            pool: object::id(pool),
+        });
     }
 
 

@@ -222,6 +222,14 @@ module turbos_clmm::pool_factory {
 		);
 	}
 
+	public entry fun lock_pool<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        ctx: &mut TxContext,
+    ) {
+        pool::lock_pool(pool, ctx);
+    }
+
 	public entry fun update_nft_name(
 		_: &PoolFactoryAdminCap,
         positions: &mut Positions,
