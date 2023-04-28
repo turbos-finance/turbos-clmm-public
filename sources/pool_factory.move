@@ -174,7 +174,7 @@ module turbos_clmm::pool_factory {
         transfer::public_share_object(pool);
     }
 
-	public entry fun enable_fee_amount<FeeType>(
+	public entry fun set_fee_tier<FeeType>(
 		_: &PoolFactoryAdminCap,
 		pool_config: &mut PoolConfig,
         feeType: &Fee<FeeType>,
@@ -218,12 +218,12 @@ module turbos_clmm::pool_factory {
 		);
 	}
 
-	public entry fun lock_pool<CoinTypeA, CoinTypeB, FeeType>(
+	public entry fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
 		_: &PoolFactoryAdminCap,
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         ctx: &mut TxContext,
     ) {
-        pool::lock_pool(pool, ctx);
+        pool::toggle_pool_status(pool, ctx);
     }
 
 	public entry fun update_nft_name(

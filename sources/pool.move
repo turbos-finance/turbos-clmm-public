@@ -176,8 +176,9 @@ module turbos_clmm::pool {
         liquidity_delta: u128,
     }
 
-    struct LockPoolEvent has copy, drop {
+    struct TogglePoolStatusEvent has copy, drop {
         pool: ID,
+        status: bool,
     }
 
     struct CollectEvent has copy, drop {
@@ -547,14 +548,15 @@ module turbos_clmm::pool {
 		state
     }
 
-    public(friend) fun lock_pool<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         _ctx: &mut TxContext,
     ) {
-        pool.unlocked = false;
+        pool.unlocked = !pool.unlocked;
 
-        event::emit(LockPoolEvent {
+        event::emit(TogglePoolStatusEvent {
             pool: object::id(pool),
+            status: pool.unlocked,
         });
     }
 

@@ -122,7 +122,7 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
-            pool_factory::enable_fee_amount(
+            pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
                 &fee_type
@@ -142,7 +142,7 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
-            pool_factory::enable_fee_amount(
+            pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
                 &fee_type
@@ -162,7 +162,7 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
-            pool_factory::enable_fee_amount(
+            pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
                 &fee_type
@@ -182,7 +182,7 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
-            pool_factory::enable_fee_amount(
+            pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
                 &fee_type
