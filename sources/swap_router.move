@@ -113,9 +113,8 @@ module turbos_clmm::swap_router {
     }
 
     // such as: pool a: BTC/USDC, pool b: USDC/ETH
-    // if swap BTC to ETH
-    // exact in: step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (a to b)
-    // exact out: step one: swap ETH to USDC (b to a), step two: swap USDC to BTC (b to a)
+    // if swap BTC to ETH,route is BTC -> USDC -> ETH,fee paid in BTC and USDC 
+    // step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (a to b)
     public entry fun swap_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
@@ -133,9 +132,9 @@ module turbos_clmm::swap_router {
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
+        let a_to_b_step_one = true;
+        let a_to_b_step_two = true;
         if (is_exact_in) {
-            let a_to_b_step_one = true;
-            let a_to_b_step_two = true;
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
@@ -163,9 +162,7 @@ module turbos_clmm::swap_router {
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            let a_to_b_step_one = false;
-            let a_to_b_step_two = false;
-            let (step2_out, step2_in) = pool::swap(
+            let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
@@ -176,7 +173,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
-            let (step1_out, step1_in) = pool::swap(
+            let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
 			    a_to_b_step_one,
@@ -206,9 +203,8 @@ module turbos_clmm::swap_router {
     }
 
     // such as: pool a: BTC/USDC, pool b: ETH/USDC
-    // if swap BTC to ETH
-    // exact in: step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (b to a)
-    // exact out: step one: swap ETH to USDC (a to b), step two: swap USDC to BTC (b to a)
+    // if swap BTC to ETH, route is BTC -> USDC -> ETH,fee paid in BTC and USDC 
+    // step one: swap BTC to USDC (a to b), step two: swap USDC to ETH (b to a)
     public entry fun swap_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
@@ -226,9 +222,9 @@ module turbos_clmm::swap_router {
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
+        let a_to_b_step_one = true;
+        let a_to_b_step_two = false;
         if (is_exact_in) {
-            let a_to_b_step_one = true;
-            let a_to_b_step_two = false;
             let (step1_in, step1_out) = pool::swap(
 			    pool_a,
                 recipient,
@@ -255,8 +251,6 @@ module turbos_clmm::swap_router {
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            let a_to_b_step_one = true;
-            let a_to_b_step_two = false;
             //b for c, exact out
             let (step2_out, step2_in) = pool::swap(
 			    pool_b,
@@ -300,9 +294,8 @@ module turbos_clmm::swap_router {
     }
 
     // such as: pool a: USDC/BTC, pool b: USDC/ETH
-    // if swap BTC to ETH
-    // exact in: step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (a to b)
-    // exact out: step one: swap ETH to USDC (b to a), step two: swap USDC to BTC (a to b)
+    // if swap BTC to ETH, route is BTC -> USDC -> ETH, fee paid in BTC and USDC 
+    // step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (a to b)
     public entry fun swap_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
@@ -320,9 +313,9 @@ module turbos_clmm::swap_router {
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
+        let a_to_b_step_one = false;
+        let a_to_b_step_two = true;
         if (is_exact_in) {
-            let a_to_b_step_one = false;
-            let a_to_b_step_two = true;
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
@@ -350,8 +343,6 @@ module turbos_clmm::swap_router {
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            let a_to_b_step_one = false;
-            let a_to_b_step_two = true;
             let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
@@ -374,6 +365,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
+
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
             amount_c_64 = (step2_out as u64);
@@ -394,9 +386,8 @@ module turbos_clmm::swap_router {
     }
 
     // such as: pool a: USDC/BTC, pool b: ETH/USDC
-    // if swap BTC to ETH
-    // exact in: step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (b to a)
-    // exact out: step one: swap ETH to USDC (a to b), step two: swap USDC to BTC (a to b)
+    // if swap BTC to ETH, route is BTC -> USDC -> ETH, fee paid in BTC and USDC 
+    // step one: swap BTC to USDC (b to a), step two: swap USDC to ETH (b to a)
     public entry fun swap_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
@@ -414,9 +405,9 @@ module turbos_clmm::swap_router {
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
+        let a_to_b_step_one = false;
+        let a_to_b_step_two = false;
         if (is_exact_in) {
-            let a_to_b_step_one = false;
-            let a_to_b_step_two = false;
             let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
@@ -445,9 +436,7 @@ module turbos_clmm::swap_router {
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold <= amount_c_64, EAmountOutBelowMinimum);
         } else {
-            let a_to_b_step_one = true;
-            let a_to_b_step_two = true;
-            let (step2_in, step2_out) = pool::swap(
+            let (step2_out, step2_in) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_one,
@@ -458,7 +447,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
-            let (step1_in, step1_out) = pool::swap(
+            let (step1_out, step1_in) = pool::swap(
 			    pool_a,
                 recipient,
 			    a_to_b_step_two,

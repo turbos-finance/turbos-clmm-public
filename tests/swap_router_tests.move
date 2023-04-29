@@ -49,6 +49,12 @@ module turbos_clmm::swap_router_tests {
             scenario
         );
 
+        tools_tests::set_fee_protocol(
+			admin,
+			100000,
+			scenario
+		);
+
         tools_tests::init_clock(
             player,
             scenario
@@ -570,6 +576,10 @@ module turbos_clmm::swap_router_tests {
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_c_before);
+        let (pool_a_protocol_fee_a_before, pool_a_protocol_fee_a_after);
+        let (pool_b_protocol_fee_a_before, pool_b_protocol_fee_a_after);
+        let (pool_a_protocol_fee_b_before, pool_a_protocol_fee_b_after);
+        let (pool_b_protocol_fee_b_before, pool_b_protocol_fee_b_after);
 		test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
@@ -579,6 +589,8 @@ module turbos_clmm::swap_router_tests {
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
             (pool_b_balance_a_before, pool_b_balance_b_before) = pool::get_pool_balance(&mut pool_b);
+            (_, _, pool_a_protocol_fee_a_before, pool_a_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_before, pool_b_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
             //get trader balance before
             let coins_a;
@@ -590,9 +602,9 @@ module turbos_clmm::swap_router_tests {
                 &mut pool_b,
 				coins_a,
 				10000, //amount out
-				10172, //amount_threshold
-                MAX_SQRT_PRICE_X64 - 1,
-				MAX_SQRT_PRICE_X64 - 1,
+				10174, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
+                MIN_SQRT_PRICE_X64 + 1,
                 false,
 				player,
 				1,
@@ -613,15 +625,24 @@ module turbos_clmm::swap_router_tests {
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
             let trader_balance_c_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
-            assert_eq(pool_a_balance_a_after - pool_a_balance_a_before, 10172);
-            assert_eq(pool_a_balance_b_before - pool_a_balance_b_after, 10131);
+            assert_eq(pool_a_balance_a_after - pool_a_balance_a_before, 10174);
+            assert_eq(pool_a_balance_b_before - pool_a_balance_b_after, 10132);
 
-            assert_eq(pool_b_balance_a_after - pool_b_balance_a_before, 10131);
+            assert_eq(pool_b_balance_a_after - pool_b_balance_a_before, 10132);
             assert_eq(pool_b_balance_b_before - pool_b_balance_b_after, 10000);
 
-            assert_eq(trader_balance_a_before - trader_balance_a_after, 10172);
+            assert_eq(trader_balance_a_before - trader_balance_a_after, 10174);
             assert_eq(trader_balance_c_after - trader_balance_c_before, 10000);
+
+            // Fees are not paid using correspond B token
+            assert_eq(pool_a_protocol_fee_b_after, pool_a_protocol_fee_b_before);
+            assert_eq(pool_b_protocol_fee_b_after, pool_b_protocol_fee_b_before);
+            // Fees are paid using corresponding A token
+            assert!(pool_a_protocol_fee_a_after > pool_a_protocol_fee_a_before, 0);
+            assert!(pool_b_protocol_fee_a_after > pool_b_protocol_fee_a_before, 1);
 
             test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
@@ -719,6 +740,10 @@ module turbos_clmm::swap_router_tests {
 
         prepare_tests(admin, player, player2, scenario);
 
+        let (pool_a_protocol_fee_a_before, pool_a_protocol_fee_a_after);
+        let (pool_b_protocol_fee_a_before, pool_b_protocol_fee_a_after);
+        let (pool_a_protocol_fee_b_before, pool_a_protocol_fee_b_after);
+        let (pool_b_protocol_fee_b_before, pool_b_protocol_fee_b_after);
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
@@ -731,6 +756,8 @@ module turbos_clmm::swap_router_tests {
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
             (pool_b_balance_a_before, pool_b_balance_b_before) = pool::get_pool_balance(&mut pool_b);
+            (_, _, pool_a_protocol_fee_a_before, pool_a_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_before, pool_b_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
             //get trader balance before
             let coins_a;
@@ -741,8 +768,8 @@ module turbos_clmm::swap_router_tests {
 				&mut pool_a,
                 &mut pool_b,
 				coins_a,
-				300, //amount_in 
-				303, //amount_threshold
+				10000, //amount_in 
+				10173, //amount_threshold
 				MIN_SQRT_PRICE_X64 + 1,
                 MAX_SQRT_PRICE_X64 - 1,
                 false,
@@ -765,15 +792,25 @@ module turbos_clmm::swap_router_tests {
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
             let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
-            assert_eq(pool_a_balance_a_after - pool_a_balance_a_before, 303);
-            assert_eq(pool_a_balance_b_before - pool_a_balance_b_after, 301);
+            assert_eq(pool_a_balance_a_after - pool_a_balance_a_before, 10173);
+            assert_eq(pool_a_balance_b_before - pool_a_balance_b_after, 10131);
 
-            assert_eq(pool_b_balance_b_after - pool_b_balance_b_before, 301);
-            assert_eq(pool_b_balance_a_before - pool_b_balance_a_after, 300);
+            assert_eq(pool_b_balance_b_after - pool_b_balance_b_before, 10131);
+            assert_eq(pool_b_balance_a_before - pool_b_balance_a_after, 10000);
 
-            assert_eq(trader_balance_a_before - trader_balance_a_after, 303);
-            assert_eq(trader_balance_b_after - trader_balance_b_before, 300);
+            assert_eq(trader_balance_a_before - trader_balance_a_after, 10173);
+            assert_eq(trader_balance_b_after - trader_balance_b_before, 10000);
+
+            // Fees are paid using correspond A token in pool a
+            assert!(pool_a_protocol_fee_a_after > pool_a_protocol_fee_a_before, 0);
+            assert_eq(pool_a_protocol_fee_b_after, pool_a_protocol_fee_b_before);
+
+            // Fees are paid using corresponding B token in pool b
+            assert!(pool_b_protocol_fee_b_after > pool_b_protocol_fee_b_before, 1);
+            assert_eq(pool_b_protocol_fee_a_after, pool_b_protocol_fee_a_before);
 
             test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
@@ -871,6 +908,10 @@ module turbos_clmm::swap_router_tests {
 
         prepare_tests(admin, player, player2, scenario);
 
+        let (pool_a_protocol_fee_a_before, pool_a_protocol_fee_a_after);
+        let (pool_b_protocol_fee_a_before, pool_b_protocol_fee_a_after);
+        let (pool_a_protocol_fee_b_before, pool_a_protocol_fee_b_after);
+        let (pool_b_protocol_fee_b_before, pool_b_protocol_fee_b_after);
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
@@ -883,6 +924,8 @@ module turbos_clmm::swap_router_tests {
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
             (pool_b_balance_a_before, pool_b_balance_b_before) = pool::get_pool_balance(&mut pool_b);
+            (_, _, pool_a_protocol_fee_a_before, pool_a_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_before, pool_b_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
             //get trader balance before
             let coins_a;
@@ -893,8 +936,8 @@ module turbos_clmm::swap_router_tests {
 				&mut pool_a,
                 &mut pool_b,
 				coins_a,
-				300, //amount_in 
-				303, //amount_threshold
+				10000, //amount_in 
+				10267, //amount_threshold
 				MAX_SQRT_PRICE_X64 - 1,
                 MIN_SQRT_PRICE_X64 + 1,
                 false,
@@ -917,15 +960,25 @@ module turbos_clmm::swap_router_tests {
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
             let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
-            assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 302);
-            assert_eq(pool_a_balance_b_after - pool_a_balance_b_before, 303);
+            assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 10132);
+            assert_eq(pool_a_balance_b_after - pool_a_balance_b_before, 10267);
 
-            assert_eq(pool_b_balance_a_after - pool_b_balance_a_before, 302);
-            assert_eq(pool_b_balance_b_before - pool_b_balance_b_after, 300);
+            assert_eq(pool_b_balance_a_after - pool_b_balance_a_before, 10132);
+            assert_eq(pool_b_balance_b_before - pool_b_balance_b_after, 10000);
 
-            assert_eq(trader_balance_a_before - trader_balance_a_after, 303);
-            assert_eq(trader_balance_b_after - trader_balance_b_before, 300);
+            assert_eq(trader_balance_a_before - trader_balance_a_after, 10267);
+            assert_eq(trader_balance_b_after - trader_balance_b_before, 10000);
+
+            // Fees are paid using correspond B token in pool a
+            assert!(pool_a_protocol_fee_b_after > pool_a_protocol_fee_b_before, 0);
+            assert_eq(pool_a_protocol_fee_a_after, pool_a_protocol_fee_a_before);
+
+            // Fees are paid using corresponding A token in pool b
+            assert!(pool_b_protocol_fee_a_after > pool_b_protocol_fee_a_before, 1);
+            assert_eq(pool_b_protocol_fee_b_after, pool_b_protocol_fee_b_before);
 
             test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
@@ -1023,6 +1076,10 @@ module turbos_clmm::swap_router_tests {
 
         prepare_tests(admin, player, player2, scenario);
 
+        let (pool_a_protocol_fee_a_before, pool_a_protocol_fee_a_after);
+        let (pool_b_protocol_fee_a_before, pool_b_protocol_fee_a_after);
+        let (pool_a_protocol_fee_b_before, pool_a_protocol_fee_b_after);
+        let (pool_b_protocol_fee_b_before, pool_b_protocol_fee_b_after);
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
@@ -1035,6 +1092,8 @@ module turbos_clmm::swap_router_tests {
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
             (pool_b_balance_a_before, pool_b_balance_b_before) = pool::get_pool_balance(&mut pool_b);
+            (_, _, pool_a_protocol_fee_a_before, pool_a_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_before, pool_b_protocol_fee_b_before, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
             //get trader balance before
             let coins_a;
@@ -1045,10 +1104,10 @@ module turbos_clmm::swap_router_tests {
 				&mut pool_a,
                 &mut pool_b,
 				coins_a,
-				300, //amount_in 
-				304, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
-				MIN_SQRT_PRICE_X64 + 1,
+				10000, //amount_in 
+				10266, //amount_threshold
+				MAX_SQRT_PRICE_X64 - 1,
+				MAX_SQRT_PRICE_X64 - 1,
                 false,
 				player,
 				1,
@@ -1069,15 +1128,25 @@ module turbos_clmm::swap_router_tests {
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
             let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
+            (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
-            assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 302);
-            assert_eq(pool_a_balance_b_after - pool_a_balance_b_before, 304);
+            assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 10131);
+            assert_eq(pool_a_balance_b_after - pool_a_balance_b_before, 10266);
 
-            assert_eq(pool_b_balance_a_before - pool_b_balance_a_after, 300);
-            assert_eq(pool_b_balance_b_after - pool_b_balance_b_before, 302);
+            assert_eq(pool_b_balance_a_before - pool_b_balance_a_after, 10000);
+            assert_eq(pool_b_balance_b_after - pool_b_balance_b_before, 10131);
 
-            assert_eq(trader_balance_a_before - trader_balance_a_after, 304);
-            assert_eq(trader_balance_b_after - trader_balance_b_before, 300);
+            assert_eq(trader_balance_a_before - trader_balance_a_after, 10266);
+            assert_eq(trader_balance_b_after - trader_balance_b_before, 10000);
+
+            // Fees are paid using correspond B token in pool a
+            assert!(pool_a_protocol_fee_b_after > pool_a_protocol_fee_b_before, 0);
+            assert_eq(pool_a_protocol_fee_a_after, pool_a_protocol_fee_a_before);
+
+            // Fees are paid using corresponding B token in pool b
+            assert!(pool_b_protocol_fee_b_after > pool_b_protocol_fee_b_before, 1);
+            assert_eq(pool_b_protocol_fee_a_after, pool_b_protocol_fee_a_before);
 
             test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
