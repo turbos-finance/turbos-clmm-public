@@ -134,12 +134,6 @@ module turbos_clmm::pool_factory {
 
     }
 
-	public fun coin_to_vec<T>(coin: Coin<T>): vector<Coin<T>> {
-        let self = vector::empty<Coin<T>>();
-        vector::push_back(&mut self, coin);
-        self
-    }
-
     public entry fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
 		pool_config: &mut PoolConfig,
 		feeType: &Fee<FeeType>,
