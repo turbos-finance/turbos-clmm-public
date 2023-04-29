@@ -3,8 +3,10 @@
 
 module turbos_clmm::pool_factory {
 	use std::vector;
-	use std::type_name;
+	use std::type_name::{Self, TypeName};
 	use sui::event;
+	use std::hash;
+	use std::ascii;
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
     use sui::object::{Self, UID, ID};
@@ -15,20 +17,32 @@ module turbos_clmm::pool_factory {
 	use sui::clock::{Clock};
 	use turbos_clmm::pool::{Self, Pool};
 	use std::string::{Self, String};
+	use sui::table::{Self, Table};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
     const EFeeAlreadyExists: u64 = 3;
 	const ERepeatedType: u64 = 4;
+	const EPoolAlreadyExists: u64 = 5;
 
 	struct PoolFactoryAdminCap has key, store { id: UID }
+
+	struct PoolSimpleInfo has copy, store {
+        pool_id: ID,
+		pool_key: ID,
+        coin_type_a: TypeName,
+		coin_type_b: TypeName,
+		fee_type: TypeName,
+		fee: u32,
+        tick_spacing: u32,
+    }
 
     struct PoolConfig has key, store {
         id: UID,
         fee_map: VecMap<String, ID>,
 		fee_protocol: u32,
-		pools: vector<ID>,
+		pools: Table<ID, PoolSimpleInfo>,
     }
 
 	struct PoolCreatedEvent has copy, drop {
@@ -58,7 +72,7 @@ module turbos_clmm::pool_factory {
 			id: object::new(ctx), 
 			fee_map: vec_map::empty(),
 			fee_protocol: 0,
-			pools: vector::empty(),
+			pools: table::new(ctx),
 		};
 
 		transfer::share_object(pool_config);
@@ -85,10 +99,17 @@ module turbos_clmm::pool_factory {
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
-		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
+		let coin_type_a = type_name::get<CoinTypeA>();
+        let coin_type_b = type_name::get<CoinTypeB>();
+		assert!(coin_type_a != coin_type_b, ERepeatedType);
 
-        let fee_type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
-		assert!(vec_map::contains(&pool_config.fee_map, &fee_type), EFeeNotExists);
+		let fee_type = type_name::get<FeeType>();
+		let fee_type_str = string::from_ascii(type_name::into_string(fee_type));
+		assert!(vec_map::contains(&pool_config.fee_map, &fee_type_str), EFeeNotExists);
+
+		let pool_key = pool_key<CoinTypeA, CoinTypeB, FeeType>(coin_type_a, coin_type_b, fee_type);
+		assert!(!table::contains(&pool_config.pools, pool_key), EPoolAlreadyExists);
+
 		let fee = fee::get_fee(feeType);
         let tick_spacing = fee::get_tick_spacing(feeType);
 
@@ -129,7 +150,15 @@ module turbos_clmm::pool_factory {
 			ctx
 		);
 
-		vector::push_back(&mut pool_config.pools, object::id(&pool));
+		table::add(&mut pool_config.pools, pool_key, PoolSimpleInfo {
+			pool_id: object::id(&pool),
+			pool_key: pool_key,
+			coin_type_a: coin_type_a,
+			coin_type_b: coin_type_b,
+			fee_type: fee_type,
+			fee: fee,
+			tick_spacing: tick_spacing,
+		});
         transfer::public_share_object(pool);
 
     }
@@ -141,9 +170,17 @@ module turbos_clmm::pool_factory {
 		clock: &Clock,
 		ctx: &mut TxContext
     ) {
-		assert!(type_name::into_string(type_name::get<CoinTypeA>()) != type_name::into_string(type_name::get<CoinTypeB>()), ERepeatedType);
-		let fee_type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
-		assert!(vec_map::contains(&pool_config.fee_map, &fee_type), EFeeNotExists);
+		let coin_type_a = type_name::get<CoinTypeA>();
+        let coin_type_b = type_name::get<CoinTypeB>();
+		assert!(coin_type_a != coin_type_b, ERepeatedType);
+
+		let fee_type = type_name::get<FeeType>();
+		let fee_type_str = string::from_ascii(type_name::into_string(fee_type));
+		assert!(vec_map::contains(&pool_config.fee_map, &fee_type_str), EFeeNotExists);
+
+		let pool_key = pool_key<CoinTypeA, CoinTypeB, FeeType>(coin_type_a, coin_type_b, fee_type);
+		assert!(!table::contains(&pool_config.pools, pool_key), EPoolAlreadyExists);
+
 		let fee = fee::get_fee(feeType);
         let tick_spacing = fee::get_tick_spacing(feeType);
 
@@ -155,7 +192,15 @@ module turbos_clmm::pool_factory {
 			clock,
             ctx
 		);
-		vector::push_back(&mut pool_config.pools, object::id(&pool));
+		table::add(&mut pool_config.pools, pool_key, PoolSimpleInfo {
+			pool_id: object::id(&pool),
+			pool_key: pool_key,
+			coin_type_a: coin_type_a,
+			coin_type_b: coin_type_b,
+			fee_type: fee_type,
+			fee: fee,
+			tick_spacing: tick_spacing,
+		});
 
 		event::emit(PoolCreatedEvent {
 			account: tx_context::sender(ctx),
@@ -166,6 +211,20 @@ module turbos_clmm::pool_factory {
 			sqrt_price: sqrt_price,
 		});
         transfer::public_share_object(pool);
+    }
+
+	fun pool_key<CoinTypeA, CoinTypeB, FeeType>(
+		coin_type_a: TypeName,
+		coin_type_b: TypeName,
+		fee_type: TypeName,
+	): ID {
+
+        let result = vector::empty<u8>();
+        vector::append(&mut result, ascii::into_bytes(type_name::into_string(coin_type_a)));
+        vector::append(&mut result, ascii::into_bytes(type_name::into_string(coin_type_b)));
+		vector::append(&mut result, ascii::into_bytes(type_name::into_string(fee_type)));
+
+        object::id_from_bytes(hash::sha2_256(result))
     }
 
 	public entry fun set_fee_tier<FeeType>(
