@@ -35,6 +35,21 @@ module turbos_clmm::reward_manager {
         transfer::public_share_object(vault);
     }
 
+    public entry fun update_reward_manager<CoinTypeA, CoinTypeB, FeeType>(
+        _: &RewardManagerAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        new_manager: address,
+        ctx: &mut TxContext
+    ) {
+        pool::update_reward_manager(
+            pool,
+            reward_index,
+            new_manager,
+            ctx,
+        )
+    }
+
     public entry fun add_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         vault: &mut  PoolRewardVault<RewardCoin>,

@@ -282,6 +282,27 @@ module turbos_clmm::reward_manager_tests {
             assert_eq(eth_amount_diff, 10000);
         };
 
+        //test update_reward_manager
+        test_scenario::next_tx(scenario, player);
+        {
+            let manager = test_scenario::take_from_sender<RewardManagerAdminCap>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
+            reward_manager::update_reward_manager<BTC, USDC, FEE500BPS>(
+                &manager,
+                &mut pool,
+                0, // index 0, reawrd ETH
+                admin,
+                test_scenario::ctx(scenario),
+            );
+            let (_, _, _, new_manager) = pool::get_reward_info<BTC, USDC, FEE500BPS>(&pool, 0);
+            assert_eq(new_manager, admin);
+
+            test_scenario::return_to_sender(scenario, manager);
+            test_scenario::return_shared(reward_vault);
+            test_scenario::return_shared(pool);
+        };
+
         test_scenario::end(scenario_val);
     }
 }

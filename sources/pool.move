@@ -214,6 +214,12 @@ module turbos_clmm::pool {
         reward_manager: address,
     }
 
+    struct UpdateRewardManagerEvent has copy, drop {
+        pool: ID,
+        reward_index: u64,
+        reward_manager: address,
+    }
+
     struct UpdateRewardEmissionsEvent has copy, drop {
         pool: ID,
         reward_index: u64,
@@ -658,6 +664,25 @@ module turbos_clmm::pool {
         });
         
         vault
+    }
+
+    public(friend) fun update_reward_manager<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        new_manager: address,
+        _ctx: &mut TxContext
+    ) {
+        assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
+        assert!(reward_index < vector::length(&pool.reward_infos), EInvalidRewardIndex);
+
+        let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
+        reward_info.manager = new_manager;
+
+        event::emit(UpdateRewardManagerEvent {
+            pool: object::id(pool),
+            reward_index: reward_index,
+            reward_manager: new_manager,
+        })
     }
 
     public(friend) fun update_reward_emissions<CoinTypeA, CoinTypeB, FeeType>(
