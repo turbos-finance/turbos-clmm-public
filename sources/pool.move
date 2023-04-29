@@ -402,7 +402,7 @@ module turbos_clmm::pool {
     ): ComputeSwapState {
         assert!(pool.unlocked, EPoolLocked);
         assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
-        if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > sqrt_price_limit) abort ESqrtPriceOutOfBounds;
+        if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > MAX_SQRT_PRICE) abort ESqrtPriceOutOfBounds;
         if (a_to_b && sqrt_price_limit > pool.sqrt_price || !a_to_b && sqrt_price_limit < pool.sqrt_price) abort EInvalidSqrtPriceLimitDirection;
 
         //reword
