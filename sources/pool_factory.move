@@ -291,6 +291,13 @@ module turbos_clmm::pool_factory {
 		);
     }
 
+	public entry fun migrate<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ) {
+        pool::migrate(pool)
+    }
+
     public entry fun update_nft_description(
 		_: &PoolFactoryAdminCap,
         positions: &mut Positions,

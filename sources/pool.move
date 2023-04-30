@@ -34,6 +34,8 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
+    const VERSION: u64 = 2;
+
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
     const EPriceSlippageCheck: u64 = 2;
@@ -56,6 +58,8 @@ module turbos_clmm::pool {
     const ESqrtPriceOutOfBounds: u64 = 19;
     const EInvalidSqrtPriceLimitDirection: u64 = 20;
     const EInvildCoins: u64 = 21;
+    const ENotUpgrade: u64 = 22;
+    const EWrongVersion: u64 = 23;
 
 	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
 	const MAX_TICK_INDEX: u32 = 443636;
@@ -127,6 +131,7 @@ module turbos_clmm::pool {
         deploy_time_ms: u64,
         reward_infos: vector<PoolRewardInfo>,
         reward_last_updated_time_ms: u64,
+        version: u64,
     }
 
     struct ComputeSwapState has copy, drop {
@@ -245,8 +250,28 @@ module turbos_clmm::pool {
         recipient: address,
     }
 
+    struct PoolMigrateEvent has copy, drop {
+        pool: ID,
+        old_version: u64,
+        new_version: u64,
+    }
+
     fun init(_ctx: &mut TxContext) {
         //some init
+    }
+
+    public(friend) fun migrate<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ) {
+        let old_version = pool.version;
+        assert!(old_version < VERSION, ENotUpgrade);
+        pool.version = VERSION;
+
+        event::emit(PoolMigrateEvent {
+            pool: object::id(pool),
+            old_version: old_version,
+            new_version: VERSION,
+        })
     }
 
     public(friend) fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
@@ -280,6 +305,7 @@ module turbos_clmm::pool {
             deploy_time_ms: clock::timestamp_ms(clock),
             reward_infos: vector::empty(),
             reward_last_updated_time_ms: 0,
+            version: VERSION,
         }
     }
 
@@ -292,6 +318,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (u64, u64) {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(pool.unlocked, EPoolLocked);
         assert!(liquidity_delta > 0, EInvildAmount);
 
@@ -338,6 +365,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ): (u64, u64) {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(pool.unlocked, EPoolLocked);
         let (amount_a, amount_b) = modify_position(
             pool,
@@ -406,6 +434,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): ComputeSwapState {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(pool.unlocked, EPoolLocked);
         assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
         if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > MAX_SQRT_PRICE) abort ESqrtPriceOutOfBounds;
@@ -576,6 +605,7 @@ module turbos_clmm::pool {
         amount_b_requested: u64,
         ctx: &mut TxContext
     ): (u64, u64) {
+        assert!(pool.version == VERSION, EWrongVersion);
         let owner = tx_context::sender(ctx);
         let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
 
@@ -608,6 +638,7 @@ module turbos_clmm::pool {
 		recipient: address,
         ctx: &mut TxContext
 	) {
+        assert!(pool.version == VERSION, EWrongVersion);
         let amount_a = if (amount_a_requested > pool.protocol_fees_a) pool.protocol_fees_a else amount_a_requested;
         let amount_b = if (amount_b_requested > pool.protocol_fees_b) pool.protocol_fees_b else amount_b_requested;
 
@@ -640,6 +671,7 @@ module turbos_clmm::pool {
         manager: address,
         ctx: &mut TxContext
     ): PoolRewardVault<RewardCoin> {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
         assert!(reward_index == vector::length(&pool.reward_infos), EInvalidRewardIndex);
 
@@ -672,6 +704,7 @@ module turbos_clmm::pool {
         new_manager: address,
         _ctx: &mut TxContext
     ) {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
         assert!(reward_index < vector::length(&pool.reward_infos), EInvalidRewardIndex);
 
@@ -692,6 +725,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ) {
+        assert!(pool.version == VERSION, EWrongVersion);
         next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let pool_id = object::id(pool);
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
@@ -718,6 +752,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ) {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
@@ -754,6 +789,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ) {
+        assert!(pool.version == VERSION, EWrongVersion);
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
@@ -785,6 +821,7 @@ module turbos_clmm::pool {
         reward_index: u64,
         ctx: &mut TxContext
     ): u64 {
+        assert!(pool.version == VERSION, EWrongVersion);
         let owner = tx_context::sender(ctx);
         let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
         assert!(reward_index < vector::length(&position.reward_infos),EInvalidRewardIndex);
