@@ -8,7 +8,7 @@ module turbos_clmm::swap_inner_tests {
     use turbos_clmm::btc::{BTC};
 	use turbos_clmm::usdc::{USDC};
     use turbos_clmm::feemock10000bps::{FEEMOCK10000BPS};
-    use turbos_clmm::pool::{Self, Pool};
+    use turbos_clmm::pool::{Self, Pool, Versioned};
     use turbos_clmm::tools_tests;
     use turbos_clmm::math_tick;
     use turbos_clmm::fee::{Fee};
@@ -62,16 +62,19 @@ module turbos_clmm::swap_inner_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
 			let clock = test_scenario::take_shared<Clock>(scenario);
+			let versioned = test_scenario::take_shared<Versioned>(scenario);
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEEMOCK10000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
 				&clock,
+				&versioned,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
 			test_scenario::return_shared(clock);
+			test_scenario::return_shared(versioned);
             test_scenario::return_shared(pool_config);
             test_scenario::return_immutable(fee_type);
         };
@@ -100,8 +103,8 @@ module turbos_clmm::swap_inner_tests {
 			assert_eq(amount_a, 18446744069414503600);
 			assert_eq(amount_b, 18446744069414503600);
 
-			test_scenario::return_shared(clock);
             test_scenario::return_shared(pool);
+			test_scenario::return_shared(clock);
 			test_scenario::return_immutable(fee_type);
 		};
     }

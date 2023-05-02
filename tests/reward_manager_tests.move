@@ -23,6 +23,7 @@ module turbos_clmm::reward_manager_tests {
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::tools_tests;
     use turbos_clmm::position_nft::{TurbosPositionNFT};
+    use turbos_clmm::pool::{Versioned};
 
     public fun init_reward_manager(
 		player: address,
@@ -76,6 +77,7 @@ module turbos_clmm::reward_manager_tests {
         test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
@@ -99,6 +101,7 @@ module turbos_clmm::reward_manager_tests {
                 player,
                 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
@@ -106,6 +109,7 @@ module turbos_clmm::reward_manager_tests {
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
         };
 
         init_reward_manager(player, scenario);
@@ -115,16 +119,19 @@ module turbos_clmm::reward_manager_tests {
         {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let manager = test_scenario::take_from_sender<RewardManagerAdminCap>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             reward_manager::init_reward<BTC, USDC, FEE500BPS, ETH>(
                 &manager,
                 &mut pool,
                 0, // index 0, reawrd ETH
                 player,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
             test_scenario::return_to_sender(scenario, manager);
             test_scenario::return_shared(pool);
+            test_scenario::return_shared(versioned);
         };
 
         //assert vault
@@ -149,11 +156,13 @@ module turbos_clmm::reward_manager_tests {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             reward_manager::update_reward_emissions<BTC, USDC, FEE500BPS>(
                 &mut pool,
                 0, // index 0, reawrd ETH
                 100,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (vault, emissions_per_second, growth_global, manager) = pool::get_reward_info<BTC, USDC, FEE500BPS>(&pool, 0);
@@ -164,6 +173,7 @@ module turbos_clmm::reward_manager_tests {
             assert_eq(manager, player);
 
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
         };
@@ -188,6 +198,7 @@ module turbos_clmm::reward_manager_tests {
             let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
             let eth = test_scenario::take_from_sender<Coin<ETH>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             reward_manager::add_reward<BTC, USDC, FEE500BPS, ETH>(
                 &mut pool,
                 &mut reward_vault,
@@ -195,10 +206,12 @@ module turbos_clmm::reward_manager_tests {
                 tools_tests::coin_to_vec(eth),
                 20000,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             assert_eq(balance::value(pool::get_reward_vault(&reward_vault)), 20000);
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
         };
@@ -208,6 +221,7 @@ module turbos_clmm::reward_manager_tests {
         {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             clock::increment_for_testing(&mut clock, 10000); //10s
             let infos = pool::next_pool_reward_infos_for_testing(&mut pool, &clock);
             let growth_global = *vector::borrow(&infos, 0);
@@ -219,6 +233,7 @@ module turbos_clmm::reward_manager_tests {
             assert_eq(growth_global >> 64, 11);
 
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(pool);
         };
 
@@ -228,6 +243,7 @@ module turbos_clmm::reward_manager_tests {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             reward_manager::remove_reward<BTC, USDC, FEE500BPS, ETH>(
                 &mut pool,
                 &mut reward_vault,
@@ -235,11 +251,13 @@ module turbos_clmm::reward_manager_tests {
                 10000,
                 player,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
             assert_eq(balance::value(pool::get_reward_vault(&reward_vault)), 10000);
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
         };
@@ -253,6 +271,7 @@ module turbos_clmm::reward_manager_tests {
             let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
             let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             eth_amount_before =  tools_tests::get_user_coin_balance<ETH>(scenario);
             
             position_manager::collect_reward<BTC, USDC, FEE500BPS, ETH>(
@@ -265,12 +284,14 @@ module turbos_clmm::reward_manager_tests {
                 player,
                 200000,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(positions);
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(reward_vault);
             test_scenario::return_shared(pool);
         };
@@ -288,11 +309,13 @@ module turbos_clmm::reward_manager_tests {
             let manager = test_scenario::take_from_sender<RewardManagerAdminCap>(scenario);
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let reward_vault = test_scenario::take_shared<PoolRewardVault<ETH>>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             reward_manager::update_reward_manager<BTC, USDC, FEE500BPS>(
                 &manager,
                 &mut pool,
                 0, // index 0, reawrd ETH
                 admin,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (_, _, _, new_manager) = pool::get_reward_info<BTC, USDC, FEE500BPS>(&pool, 0);
@@ -300,6 +323,7 @@ module turbos_clmm::reward_manager_tests {
 
             test_scenario::return_to_sender(scenario, manager);
             test_scenario::return_shared(reward_vault);
+            test_scenario::return_shared(versioned);
             test_scenario::return_shared(pool);
         };
 

@@ -19,7 +19,7 @@ module turbos_clmm::tools_tests {
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
     use turbos_clmm::i32::{I32};
-    use turbos_clmm::pool::{Self, Pool};
+    use turbos_clmm::pool::{Self, Pool, Versioned};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use std::option::{Self, Option};
     use sui::clock::{Self};
@@ -39,6 +39,11 @@ module turbos_clmm::tools_tests {
         test_scenario::next_tx(scenario, admin);
 		{
             pool_factory::init_for_testing(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, admin);
+		{
+            pool::init_for_testing(test_scenario::ctx(scenario));
         };
     }
 
@@ -122,14 +127,17 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
-                &fee_type
+                &fee_type,
+                &versioned
             );
             test_scenario::return_immutable(fee_type);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(versioned);
         };
 
         test_scenario::next_tx(scenario, admin);
@@ -142,14 +150,17 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
-                &fee_type
+                &fee_type,
+                &versioned
             );
             test_scenario::return_immutable(fee_type);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(versioned);
         };
 
         test_scenario::next_tx(scenario, admin);
@@ -162,14 +173,17 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEE10000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
-                &fee_type
+                &fee_type,
+                &versioned
             );
             test_scenario::return_immutable(fee_type);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(versioned);
         };
 
         test_scenario::next_tx(scenario, admin);
@@ -182,14 +196,17 @@ module turbos_clmm::tools_tests {
             let fee_type = test_scenario::take_immutable<Fee<FEEMOCK10000BPS>>(scenario);
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             pool_factory::set_fee_tier(
                 &admin_cap,
                 &mut pool_config,
-                &fee_type
+                &fee_type,
+                &versioned
             );
             test_scenario::return_immutable(fee_type);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(versioned);
         };
 
     }
@@ -203,13 +220,16 @@ module turbos_clmm::tools_tests {
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             pool_factory::set_fee_protocol(
                 &admin_cap,
                 &mut pool_config,
-                fee_protocol
+                fee_protocol,
+                &versioned
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(versioned);
         };
     }
 

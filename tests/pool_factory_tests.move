@@ -14,6 +14,7 @@ module turbos_clmm::pool_factory_tests {
     use turbos_clmm::i32::{Self};
     use turbos_clmm::math_tick;
     use turbos_clmm::position_manager::{Self,Positions};
+    use turbos_clmm::pool::{Versioned};
     use sui::coin::{Coin};
     use std::string::{Self};
     use sui::clock::{Clock};
@@ -54,6 +55,7 @@ module turbos_clmm::pool_factory_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             //price=1 1btc = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEE500BPS>(
@@ -61,12 +63,14 @@ module turbos_clmm::pool_factory_tests {
                 &fee_type,
                 sqrt_price,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
             test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
         };
 
         // init USDCBTC pool
@@ -76,6 +80,7 @@ module turbos_clmm::pool_factory_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             //price=0.01 1usdc = 0.01BTC
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 100);
             pool_factory::deploy_pool<USDC, BTC, FEE500BPS>(
@@ -83,12 +88,14 @@ module turbos_clmm::pool_factory_tests {
                 &fee_type,
                 sqrt_price,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
             test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
         };
 	}
 
@@ -132,6 +139,7 @@ module turbos_clmm::pool_factory_tests {
             let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
             //price=1 1btc = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, BTC, FEE500BPS>(
@@ -139,12 +147,14 @@ module turbos_clmm::pool_factory_tests {
                 &fee_type,
                 sqrt_price,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(pool_config);
             test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
         };
         test_scenario::end(scenario_val);
     }
@@ -215,6 +225,7 @@ module turbos_clmm::pool_factory_tests {
             let min_tick_index = math_tick::get_min_tick(10);
             let max_tick_index = math_tick::get_max_tick(10);
             let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
 
             pool_factory::deploy_pool_and_mint<BTC, USDC, FEE500BPS>(
                 &mut pool_config,
@@ -234,6 +245,7 @@ module turbos_clmm::pool_factory_tests {
                 player,
                 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             test_scenario::return_to_sender(scenario, admin_cap);
@@ -241,6 +253,7 @@ module turbos_clmm::pool_factory_tests {
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
             test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
         };
 
         test_scenario::end(scenario_val);
@@ -268,11 +281,13 @@ module turbos_clmm::pool_factory_tests {
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
 
             pool_factory::update_nft_name(
                 &admin_cap,
                 &mut positions,
                 string::utf8(b"name"),
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
@@ -280,6 +295,7 @@ module turbos_clmm::pool_factory_tests {
                 &admin_cap,
                 &mut positions,
                 string::utf8(b"description"),
+                &versioned,
                 test_scenario::ctx(scenario),
             );
 
@@ -287,11 +303,13 @@ module turbos_clmm::pool_factory_tests {
                 &admin_cap,
                 &mut positions,
                 string::utf8(b"imgurl"),
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             //std::debug::print(&positions);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(versioned);
         };
 
         test_scenario::end(scenario_val);
