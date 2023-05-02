@@ -154,6 +154,7 @@ module turbos_clmm::pool {
         amount_b: u64,
         liquidity: u128,
         tick_current_index: I32,
+        tick_pre_index: I32,
         sqrt_price: u128,
         protocol_fee: u64,
         fee_amount: u64,
@@ -442,6 +443,7 @@ module turbos_clmm::pool {
 
         //reword
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
+        let tick_pre_index = pool.tick_current_index;
 
 		//state
         let state = ComputeSwapState {
@@ -573,6 +575,7 @@ module turbos_clmm::pool {
             amount_b: (state.amount_b as u64),
             liquidity: state.liquidity,
             tick_current_index: state.tick_current_index,
+            tick_pre_index: tick_pre_index,
             sqrt_price: state.sqrt_price,
             protocol_fee: (state.protocol_fee as u64),
             fee_amount: (state.fee_amount as u64),
