@@ -3,6 +3,7 @@
 
 module turbos_clmm::position_manager {
 	use std::vector;
+    use std::type_name::{Self};
     use sui::transfer;
     use sui::event;
     use std::string::{Self, String};
@@ -143,7 +144,7 @@ module turbos_clmm::position_manager {
 
         let position_id = object::new(ctx);
 		//mint nft
-		let nft_address = mint_nft(
+		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
             object::id(pool), 
             object::uid_to_inner(&position_id), 
             positions, 
@@ -484,7 +485,7 @@ module turbos_clmm::position_manager {
         positions.nft_img_url = nft_img_url;
     }
 
-	fun mint_nft(
+	fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(
         pool_id: ID,
         position_id: ID,
         positions: &mut Positions,
@@ -497,6 +498,9 @@ module turbos_clmm::position_manager {
 			positions.nft_img_url,
             pool_id,
             position_id,
+            type_name::get<CoinTypeA>(),
+            type_name::get<CoinTypeB>(),
+            type_name::get<FeeType>(),
             ctx,
         );
 		positions.nft_minted = positions.nft_minted + 1;

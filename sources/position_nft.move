@@ -11,6 +11,7 @@ module turbos_clmm::position_nft {
     use sui::display;
     use sui::package;
     use sui::tx_context::{Self, TxContext};
+    use std::type_name::{TypeName};
 
 	friend turbos_clmm::position_manager;
 
@@ -21,6 +22,9 @@ module turbos_clmm::position_nft {
         img_url: Url,
         pool_id: ID,
         position_id: ID,
+        coin_type_a: TypeName,
+        coin_type_b: TypeName,
+        fee_type: TypeName,
     }
 
     struct POSITION_NFT has drop {}
@@ -63,6 +67,9 @@ module turbos_clmm::position_nft {
         img_url: String,
         pool_id: ID,
         position_id: ID,
+        coin_type_a: TypeName,
+        coin_type_b: TypeName,
+        fee_type: TypeName,
         ctx: &mut TxContext
     ): TurbosPositionNFT {
         let nft = TurbosPositionNFT {
@@ -72,6 +79,9 @@ module turbos_clmm::position_nft {
             img_url: url::new_unsafe(string::to_ascii(img_url)),
             pool_id,
             position_id,
+            coin_type_a,
+            coin_type_b,
+            fee_type,
         };
         let sender = tx_context::sender(ctx);
         event::emit(MintNFTEvent {
@@ -85,7 +95,17 @@ module turbos_clmm::position_nft {
 
     /// Permanently delete `nft`
     public(friend) entry fun burn(nft: TurbosPositionNFT) {
-        let TurbosPositionNFT { id, name: _, description: _, img_url: _, pool_id: _, position_id: _ } = nft;
+        let TurbosPositionNFT { 
+            id, 
+            name: _, 
+            description: _, 
+            img_url: _, 
+            pool_id: _, 
+            position_id: _,
+            coin_type_a: _,
+            coin_type_b: _,
+            fee_type: _,
+        } = nft;
         object::delete(id)
     }
 
