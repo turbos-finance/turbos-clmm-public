@@ -15,10 +15,12 @@ module turbos_clmm::pool_factory {
 	use turbos_clmm::position_manager::{Self, Positions};
     use turbos_clmm::fee::{Self, Fee};
 	use sui::clock::{Clock};
-	use turbos_clmm::pool::{Self, Pool};
+	use turbos_clmm::pool::{Self, Pool, Versioned};
 	use std::string::{Self, String};
 	use sui::table::{Self, Table};
     
+	const VERSION: u64 = 1;
+
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
@@ -97,8 +99,11 @@ module turbos_clmm::pool_factory {
         recipient: address,
         deadline: u64,
 		clock: &Clock,
+		versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+		pool::check_version(versioned, VERSION);
+
 		let coin_type_a = type_name::get<CoinTypeA>();
         let coin_type_b = type_name::get<CoinTypeB>();
 		assert!(coin_type_a != coin_type_b, ERepeatedType);
@@ -147,6 +152,7 @@ module turbos_clmm::pool_factory {
 			recipient,
 			deadline,
 			clock,
+			versioned,
 			ctx
 		);
 
@@ -168,8 +174,11 @@ module turbos_clmm::pool_factory {
 		feeType: &Fee<FeeType>,
 		sqrt_price: u128,
 		clock: &Clock,
+		versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+		pool::check_version(versioned, VERSION);
+
 		let coin_type_a = type_name::get<CoinTypeA>();
         let coin_type_b = type_name::get<CoinTypeB>();
 		assert!(coin_type_a != coin_type_b, ERepeatedType);
@@ -231,7 +240,10 @@ module turbos_clmm::pool_factory {
 		_: &PoolFactoryAdminCap,
 		pool_config: &mut PoolConfig,
         feeType: &Fee<FeeType>,
+		versioned: &Versioned,
 	) {
+		pool::check_version(versioned, VERSION);
+
         let type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
 		assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists);
 
@@ -248,7 +260,10 @@ module turbos_clmm::pool_factory {
 		_: &PoolFactoryAdminCap,
 		pool_config: &mut PoolConfig,
 		fee_protocol: u32,
+		versioned: &Versioned,
 	) {
+		pool::check_version(versioned, VERSION);
+
 		assert!(fee_protocol < 1000000, EInvalidFee);
 		pool_config.fee_protocol = fee_protocol;
 		event::emit(SetFeeProtocolEvent {fee_protocol: fee_protocol});
@@ -260,8 +275,10 @@ module turbos_clmm::pool_factory {
 		amount_a_requested: u64,
 		amount_b_requested: u64,
 		recipient: address,
+		versioned: &Versioned,
         ctx: &mut TxContext
 	) {
+		pool::check_version(versioned, VERSION);
 		pool::collect_protocol_fee(
 			pool,
 			amount_a_requested,
@@ -274,8 +291,10 @@ module turbos_clmm::pool_factory {
 	public entry fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
 		_: &PoolFactoryAdminCap,
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		versioned: &Versioned,
         ctx: &mut TxContext,
     ) {
+		pool::check_version(versioned, VERSION);
         pool::toggle_pool_status(pool, ctx);
     }
 
@@ -283,27 +302,31 @@ module turbos_clmm::pool_factory {
 		_: &PoolFactoryAdminCap,
         positions: &mut Positions,
         name: String,
+		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+		pool::check_version(versioned, VERSION);
         position_manager::update_nft_name(
 			positions,
 			name,
 		);
     }
 
-	public entry fun migrate<CoinTypeA, CoinTypeB, FeeType>(
+	public entry fun upgrade(
 		_: &PoolFactoryAdminCap,
-        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        versioned: &mut Versioned,
     ) {
-        pool::migrate(pool)
+        pool::upgrade(versioned)
     }
 
     public entry fun update_nft_description(
 		_: &PoolFactoryAdminCap,
         positions: &mut Positions,
         nft_description: String,
+		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+		pool::check_version(versioned, VERSION);
         position_manager::update_nft_description(
 			positions,
 			nft_description,
@@ -314,8 +337,10 @@ module turbos_clmm::pool_factory {
 		_: &PoolFactoryAdminCap,
         positions: &mut Positions,
         nft_img_url: String,
+		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+		pool::check_version(versioned, VERSION);
         position_manager::update_nft_img_url(
 			positions,
 			nft_img_url,

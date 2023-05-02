@@ -15,11 +15,13 @@ module turbos_clmm::position_manager {
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::math_liquidity;
     use turbos_clmm::math_tick;
-    use turbos_clmm::pool::{Self, Pool, PositionRewardInfo as PositionRewardInfoInPool, PoolRewardVault};
+    use turbos_clmm::pool::{Self, Pool, PositionRewardInfo as PositionRewardInfoInPool, PoolRewardVault, Versioned};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use sui::clock::{Self, Clock};
     
     friend turbos_clmm::pool_factory;
+
+    const VERSION: u64 = 1;
 
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -119,8 +121,10 @@ module turbos_clmm::position_manager {
         recipient: address,
         deadline: u64,
         clock: &Clock,
+        versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -180,8 +184,10 @@ module turbos_clmm::position_manager {
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
         positions: &mut Positions,
         nft: TurbosPositionNFT,
+        versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_b == 0, EPositionNotCleared);
@@ -261,8 +267,10 @@ module turbos_clmm::position_manager {
         amount_b_min: u64,
         deadline: u64,
         clock: &Clock,
+        versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -304,8 +312,10 @@ module turbos_clmm::position_manager {
         amount_b_min: u64,
         deadline: u64,
         clock: &Clock,
+        versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
@@ -352,8 +362,10 @@ module turbos_clmm::position_manager {
         recipient: address,
         deadline: u64,
         clock: &Clock,
+        versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
@@ -418,8 +430,10 @@ module turbos_clmm::position_manager {
         recipient: address,
         deadline: u64,
         clock: &Clock,
+        versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        pool::check_version(versioned, VERSION);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
