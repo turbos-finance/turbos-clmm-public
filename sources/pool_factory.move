@@ -225,13 +225,44 @@ module turbos_clmm::pool_factory {
 		coin_type_b: TypeName,
 		fee_type: TypeName,
 	): ID {
-
         let result = vector::empty<u8>();
-        vector::append(&mut result, ascii::into_bytes(type_name::into_string(coin_type_a)));
-        vector::append(&mut result, ascii::into_bytes(type_name::into_string(coin_type_b)));
+		let coin_type_a_bytes = ascii::into_bytes(type_name::into_string(coin_type_a));
+		let coin_type_b_bytes = ascii::into_bytes(type_name::into_string(coin_type_b));
+		let (coin_type_a_bytes, coin_type_b_bytes) = if (!compare_types(&coin_type_a_bytes, &coin_type_b_bytes)) {
+			(coin_type_a_bytes, coin_type_b_bytes)
+		} else {
+			(coin_type_b_bytes, coin_type_a_bytes)
+		};
+        vector::append(&mut result, coin_type_a_bytes);
+        vector::append(&mut result, coin_type_b_bytes);
 		vector::append(&mut result, ascii::into_bytes(type_name::into_string(fee_type)));
 
         object::id_from_bytes(hash::sha2_256(result))
+    }
+
+	fun compare_types(a: &vector<u8>, b: &vector<u8>): bool {
+        let a_len = vector::length(a);
+        let b_len = vector::length(b);
+
+        let i = 0;
+        while (i < a_len && i < b_len) {
+            let a_val = *vector::borrow(a, i);
+            let b_val = *vector::borrow(b, i);
+
+            if (a_val < b_val) {
+                return false
+            } else if (a_val > b_val) {
+                return true
+            };
+
+            i = i + 1;
+        };
+
+        if (a_len < b_len) {
+            false
+        } else {
+            true
+        }
     }
 
 	public entry fun set_fee_tier<FeeType>(
