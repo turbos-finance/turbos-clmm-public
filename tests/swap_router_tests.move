@@ -9,6 +9,8 @@ module turbos_clmm::swap_router_tests {
     use turbos_clmm::btc::{BTC};
 	use turbos_clmm::usdc::{USDC};
     use turbos_clmm::eth::{ETH};
+    use turbos_clmm::sui::{SUI};
+    use turbos_clmm::trb::{TRB};
     use turbos_clmm::fee3000bps::{FEE3000BPS};
     use turbos_clmm::pool::{Self, Pool, Versioned};
     use turbos_clmm::tools_tests;
@@ -109,7 +111,7 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(versioned);
         };
 
-        //init USDCETH pool
+        //init USDCSUI pool
         test_scenario::next_tx(scenario, admin);
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
@@ -118,9 +120,9 @@ module turbos_clmm::swap_router_tests {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
 
-            //price=1, 1btc = 1usdc
+            //price=1, 1sui = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
-            pool_factory::deploy_pool<USDC, ETH, FEE3000BPS>(
+            pool_factory::deploy_pool<USDC, SUI, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
@@ -135,7 +137,7 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(versioned);
         };
 
-        //init USDCBTC pool
+        //init USDCTRB pool
         test_scenario::next_tx(scenario, admin);
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
@@ -144,7 +146,7 @@ module turbos_clmm::swap_router_tests {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
-            pool_factory::deploy_pool<USDC, BTC, FEE3000BPS>(
+            pool_factory::deploy_pool<USDC, TRB, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
@@ -205,19 +207,19 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
-            let eth = test_scenario::take_from_sender<Coin<ETH>>(scenario);
+            let sui = test_scenario::take_from_sender<Coin<SUI>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
 
-            position_manager::mint<USDC, ETH, FEE3000BPS>(
+            position_manager::mint<USDC, SUI, FEE3000BPS>(
                 &mut pool,
                 &mut positions,
                 tools_tests::coin_to_vec(usdc),
-                tools_tests::coin_to_vec(eth),
+                tools_tests::coin_to_vec(sui),
                 i32::abs_u32(min_tick_index),
                 i32::is_neg(min_tick_index),
                 i32::abs_u32(max_tick_index),
@@ -285,19 +287,19 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
+			let pool = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
-            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
+            let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(60);
             let max_tick_index = math_tick::get_max_tick(60);
 
-            position_manager::mint<USDC, BTC, FEE3000BPS>(
+            position_manager::mint<USDC, TRB, FEE3000BPS>(
                 &mut pool,
                 &mut positions,
                 tools_tests::coin_to_vec(usdc),
-                tools_tests::coin_to_vec(btc),
+                tools_tests::coin_to_vec(trb),
                 i32::abs_u32(min_tick_index),
                 i32::is_neg(min_tick_index),
                 i32::abs_u32(max_tick_index),
@@ -539,7 +541,7 @@ module turbos_clmm::swap_router_tests {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
 			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -548,7 +550,7 @@ module turbos_clmm::swap_router_tests {
             //get trader balance before
             let coins_a;
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
-            trader_balance_c_before = tools_tests::get_user_coin_balance<ETH>(scenario);
+            trader_balance_c_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
 			swap_router::swap_a_b_b_c(
 				&mut pool_a,
@@ -575,11 +577,11 @@ module turbos_clmm::swap_router_tests {
         test_scenario::next_tx(scenario, player);
         {
             let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let trader_balance_c_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            let trader_balance_c_after = tools_tests::get_user_coin_balance<SUI>(scenario);
 
             assert_eq(pool_a_balance_a_after - pool_a_balance_a_before, 30);
             assert_eq(pool_a_balance_b_before - pool_a_balance_b_after, 28);
@@ -622,7 +624,7 @@ module turbos_clmm::swap_router_tests {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
 			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -633,7 +635,7 @@ module turbos_clmm::swap_router_tests {
             //get trader balance before
             let coins_a;
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
-            trader_balance_c_before = tools_tests::get_user_coin_balance<ETH>(scenario);
+            trader_balance_c_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
 			swap_router::swap_a_b_b_c(
 				&mut pool_a,
@@ -660,11 +662,11 @@ module turbos_clmm::swap_router_tests {
         test_scenario::next_tx(scenario, player);
         {
             let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
             let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let trader_balance_c_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            let trader_balance_c_after = tools_tests::get_user_coin_balance<SUI>(scenario);
             (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
             (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
@@ -885,8 +887,8 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -894,8 +896,8 @@ module turbos_clmm::swap_router_tests {
 
             //get trader balance before
             let coins_a;
-            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
-            trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
+            trader_balance_b_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
 			swap_router::swap_b_a_b_c(
 				&mut pool_a,
@@ -921,12 +923,12 @@ module turbos_clmm::swap_router_tests {
 
         test_scenario::next_tx(scenario, player);
         {
-            let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
-            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<TRB>(scenario);
+            let trader_balance_b_after = tools_tests::get_user_coin_balance<SUI>(scenario);
 
             assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 28);
             assert_eq(pool_a_balance_b_after - pool_a_balance_b_before, 30);
@@ -968,8 +970,8 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
             (pool_a_balance_a_before, pool_a_balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -979,8 +981,8 @@ module turbos_clmm::swap_router_tests {
 
             //get trader balance before
             let coins_a;
-            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
-            trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
+            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
+            trader_balance_b_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
 			swap_router::swap_b_a_b_c(
 				&mut pool_a,
@@ -1006,12 +1008,12 @@ module turbos_clmm::swap_router_tests {
 
         test_scenario::next_tx(scenario, player);
         {
-            let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
-            let pool_b = test_scenario::take_shared<Pool<USDC, ETH, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
-            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<TRB>(scenario);
+            let trader_balance_b_after = tools_tests::get_user_coin_balance<SUI>(scenario);
             (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
             (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);
 
@@ -1059,7 +1061,7 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
+			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -1068,7 +1070,7 @@ module turbos_clmm::swap_router_tests {
 
             //get trader balance before
             let coins_a;
-            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
+            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
 			swap_router::swap_b_a_c_b(
@@ -1095,11 +1097,11 @@ module turbos_clmm::swap_router_tests {
 
         test_scenario::next_tx(scenario, player);
         {
-            let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
-            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<TRB>(scenario);
             let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
 
             assert_eq(pool_a_balance_a_before - pool_a_balance_a_after, 28);
@@ -1142,7 +1144,7 @@ module turbos_clmm::swap_router_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
+			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -1153,7 +1155,7 @@ module turbos_clmm::swap_router_tests {
 
             //get trader balance before
             let coins_a;
-            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
+            (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
 			swap_router::swap_b_a_c_b(
@@ -1180,11 +1182,11 @@ module turbos_clmm::swap_router_tests {
 
         test_scenario::next_tx(scenario, player);
         {
-            let pool_a = test_scenario::take_shared<Pool<USDC, BTC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
             let (pool_a_balance_a_after, pool_a_balance_b_after) = pool::get_pool_balance(&mut pool_a);
             let (pool_b_balance_a_after, pool_b_balance_b_after) = pool::get_pool_balance(&mut pool_b);
-            let trader_balance_a_after = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let trader_balance_a_after = tools_tests::get_user_coin_balance<TRB>(scenario);
             let trader_balance_b_after = tools_tests::get_user_coin_balance<ETH>(scenario);
             (_, _, pool_a_protocol_fee_a_after, pool_a_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_a);
             (_, _, pool_b_protocol_fee_a_after, pool_b_protocol_fee_b_after, _, _,_, _, _, _, _, _, _) = pool::get_pool_info(&pool_b);

@@ -12,7 +12,7 @@ module turbos_token::btc {
     struct BTC has drop {}
 
     fun init(witness: BTC, ctx: &mut TxContext) {
-        let (treasury, metadata) = coin::create_currency(witness, 9, b"TurbosTestBtc", b"BTC", b"", option::none(), ctx);
+        let (treasury, metadata) = coin::create_currency(witness, 9, b"BTC", b"TurbosTestBtc", b"", option::none(), ctx);
         transfer::public_freeze_object(metadata);
         transfer::public_transfer(treasury, tx_context::sender(ctx));
     }

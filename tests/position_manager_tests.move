@@ -8,6 +8,7 @@ module turbos_clmm::position_manager_tests {
     use turbos_clmm::pool_factory_tests;
     use turbos_clmm::btc::{BTC};
 	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::trb::{TRB};
     use turbos_clmm::fee500bps::{FEE500BPS};
     use turbos_clmm::pool::{Self, Pool, Versioned};
     use turbos_clmm::tools_tests;
@@ -163,18 +164,18 @@ module turbos_clmm::position_manager_tests {
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let pool = test_scenario::take_shared<Pool<USDC, BTC, FEE500BPS>>(scenario);
+            let pool = test_scenario::take_shared<Pool<USDC, TRB, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
-            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
+            let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(10);
             let max_tick_index = math_tick::get_max_tick(10);
-            position_manager::mint<USDC, BTC, FEE500BPS>(
+            position_manager::mint<USDC, TRB, FEE500BPS>(
                 &mut pool,
                 &mut positions,
                 tools_tests::coin_to_vec(usdc),
-                tools_tests::coin_to_vec(btc),
+                tools_tests::coin_to_vec(trb),
                 i32::abs_u32(min_tick_index),
                 i32::is_neg(min_tick_index),
                 i32::abs_u32(max_tick_index),
@@ -205,7 +206,7 @@ module turbos_clmm::position_manager_tests {
                 fee_growth_global_a,
                 fee_growth_global_b,
                 liquidity,
-		    ) = pool::get_pool_info<USDC, BTC, FEE500BPS>(&pool);
+		    ) = pool::get_pool_info<USDC, TRB, FEE500BPS>(&pool);
             assert_eq(coin_a, 1000);
             assert_eq(coin_b, 10);
             assert_eq(sqrt_price, 1844674407370955161);
@@ -240,15 +241,15 @@ module turbos_clmm::position_manager_tests {
         test_scenario::next_tx(scenario, player);
         {
             let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
-            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
+            let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
-            let amount_btc = coin::value(&btc);
+            let amount_trb = coin::value(&trb);
             let amount_usdc = coin::value(&usdc);
-            assert_eq(amount_btc, 8990);
+            assert_eq(amount_trb, 9990);
             assert_eq(amount_usdc, 8000);
 
             test_scenario::return_to_sender(scenario, nft);
-            test_scenario::return_to_sender(scenario, btc);
+            test_scenario::return_to_sender(scenario, trb);
             test_scenario::return_to_sender(scenario, usdc);
         };
 
@@ -309,7 +310,7 @@ module turbos_clmm::position_manager_tests {
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let amount_btc = coin::value(&btc);
             let amount_usdc = coin::value(&usdc);
-            assert_eq(amount_btc, 8890);
+            assert_eq(amount_btc, 8900);
             assert_eq(amount_usdc, 7900);
 
             test_scenario::return_to_sender(scenario, btc);
@@ -392,7 +393,7 @@ module turbos_clmm::position_manager_tests {
         {
             let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
             let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
-            assert_eq(amount_btc, 8890 + 99);
+            assert_eq(amount_btc, 8999);
             assert_eq(amount_usdc, 7900 + 99);
         };
 
@@ -472,7 +473,7 @@ module turbos_clmm::position_manager_tests {
         {
             let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
             let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
-            assert_eq(amount_btc, 8989);
+            assert_eq(amount_btc, 8999);
             assert_eq(amount_usdc, 7999);
         };
 

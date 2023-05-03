@@ -7,6 +7,7 @@ module turbos_clmm::pool_factory_tests {
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::btc::{BTC};
 	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::trb::{TRB};
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::tools_tests;
     use turbos_clmm::fee500bps::{FEE500BPS};
@@ -73,7 +74,7 @@ module turbos_clmm::pool_factory_tests {
             test_scenario::return_shared(versioned);
         };
 
-        // init USDCBTC pool
+        //init USDCTRB pool
         test_scenario::next_tx(scenario, admin);
         {
             let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
@@ -83,7 +84,7 @@ module turbos_clmm::pool_factory_tests {
             let versioned = test_scenario::take_shared<Versioned>(scenario);
             //price=0.01 1usdc = 0.01BTC
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 100);
-            pool_factory::deploy_pool<USDC, BTC, FEE500BPS>(
+            pool_factory::deploy_pool<USDC, TRB, FEE500BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,
@@ -233,6 +234,51 @@ module turbos_clmm::pool_factory_tests {
                 sqrt_price,
                 &mut positions,
                 tools_tests::coin_to_vec(btc),
+                tools_tests::coin_to_vec(usdc),
+                i32::abs_u32(min_tick_index),
+                i32::is_neg(min_tick_index),
+                i32::abs_u32(max_tick_index),
+                i32::is_neg(max_tick_index),
+                1000,
+                1000,
+                0,
+                0,
+                player,
+                1,
+                &clock,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
+        };
+
+        // init USDCTRB pool
+        test_scenario::next_tx(scenario, player);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            //price=0.01 1usdc = 0.01TRB
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 100);
+            let positions = test_scenario::take_shared<Positions>(scenario);
+            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
+            let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+
+            pool_factory::deploy_pool_and_mint<TRB, USDC, FEE500BPS>(
+                &mut pool_config,
+                &fee_type,
+                sqrt_price,
+                &mut positions,
+                tools_tests::coin_to_vec(trb),
                 tools_tests::coin_to_vec(usdc),
                 i32::abs_u32(min_tick_index),
                 i32::is_neg(min_tick_index),

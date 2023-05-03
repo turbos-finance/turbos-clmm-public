@@ -11,6 +11,8 @@ module turbos_clmm::tools_tests {
     use turbos_clmm::btc::{Self, BTC};
 	use turbos_clmm::usdc::{Self, USDC};
     use turbos_clmm::eth::{Self, ETH};
+    use turbos_clmm::trb::{Self, TRB};
+    use turbos_clmm::sui::{Self, SUI};
     use sui::coin::{Self, TreasuryCap};
     use turbos_clmm::fee500bps::{Self, FEE500BPS};
     use turbos_clmm::fee3000bps::{Self, FEE3000BPS};
@@ -84,6 +86,18 @@ module turbos_clmm::tools_tests {
             eth::init_for_testing(test_scenario::ctx(scenario));
         };
 
+        // create sui coin
+        test_scenario::next_tx(scenario, admin);
+        {
+            sui::init_for_testing(test_scenario::ctx(scenario));
+        };
+
+        // create trb coin
+        test_scenario::next_tx(scenario, admin);
+        {
+            trb::init_for_testing(test_scenario::ctx(scenario));
+        };
+
         // mint btc to player
         test_scenario::next_tx(scenario, admin);
         {
@@ -106,6 +120,24 @@ module turbos_clmm::tools_tests {
         test_scenario::next_tx(scenario, admin);
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<ETH>>(scenario);
+            let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
+            transfer::public_transfer(coins, copy player);
+            test_scenario::return_to_sender(scenario, treasury_cap);
+        };
+
+         // mint sui to player
+        test_scenario::next_tx(scenario, admin);
+        {
+            let treasury_cap = test_scenario::take_from_sender<TreasuryCap<SUI>>(scenario);
+            let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
+            transfer::public_transfer(coins, copy player);
+            test_scenario::return_to_sender(scenario, treasury_cap);
+        };
+
+         // mint trb to player
+        test_scenario::next_tx(scenario, admin);
+        {
+            let treasury_cap = test_scenario::take_from_sender<TreasuryCap<TRB>>(scenario);
             let coins = coin::mint(&mut treasury_cap, init_amount, test_scenario::ctx(scenario));
             transfer::public_transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
