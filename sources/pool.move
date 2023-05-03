@@ -284,8 +284,8 @@ module turbos_clmm::pool {
         versioned.version
     }
 
-    public fun check_version(versioned: &Versioned, current_version: u64) {
-        assert!(versioned.version == current_version, EWrongVersion);
+    public fun check_version(versioned: &Versioned) {
+        assert!(versioned.version == VERSION, EWrongVersion);
     }
 
     public(friend) fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
@@ -1698,7 +1698,7 @@ module turbos_clmm::pool {
     }
 
     /// swap: a=>c, pool_a: (a,b), pool_b:(b,c)
-	public(friend) entry fun swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+	public(friend) fun swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 
@@ -1733,7 +1733,7 @@ module turbos_clmm::pool {
 	}
 
     /// swap: a=>c, pool_a: (a,b), pool_b:(c,b)
-	public(friend) entry fun swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+	public(friend) fun swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 
@@ -1768,7 +1768,7 @@ module turbos_clmm::pool {
 	}
 
     /// swap: a=>c, pool_a: (b,a), pool_b:(b,c)
-	public(friend) entry fun swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+	public(friend) fun swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 
@@ -1803,7 +1803,7 @@ module turbos_clmm::pool {
 	}
 
     /// swap: a=>c, pool_a: (b,a), pool_b:(c,b)
-	public(friend) entry fun swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+	public(friend) fun swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
 		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
 		coin_a: Coin<CoinTypeA>, 

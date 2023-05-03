@@ -6,8 +6,6 @@ module turbos_clmm::pool_fetcher {
 	use sui::clock::{Clock};
 	use turbos_clmm::pool::{Self, Pool, ComputeSwapState, Versioned};
 
-	const VERSION: u64 = 1;
-
 	public entry fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         a_to_b: bool,
@@ -18,7 +16,7 @@ module turbos_clmm::pool_fetcher {
 		versioned: &Versioned,
         ctx: &mut TxContext,
     ): ComputeSwapState {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 		pool::compute_swap_result(
 			pool,
 			tx_context::sender(ctx),

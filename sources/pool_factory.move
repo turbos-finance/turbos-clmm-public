@@ -19,8 +19,6 @@ module turbos_clmm::pool_factory {
 	use std::string::{Self, String};
 	use sui::table::{Self, Table};
     
-	const VERSION: u64 = 1;
-
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
@@ -102,7 +100,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 
 		let coin_type_a = type_name::get<CoinTypeA>();
         let coin_type_b = type_name::get<CoinTypeB>();
@@ -177,7 +175,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 
 		let coin_type_a = type_name::get<CoinTypeA>();
         let coin_type_b = type_name::get<CoinTypeB>();
@@ -242,7 +240,7 @@ module turbos_clmm::pool_factory {
         feeType: &Fee<FeeType>,
 		versioned: &Versioned,
 	) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 
         let type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
 		assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists);
@@ -262,7 +260,7 @@ module turbos_clmm::pool_factory {
 		fee_protocol: u32,
 		versioned: &Versioned,
 	) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 
 		assert!(fee_protocol < 1000000, EInvalidFee);
 		pool_config.fee_protocol = fee_protocol;
@@ -278,7 +276,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
         ctx: &mut TxContext
 	) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
 		pool::collect_protocol_fee(
 			pool,
 			amount_a_requested,
@@ -294,7 +292,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
         ctx: &mut TxContext,
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
         pool::toggle_pool_status(pool, ctx);
     }
 
@@ -305,7 +303,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
         position_manager::update_nft_name(
 			positions,
 			name,
@@ -326,7 +324,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
         position_manager::update_nft_description(
 			positions,
 			nft_description,
@@ -340,7 +338,7 @@ module turbos_clmm::pool_factory {
 		versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
-		pool::check_version(versioned, VERSION);
+		pool::check_version(versioned);
         position_manager::update_nft_img_url(
 			positions,
 			nft_img_url,

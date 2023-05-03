@@ -9,8 +9,6 @@ module turbos_clmm::reward_manager {
     use sui::coin::{Coin};
     use sui::clock::{Clock};
 
-    const VERSION: u64 = 1;
-
     struct RewardManagerAdminCap has key, store { id: UID }
 
     fun init(ctx: &mut TxContext) {
@@ -29,7 +27,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         let vault = pool::init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
             pool,
             reward_index,
@@ -47,7 +45,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         pool::update_reward_manager(
             pool,
             reward_index,
@@ -66,7 +64,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         pool::add_reward(
             pool,
             vault,
@@ -88,7 +86,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         pool::remove_reward(
             pool,
             vault,
@@ -110,7 +108,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         pool::update_reward_emissions(
             pool,
             reward_index,

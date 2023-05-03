@@ -21,8 +21,6 @@ module turbos_clmm::position_manager {
     
     friend turbos_clmm::pool_factory;
 
-    const VERSION: u64 = 1;
-
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
 	const EInvalidTicKSpacing: u64 = 2;
@@ -124,7 +122,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -187,7 +185,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_b == 0, EPositionNotCleared);
@@ -270,7 +268,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -315,7 +313,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
@@ -365,7 +363,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);
@@ -433,7 +431,7 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let owner = tx_context::sender(ctx);

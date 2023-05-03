@@ -7,8 +7,6 @@ module turbos_clmm::swap_router {
 	use sui::coin::{Coin};
     use sui::clock::{Self, Clock};
 
-    const VERSION: u64 = 1;
-
     const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
 
@@ -31,7 +29,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a, amount_b) = pool::swap(
 			pool,
@@ -70,7 +68,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a, amount_b) = pool::swap(
 			pool,
@@ -136,7 +134,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
@@ -228,7 +226,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
@@ -321,7 +319,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
@@ -415,7 +413,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        pool::check_version(versioned, VERSION);
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
 
