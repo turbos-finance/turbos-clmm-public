@@ -298,6 +298,20 @@ module turbos_clmm::pool_factory {
 		event::emit(SetFeeProtocolEvent {fee_protocol: fee_protocol});
 	}
 
+	public entry fun update_pool_fee_protocol<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		fee_protocol: u32,
+		versioned: &Versioned,
+		_ctx: &mut TxContext
+	) {
+		pool::check_version(versioned);
+		assert!(fee_protocol < 1000000, EInvalidFee);
+
+		pool::update_pool_fee_protocol(pool, fee_protocol);
+		event::emit(SetFeeProtocolEvent {fee_protocol: fee_protocol});
+	}
+
 	public entry fun collect_protocol_fee<CoinTypeA, CoinTypeB, FeeType>(
 		_: &PoolFactoryAdminCap,
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,

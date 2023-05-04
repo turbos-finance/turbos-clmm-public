@@ -15,10 +15,11 @@ module turbos_clmm::pool_factory_tests {
     use turbos_clmm::i32::{Self};
     use turbos_clmm::math_tick;
     use turbos_clmm::position_manager::{Self,Positions};
-    use turbos_clmm::pool::{Versioned};
+    use turbos_clmm::pool::{Self, Pool, Versioned};
     use sui::coin::{Coin};
     use std::string::{Self};
     use sui::clock::{Clock};
+    use sui::test_utils::{assert_eq};
 
 	public fun init_pools(
 		admin: address,
@@ -355,6 +356,46 @@ module turbos_clmm::pool_factory_tests {
             //std::debug::print(&positions);
             test_scenario::return_to_sender(scenario, admin_cap);
             test_scenario::return_shared(positions);
+            test_scenario::return_shared(versioned);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    public fun test_update_pool_fee_protocol() {
+        let admin = @0x0;
+        let player = @0x1;
+		let player2 = @0x2;
+
+        let scenario_val = test_scenario::begin(admin);
+        let scenario = &mut scenario_val;
+
+        init_pools(admin, player, player2, scenario);
+
+        //init pool position manager
+        test_scenario::next_tx(scenario, admin);
+		{
+            position_manager::init_for_testing(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+
+            pool_factory::update_pool_fee_protocol(
+                &admin_cap,
+                &mut pool,
+                300000,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+
+            assert_eq(pool::get_pool_fee_protocol(&pool), 300000);
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool);
             test_scenario::return_shared(versioned);
         };
 

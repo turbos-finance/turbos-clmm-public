@@ -191,6 +191,11 @@ module turbos_clmm::pool {
         status: bool,
     }
 
+    struct UpdatePoolFeeProtocolEvent has copy, drop {
+        pool: ID,
+        fee_protocol: u32,
+    }
+
     struct CollectEvent has copy, drop {
         pool: ID,
         recipient: address,
@@ -672,6 +677,17 @@ module turbos_clmm::pool {
             recipient: recipient,
             amount_a: amount_a,
             amount_b: amount_b,
+        });
+	}
+
+    public(friend) fun update_pool_fee_protocol<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		fee_protocol: u32,
+	) {
+		pool.fee_protocol = fee_protocol;
+		event::emit(UpdatePoolFeeProtocolEvent {
+            pool: object::id(pool),
+            fee_protocol: fee_protocol
         });
 	}
 
@@ -1872,6 +1888,13 @@ module turbos_clmm::pool {
 			pool.fee_growth_global_b,
 			pool.liquidity
 		)
+    }
+
+    #[test_only]
+    public fun get_pool_fee_protocol<CoinTypeA, CoinTypeB, FeeType>(
+		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+	): u32 {
+        pool.fee_protocol
     }
 
     #[test_only]
