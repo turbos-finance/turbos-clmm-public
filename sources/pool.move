@@ -34,7 +34,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 1;
+    const VERSION: u64 = 3;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -1457,10 +1457,6 @@ module turbos_clmm::pool {
         let growth_delta_b = math_u128::wrapping_sub(fee_growth_inside_b, position.fee_growth_inside_b);
         let tokens_owed_b = (full_math_u128::mul_div_floor(growth_delta_b, position.liquidity, Q64) as u64);
 
-        // update the position
-        if (!i128::eq(liquidity_delta, i128::zero())) {
-            position.liquidity = liquidity_next;
-        };
         position.fee_growth_inside_a = fee_growth_inside_a;
         position.fee_growth_inside_b = fee_growth_inside_b;
         if (tokens_owed_a > 0 || tokens_owed_b > 0) {
@@ -1482,6 +1478,10 @@ module turbos_clmm::pool {
             i = i + 1;
         };
 
+        // update the position
+        if (!i128::eq(liquidity_delta, i128::zero())) {
+            position.liquidity = liquidity_next;
+        };
     }
 
     public fun get_position<CoinTypeA, CoinTypeB, FeeType>(
