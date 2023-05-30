@@ -390,6 +390,26 @@ module turbos_clmm::pool_factory {
 		);
     }
 
+	public entry fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
+        _: &PoolFactoryAdminCap,
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		positions: &mut Positions,
+		nfts: vector<address>,
+        owned: address,
+        versioned: &Versioned,
+		ctx: &mut TxContext
+    ) {
+		pool::check_version(versioned);
+        position_manager::migrate_position(
+			pool,
+			positions,
+			nfts,
+			owned,
+			ctx
+	    ); 
+
+    }
+
     #[test_only]
     public fun init_for_testing(ctx: &mut TxContext) {
         init_(ctx);
