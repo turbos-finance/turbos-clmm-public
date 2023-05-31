@@ -924,6 +924,8 @@ module turbos_clmm::pool {
         reward_index: u64,
         ctx: &mut TxContext
     ): u64 {
+        let pool_reward_info = vector::borrow(&pool.reward_infos, reward_index);
+        assert!(pool_reward_info.vault == object::id_address(vault), EInvalidRewardVault);
         let position = get_position_mut(pool, position_owner, tick_lower_index, tick_upper_index);
         assert!(reward_index < vector::length(&position.reward_infos),EInvalidRewardIndex);
         let reward_info = vector::borrow_mut(&mut position.reward_infos, reward_index);
