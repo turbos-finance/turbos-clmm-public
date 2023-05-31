@@ -968,10 +968,10 @@ module turbos_clmm::pool {
         let len = vector::length(&pool.reward_infos);
         let i = 0;
         while (i < len) {
+            let reward_info = vector::borrow_mut(&mut pool.reward_infos, i);
             if (pool.liquidity == 0 || time_delta == 0) {
-                vector::insert(&mut growth_global_vector, 0, i);
+                vector::insert(&mut growth_global_vector, reward_info.growth_global, i);
             } else {
-                let reward_info = vector::borrow_mut(&mut pool.reward_infos, i);
                 // Calculate the new reward growth delta.
                 let reward_growth_delta = full_math_u128::mul_div_floor(
                     (time_delta as u128),
