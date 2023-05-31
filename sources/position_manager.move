@@ -35,6 +35,7 @@ module turbos_clmm::position_manager {
     const EPositionNotExists: u64 = 11;
     const EPositionAlreadyExists: u64 = 12;
     const EPositionMigrateFail: u64 = 14;
+    const EInvalidPool: u64 = 15;
 
     struct PositionRewardInfo has store {
         reward_growth_inside: u128,
@@ -271,6 +272,7 @@ module turbos_clmm::position_manager {
 		ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
 		assert!(vector::length(&coins_a) > 0, ENoCoins);
 		assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -325,6 +327,7 @@ module turbos_clmm::position_manager {
 		ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let sender = tx_context::sender(ctx);
@@ -382,6 +385,7 @@ module turbos_clmm::position_manager {
 		ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let sender = tx_context::sender(ctx);
@@ -457,6 +461,7 @@ module turbos_clmm::position_manager {
 		ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
 		let sender = tx_context::sender(ctx);
