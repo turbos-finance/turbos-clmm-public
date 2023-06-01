@@ -513,7 +513,7 @@ module turbos_clmm::position_manager {
         });
     }
 
-    public(friend) entry fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
 		positions: &mut Positions,
 		nfts: vector<address>,

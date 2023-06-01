@@ -271,6 +271,12 @@ module turbos_clmm::pool {
 		new_key: String,
     }
 
+    struct ModifyTickRewardEvent has copy, drop {
+        pool: ID,
+        old_reward: u128, 
+		new_reward: u128,
+    }
+
     fun init(ctx: &mut TxContext) {
         transfer::share_object(Versioned {
             id: object::new(ctx),
@@ -1989,6 +1995,34 @@ module turbos_clmm::pool {
             old_key: old_key,
             new_key: new_key,
         });
+    }
+
+    public(friend) fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32,
+        _ctx: &mut TxContext,
+    ) {
+        let pool_id = object::id(pool);
+        let tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+        let reward_infos = &pool.reward_infos;
+        let reward_infos_len = vector::length(reward_infos);
+        let i = 0;
+        while (i < reward_infos_len) {
+                let reward_global = vector::borrow(reward_infos, i);
+                let reward = vector::borrow_mut(&mut tick.reward_growths_outside, i);
+                let old_reward = *reward;
+                // reward outside can't be greater than global
+                if (*reward > reward_global.growth_global) {
+                    *reward = reward_global.growth_global;
+
+                    event::emit(ModifyTickRewardEvent {
+                        pool: pool_id,
+                        old_reward: old_reward,
+                        new_reward: *reward,
+                    });
+                };
+                i = i + 1;
+        };
     }
 
     fun save_position<CoinTypeA, CoinTypeB, FeeType>(

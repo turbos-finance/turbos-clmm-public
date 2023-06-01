@@ -18,6 +18,7 @@ module turbos_clmm::pool_factory {
 	use turbos_clmm::pool::{Self, Pool, Versioned};
 	use std::string::{Self, String};
 	use sui::table::{Self, Table};
+	use turbos_clmm::i32::{Self};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -408,6 +409,22 @@ module turbos_clmm::pool_factory {
 			ctx
 	    ); 
 
+    }
+
+	public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: u32,
+		tick_index_is_neg: bool,
+		versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
+		pool::check_version(versioned);
+        pool::modify_tick_reward(
+			pool,
+			i32::from_u32_neg(tick_index, tick_index_is_neg),
+			ctx
+		);
     }
 
     #[test_only]
