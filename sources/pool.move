@@ -1442,7 +1442,10 @@ module turbos_clmm::pool {
         // calculate fee growth below
         let fee_growth_below_a;
         let fee_growth_below_b;
-        if (i32::gte(tick_current_index, tick_lower_index)) {
+        if (!tick_lower.initialized) {
+            fee_growth_below_a = pool.fee_growth_global_a;
+            fee_growth_below_b = pool.fee_growth_global_a;
+        } else if (i32::gte(tick_current_index, tick_lower_index)) {
             fee_growth_below_a = tick_lower.fee_growth_outside_a;
             fee_growth_below_b = tick_lower.fee_growth_outside_b;
         } else {
@@ -1453,7 +1456,10 @@ module turbos_clmm::pool {
         // calculate fee growth above
         let fee_growth_above_a;
         let fee_growth_above_b;
-        if (i32::lt(tick_current_index, tick_upper_index)) {
+        if (!tick_lower.initialized) {
+            fee_growth_above_a = 0;
+            fee_growth_above_b = 0;
+        } else if (i32::lt(tick_current_index, tick_upper_index)) {
             fee_growth_above_a = tick_upper.fee_growth_outside_a;
             fee_growth_above_b = tick_upper.fee_growth_outside_b;
         } else {
@@ -1491,7 +1497,9 @@ module turbos_clmm::pool {
 
             // calculate reword growth below
             let reward_growth_below;
-            if (i32::gte(tick_current_index, tick_lower_index)) {
+            if (!tick_lower.initialized) {
+                reward_growth_below = reward_info.growth_global;
+            } else if (i32::gte(tick_current_index, tick_lower_index)) {
                 reward_growth_below = reward_growths_outside_lower;
             } else {
                 reward_growth_below = math_u128::wrapping_sub(reward_info.growth_global, reward_growths_outside_lower);
@@ -1499,7 +1507,9 @@ module turbos_clmm::pool {
 
             // calculate reword growth above
             let reward_growth_above;
-            if (i32::lt(tick_current_index, tick_upper_index)) {
+            if (!tick_upper.initialized) {
+                reward_growth_above = 0;
+            } else if (i32::lt(tick_current_index, tick_upper_index)) {
                 reward_growth_above = reward_growths_outside_upper;
             } else {
                 reward_growth_above = math_u128::wrapping_sub(reward_info.growth_global, reward_growths_outside_upper);
