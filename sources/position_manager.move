@@ -547,6 +547,18 @@ module turbos_clmm::position_manager {
         }
     }
 
+    public(friend) fun modify_position_reward_inside(
+        positions: &mut Positions,
+        nft_address: address,
+        tick_reward_index: u64,
+        vaule: u128,
+    ) {
+        let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
+        let reward_infos = &mut position.reward_infos;
+        let reward_info = vector::borrow_mut(reward_infos, tick_reward_index);
+        reward_info.reward_growth_inside = vaule;
+    }
+
     fun get_position_tick_info(
         positions: &mut Positions,
         nft_address: address
