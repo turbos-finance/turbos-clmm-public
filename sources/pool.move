@@ -2019,7 +2019,7 @@ module turbos_clmm::pool {
             modify_tick_reward_outside(pool, tick_lower_index, 0, 0);
             modify_tick_reward_outside(pool, tick_upper_index, 0, 0);
         } else if (
-            i32::gt(pool.tick_current_index, tick_lower_index) || 
+            i32::gt(pool.tick_current_index, tick_lower_index) && 
             i32::lt(pool.tick_current_index, tick_upper_index)
         ) {
             let reward_infos = &pool.reward_infos;
