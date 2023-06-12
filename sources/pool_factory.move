@@ -444,7 +444,7 @@ module turbos_clmm::pool_factory {
 			);
         };
 		while(vector::length(&nfts) > 0) {
-            let nft_address = vector::pop_back(&mut owners);
+            let nft_address = vector::pop_back(&mut nfts);
             position_manager::modify_position_reward_inside(
 				positions,
 				nft_address, 
