@@ -1444,7 +1444,7 @@ module turbos_clmm::pool {
         let fee_growth_below_b;
         if (!tick_lower.initialized) {
             fee_growth_below_a = pool.fee_growth_global_a;
-            fee_growth_below_b = pool.fee_growth_global_a;
+            fee_growth_below_b = pool.fee_growth_global_b;
         } else if (i32::gte(tick_current_index, tick_lower_index)) {
             fee_growth_below_a = tick_lower.fee_growth_outside_a;
             fee_growth_below_b = tick_lower.fee_growth_outside_b;
