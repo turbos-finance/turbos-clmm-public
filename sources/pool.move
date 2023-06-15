@@ -34,7 +34,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 4;
+    const VERSION: u64 = 5;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -2013,18 +2013,31 @@ module turbos_clmm::pool {
         tick_upper_index: I32,
     ) {
         if (i32::lte(tick_lower_index, pool.tick_current_index)) {
-            modify_tick_reward_outside(pool, tick_lower_index, 0, 0);
-        } else {
             let reward_infos = &pool.reward_infos;
             let reawrd_info = vector::borrow(reward_infos, 0);
             modify_tick_reward_outside(pool, tick_lower_index, 0, reawrd_info.growth_global);
+        } else {
+            modify_tick_reward_outside(pool, tick_lower_index, 0, 0);
         };
         if (i32::lte(tick_upper_index, pool.tick_current_index)) {
-            modify_tick_reward_outside(pool, tick_upper_index, 0, 0);
-        } else {
             let reward_infos = &pool.reward_infos;
             let reawrd_info = vector::borrow(reward_infos, 0);
             modify_tick_reward_outside(pool, tick_upper_index, 0, reawrd_info.growth_global);
+        } else {
+            modify_tick_reward_outside(pool, tick_upper_index, 0, 0);
+        };
+    }
+
+    public(friend) fun modify_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32,
+    ) {
+        if (i32::lte(tick_index, pool.tick_current_index)) {
+            let reward_infos = &pool.reward_infos;
+            let reawrd_info = vector::borrow(reward_infos, 0);
+            modify_tick_reward_outside(pool, tick_index, 0, reawrd_info.growth_global);
+        } else {
+            modify_tick_reward_outside(pool, tick_index, 0, 0);
         };
     }
 

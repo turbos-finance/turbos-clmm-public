@@ -411,6 +411,33 @@ module turbos_clmm::pool_factory {
 
     }
 
+	// public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
+	// 	_: &PoolFactoryAdminCap,
+    //     pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+    //     tick_index: u32,
+	// 	tick_index_is_neg: bool,
+	// 	clock: &Clock,
+	// 	versioned: &Versioned,
+    //     ctx: &mut TxContext,
+    // ) {
+		
+    // }
+
+	public entry fun modify_tick<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: u32,
+		tick_index_is_neg: bool,
+		versioned: &Versioned,
+    ) {
+		pool::check_version(versioned);
+		let tick = i32::from_u32_neg(tick_index, tick_index_is_neg);
+        pool::modify_tick(
+			pool,
+			tick,
+		);
+    } 
+
 	public entry fun modify_reward<CoinTypeA, CoinTypeB, FeeType>(
 		_: &PoolFactoryAdminCap,
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
