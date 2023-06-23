@@ -41,7 +41,7 @@ module turbos_clmm::math_sqrt_price {
         let amount_a;
         if (round_up) {
             amount_a = math_u256::div_round(
-                numerator1 * numerator2 / sqrt_price_b_u256,
+                math_u256::div_round(numerator1 * numerator2, sqrt_price_b_u256, true),
                 sqrt_price_a_u256,
                 true
             );

@@ -114,7 +114,7 @@ module turbos_clmm::position_nft {
     }
 
     public fun position_id(nft: &TurbosPositionNFT): ID {
-        nft.pool_id
+        nft.position_id
     }
 
 }

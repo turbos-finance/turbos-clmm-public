@@ -18,6 +18,7 @@ module turbos_clmm::pool_factory {
 	use turbos_clmm::pool::{Self, Pool, Versioned};
 	use std::string::{Self, String};
 	use sui::table::{Self, Table};
+	use turbos_clmm::i32::{Self};
     
     const EFeeNotExists: u64 = 0;
 	const EInvalidFee: u64 = 1;
@@ -388,6 +389,96 @@ module turbos_clmm::pool_factory {
 			positions,
 			nft_img_url,
 		);
+    }
+
+	public entry fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
+        _: &PoolFactoryAdminCap,
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		positions: &mut Positions,
+		nfts: vector<address>,
+        owned: address,
+        versioned: &Versioned,
+		ctx: &mut TxContext
+    ) {
+		pool::check_version(versioned);
+        position_manager::migrate_position(
+			pool,
+			positions,
+			nfts,
+			owned,
+			ctx
+	    ); 
+
+    }
+
+	// public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
+	// 	_: &PoolFactoryAdminCap,
+    //     pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+    //     tick_index: u32,
+	// 	tick_index_is_neg: bool,
+	// 	clock: &Clock,
+	// 	versioned: &Versioned,
+    //     ctx: &mut TxContext,
+    // ) {
+		
+    // }
+
+	public entry fun modify_tick<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: u32,
+		tick_index_is_neg: bool,
+		versioned: &Versioned,
+    ) {
+		pool::check_version(versioned);
+		let tick = i32::from_u32_neg(tick_index, tick_index_is_neg);
+        pool::modify_tick(
+			pool,
+			tick,
+		);
+    } 
+
+	public entry fun modify_reward<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+		positions: &mut Positions,
+        tick_lower_index: u32,
+		tick_lower_index_is_neg: bool,
+        tick_upper_index: u32,
+		tick_upper_index_is_neg: bool,
+		nfts: vector<address>,
+        owners: vector<address>,
+		versioned: &Versioned,
+        _ctx: &mut TxContext,
+    ) {
+		pool::check_version(versioned);
+		let tick_lower = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
+		let tick_upper = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
+        pool::modify_tick_reward(
+			pool,
+			tick_lower,
+			tick_upper,
+		);
+		while(vector::length(&owners) > 0) {
+            let owner_address = vector::pop_back(&mut owners);
+            pool::modify_position_reward_inside(
+				pool, 
+				tick_lower, 
+				tick_upper, 
+				owner_address,
+				0,
+				0
+			);
+        };
+		while(vector::length(&nfts) > 0) {
+            let nft_address = vector::pop_back(&mut nfts);
+            position_manager::modify_position_reward_inside(
+				positions,
+				nft_address, 
+				0,
+				0
+			);
+        }
     }
 
     #[test_only]

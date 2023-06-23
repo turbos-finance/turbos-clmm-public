@@ -4,6 +4,7 @@
 #[test_only]
 module turbos_clmm::position_manager_tests {
     use sui::coin::{Self, Coin};
+    use sui::object;
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::pool_factory_tests;
     use turbos_clmm::btc::{BTC};
@@ -121,21 +122,6 @@ module turbos_clmm::position_manager_tests {
             assert_eq(amount_a, 999);
             assert_eq(amount_b, 999);
 
-            //get pool position info
-            let (
-                liquidity,
-                fee_growth_inside_a,
-                fee_growth_inside_b,
-                tokens_owed_a,
-                tokens_owed_b
-            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, player, min_tick_index, max_tick_index);
-            assert_eq(liquidity, 1000);
-            assert_eq(fee_growth_inside_a, 0);
-            assert_eq(fee_growth_inside_b, 0);
-            assert_eq(tokens_owed_a, 0);
-            assert_eq(tokens_owed_b, 0);
-
-
             test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
@@ -146,18 +132,262 @@ module turbos_clmm::position_manager_tests {
         //check users coin
         test_scenario::next_tx(scenario, player);
         {
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let amount_btc = coin::value(&btc);
             let amount_usdc = coin::value(&usdc);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
             assert_eq(amount_btc, 9000);
             assert_eq(amount_usdc, 9000);
+        
+            //get pool position info
+            let (
+                liquidity,
+                fee_growth_inside_a,
+                fee_growth_inside_b,
+                tokens_owed_a,
+                tokens_owed_b
+            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, object::id_address(&nft), min_tick_index, max_tick_index);
+            assert_eq(liquidity, 1000);
+            assert_eq(fee_growth_inside_a, 0);
+            assert_eq(fee_growth_inside_b, 0);
+            assert_eq(tokens_owed_a, 0);
+            assert_eq(tokens_owed_b, 0);
 
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_to_sender(scenario, btc);
             test_scenario::return_to_sender(scenario, usdc);
+            test_scenario::return_shared(pool);
         };
+
+   
+        // increase position liquidity
+        test_scenario::next_tx(scenario, player);
+        {
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let positions = test_scenario::take_shared<Positions>(scenario);
+            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
+            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
+            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
+
+            position_manager::increase_liquidity(
+                &mut pool,
+                &mut positions,
+                tools_tests::coin_to_vec(btc),
+                tools_tests::coin_to_vec(usdc),
+                &mut nft,
+                100,
+                100,
+                0,
+                0,
+                1,
+                &clock,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+            let (
+                liquidity,
+                fee_growth_inside_a,
+                fee_growth_inside_b,
+                tokens_owed_a,
+                tokens_owed_b
+            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, object::id_address(&nft), min_tick_index, max_tick_index);
+            assert_eq(liquidity, 1100);
+            assert_eq(fee_growth_inside_a, 0);
+            assert_eq(fee_growth_inside_b, 0);
+            assert_eq(tokens_owed_a, 0);
+            assert_eq(tokens_owed_b, 0);
+
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, nft);
+            test_scenario::return_shared(pool);
+            test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
+        };
+
+        //check users coin
+        test_scenario::next_tx(scenario, player);
+        {
+            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
+            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
+            let amount_btc = coin::value(&btc);
+            let amount_usdc = coin::value(&usdc);
+            assert_eq(amount_btc, 8900);
+            assert_eq(amount_usdc, 8900);
+
+            test_scenario::return_to_sender(scenario, btc);
+            test_scenario::return_to_sender(scenario, usdc);
+        };
+
+        //decrease position liquidity
+        test_scenario::next_tx(scenario, player);
+        {
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let positions = test_scenario::take_shared<Positions>(scenario);
+            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
+
+            position_manager::decrease_liquidity(
+                &mut pool,
+                &mut positions,
+                &mut nft,
+                100,
+                0,
+                0,
+                1,
+                &clock,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+            let (
+                liquidity,
+                fee_growth_inside_a,
+                fee_growth_inside_b,
+                tokens_owed_a,
+                tokens_owed_b
+            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, object::id_address(&nft), min_tick_index, max_tick_index);
+            assert_eq(liquidity, 1000);
+            assert_eq(fee_growth_inside_a, 0);
+            assert_eq(fee_growth_inside_b, 0);
+            assert_eq(tokens_owed_a, 0);
+            assert_eq(tokens_owed_b, 0);
+
+            let (
+			    coin_a,
+			    coin_b,
+			    _,
+			    _,
+			    sqrt_price,
+			    tick_current_index,
+			    tick_spacing,
+			    _,
+                fee,
+                fee_protocol,
+                fee_growth_global_a,
+                fee_growth_global_b,
+                liquidity,
+		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+            assert_eq(coin_a, 1001);
+            assert_eq(coin_b, 1001);
+            assert_eq(sqrt_price, 18446744073709551616);
+            assert_eq(i32::eq(tick_current_index, i32::from(0)), true);
+            assert_eq(tick_spacing, 10);
+            assert_eq(fee, 500);
+            assert_eq(fee_protocol, 0);
+            assert_eq(fee_growth_global_a, 0);
+            assert_eq(fee_growth_global_b, 0);
+            assert_eq(liquidity, 1000);
+
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, nft);
+            test_scenario::return_shared(pool);
+            test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
+        };
+
+        //check users coin
+        test_scenario::next_tx(scenario, player);
+        {
+            let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
+            assert_eq(amount_btc, 8999);
+            assert_eq(amount_usdc, 8900 + 99);
+        };
+
+        // collect position
+        test_scenario::next_tx(scenario, player);
+        {
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
+            let positions = test_scenario::take_shared<Positions>(scenario);
+            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
+            let min_tick_index = math_tick::get_min_tick(10);
+            let max_tick_index = math_tick::get_max_tick(10);
+
+            position_manager::collect(
+                &mut pool,
+                &mut positions,
+                &mut nft,
+                900,
+                90,
+                player,
+                1,
+                &clock,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+            let (
+                liquidity,
+                fee_growth_inside_a,
+                fee_growth_inside_b,
+                tokens_owed_a,
+                tokens_owed_b
+            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, object::id_address(&nft), min_tick_index, max_tick_index);
+            assert_eq(liquidity, 1000);
+            assert_eq(fee_growth_inside_a, 0);
+            assert_eq(fee_growth_inside_b, 0);
+            assert_eq(tokens_owed_a, 0);
+            assert_eq(tokens_owed_b, 0);
+
+            let (
+			    coin_a,
+			    coin_b,
+			    _,
+			    _,
+			    sqrt_price,
+			    tick_current_index,
+			    tick_spacing,
+			    _,
+                fee,
+                fee_protocol,
+                fee_growth_global_a,
+                fee_growth_global_b,
+                liquidity,
+		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+            assert_eq(coin_a, 1001);
+            assert_eq(coin_b, 1001);
+            assert_eq(sqrt_price, 18446744073709551616);
+            assert_eq(i32::eq(tick_current_index, i32::from(0)), true);
+            assert_eq(tick_spacing, 10);
+            assert_eq(fee, 500);
+            assert_eq(fee_protocol, 0);
+            assert_eq(fee_growth_global_a, 0);
+            assert_eq(fee_growth_global_b, 0);
+            assert_eq(liquidity, 1000);
+
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_to_sender(scenario, nft);
+            test_scenario::return_shared(pool);
+            test_scenario::return_shared(positions);
+            test_scenario::return_shared(clock);
+            test_scenario::return_shared(versioned);
+        };
+
+        //check users coin
+        test_scenario::next_tx(scenario, player);
+        {
+            let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
+            let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
+            assert_eq(amount_btc, 8999);
+            assert_eq(amount_usdc, 8999);
+        };
+
 
         //test USDCBTC pool, 1USDC = 0.01BTC
         test_scenario::next_tx(scenario, player);
@@ -166,16 +396,14 @@ module turbos_clmm::position_manager_tests {
             let versioned = test_scenario::take_shared<Versioned>(scenario);
             let pool = test_scenario::take_shared<Pool<USDC, TRB, FEE500BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
-            let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
-            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
             let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
             let min_tick_index = math_tick::get_min_tick(10);
             let max_tick_index = math_tick::get_max_tick(10);
             position_manager::mint<USDC, TRB, FEE500BPS>(
                 &mut pool,
                 &mut positions,
-                tools_tests::coin_to_vec(usdc),
-                tools_tests::coin_to_vec(trb),
+                tools_tests::get_user_coin_vec<USDC>(scenario),
+                tools_tests::get_user_coin_vec<TRB>(scenario),
                 i32::abs_u32(min_tick_index),
                 i32::is_neg(min_tick_index),
                 i32::abs_u32(max_tick_index),
@@ -246,237 +474,12 @@ module turbos_clmm::position_manager_tests {
             let amount_trb = coin::value(&trb);
             let amount_usdc = coin::value(&usdc);
             assert_eq(amount_trb, 9990);
-            assert_eq(amount_usdc, 8000);
+            assert_eq(amount_usdc, 7999);
 
             test_scenario::return_to_sender(scenario, nft);
             test_scenario::return_to_sender(scenario, trb);
             test_scenario::return_to_sender(scenario, usdc);
         };
-
-        // increase position liquidity
-        test_scenario::next_tx(scenario, player);
-        {
-            let clock = test_scenario::take_shared<Clock>(scenario);
-            let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
-            let positions = test_scenario::take_shared<Positions>(scenario);
-            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
-            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
-            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
-            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let min_tick_index = math_tick::get_min_tick(10);
-            let max_tick_index = math_tick::get_max_tick(10);
-
-            position_manager::increase_liquidity(
-                &mut pool,
-                &mut positions,
-                tools_tests::coin_to_vec(btc),
-                tools_tests::coin_to_vec(usdc),
-                &mut nft,
-                100,
-                100,
-                0,
-                0,
-                1,
-                &clock,
-                &versioned,
-                test_scenario::ctx(scenario),
-            );
-            let (
-                liquidity,
-                fee_growth_inside_a,
-                fee_growth_inside_b,
-                tokens_owed_a,
-                tokens_owed_b
-            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, player, min_tick_index, max_tick_index);
-            assert_eq(liquidity, 1100);
-            assert_eq(fee_growth_inside_a, 0);
-            assert_eq(fee_growth_inside_b, 0);
-            assert_eq(tokens_owed_a, 0);
-            assert_eq(tokens_owed_b, 0);
-
-            test_scenario::return_immutable(fee_type);
-            test_scenario::return_to_sender(scenario, nft);
-            test_scenario::return_shared(pool);
-            test_scenario::return_shared(positions);
-            test_scenario::return_shared(clock);
-            test_scenario::return_shared(versioned);
-        };
-
-        //check users coin
-        test_scenario::next_tx(scenario, player);
-        {
-            let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
-            let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
-            let amount_btc = coin::value(&btc);
-            let amount_usdc = coin::value(&usdc);
-            assert_eq(amount_btc, 8900);
-            assert_eq(amount_usdc, 7900);
-
-            test_scenario::return_to_sender(scenario, btc);
-            test_scenario::return_to_sender(scenario, usdc);
-        };
-
-        // decrease position liquidity
-        test_scenario::next_tx(scenario, player);
-        {
-            let clock = test_scenario::take_shared<Clock>(scenario);
-            let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
-            let positions = test_scenario::take_shared<Positions>(scenario);
-            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
-            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let min_tick_index = math_tick::get_min_tick(10);
-            let max_tick_index = math_tick::get_max_tick(10);
-
-            position_manager::decrease_liquidity(
-                &mut pool,
-                &mut positions,
-                &mut nft,
-                100,
-                0,
-                0,
-                1,
-                &clock,
-                &versioned,
-                test_scenario::ctx(scenario),
-            );
-            let (
-                liquidity,
-                fee_growth_inside_a,
-                fee_growth_inside_b,
-                tokens_owed_a,
-                tokens_owed_b
-            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, player, min_tick_index, max_tick_index);
-            assert_eq(liquidity, 1000);
-            assert_eq(fee_growth_inside_a, 0);
-            assert_eq(fee_growth_inside_b, 0);
-            assert_eq(tokens_owed_a, 0);
-            assert_eq(tokens_owed_b, 0);
-
-            let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
-                fee,
-                fee_protocol,
-                fee_growth_global_a,
-                fee_growth_global_b,
-                liquidity,
-		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
-            assert_eq(coin_a, 1001);
-            assert_eq(coin_b, 1001);
-            assert_eq(sqrt_price, 18446744073709551616);
-            assert_eq(i32::eq(tick_current_index, i32::from(0)), true);
-            assert_eq(tick_spacing, 10);
-            assert_eq(fee, 500);
-            assert_eq(fee_protocol, 0);
-            assert_eq(fee_growth_global_a, 0);
-            assert_eq(fee_growth_global_b, 0);
-            assert_eq(liquidity, 1000);
-
-            test_scenario::return_immutable(fee_type);
-            test_scenario::return_to_sender(scenario, nft);
-            test_scenario::return_shared(pool);
-            test_scenario::return_shared(positions);
-            test_scenario::return_shared(clock);
-            test_scenario::return_shared(versioned);
-        };
-
-        //check users coin
-        test_scenario::next_tx(scenario, player);
-        {
-            let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
-            assert_eq(amount_btc, 8999);
-            assert_eq(amount_usdc, 7900 + 99);
-        };
-
-        // collect position
-        test_scenario::next_tx(scenario, player);
-        {
-            let clock = test_scenario::take_shared<Clock>(scenario);
-            let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
-            let positions = test_scenario::take_shared<Positions>(scenario);
-            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(scenario);
-            let fee_type = test_scenario::take_immutable<Fee<FEE500BPS>>(scenario);
-            let min_tick_index = math_tick::get_min_tick(10);
-            let max_tick_index = math_tick::get_max_tick(10);
-
-            position_manager::collect(
-                &mut pool,
-                &mut positions,
-                &mut nft,
-                900,
-                90,
-                player,
-                1,
-                &clock,
-                &versioned,
-                test_scenario::ctx(scenario),
-            );
-            let (
-                liquidity,
-                fee_growth_inside_a,
-                fee_growth_inside_b,
-                tokens_owed_a,
-                tokens_owed_b
-            ) = pool::get_position_info<BTC, USDC, FEE500BPS>(&pool, player, min_tick_index, max_tick_index);
-            assert_eq(liquidity, 1000);
-            assert_eq(fee_growth_inside_a, 0);
-            assert_eq(fee_growth_inside_b, 0);
-            assert_eq(tokens_owed_a, 0);
-            assert_eq(tokens_owed_b, 0);
-
-            let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
-                fee,
-                fee_protocol,
-                fee_growth_global_a,
-                fee_growth_global_b,
-                liquidity,
-		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
-            assert_eq(coin_a, 1001);
-            assert_eq(coin_b, 1001);
-            assert_eq(sqrt_price, 18446744073709551616);
-            assert_eq(i32::eq(tick_current_index, i32::from(0)), true);
-            assert_eq(tick_spacing, 10);
-            assert_eq(fee, 500);
-            assert_eq(fee_protocol, 0);
-            assert_eq(fee_growth_global_a, 0);
-            assert_eq(fee_growth_global_b, 0);
-            assert_eq(liquidity, 1000);
-
-            test_scenario::return_immutable(fee_type);
-            test_scenario::return_to_sender(scenario, nft);
-            test_scenario::return_shared(pool);
-            test_scenario::return_shared(positions);
-            test_scenario::return_shared(clock);
-            test_scenario::return_shared(versioned);
-        };
-
-        //check users coin
-        test_scenario::next_tx(scenario, player);
-        {
-            let amount_btc = tools_tests::get_user_coin_balance<BTC>(scenario);
-            let amount_usdc = tools_tests::get_user_coin_balance<USDC>(scenario);
-            assert_eq(amount_btc, 8999);
-            assert_eq(amount_usdc, 7999);
-        };
-
 
         // decrease  all
         // test_scenario::next_tx(scenario, player);
