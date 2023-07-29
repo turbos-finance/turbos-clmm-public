@@ -15,6 +15,7 @@ module turbos_clmm::swap_router {
     const ETooLittleReceived: u64 = 3; 
     const EAmountOutBelowMinimum: u64 = 4; 
     const EAmountInAboveMaximum: u64 = 5; 
+    const ETwoStepSwapLackOfLiquidity: u64 = 6; 
     
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
 		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -134,7 +135,6 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -153,7 +153,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
-            let (_step2_in, step2_out) = pool::swap(
+            let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
@@ -163,6 +163,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -190,6 +191,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -227,7 +229,6 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -246,7 +247,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
-            let (step2_out, _step2_in) = pool::swap(
+            let (step2_out, step2_in) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
@@ -256,6 +257,8 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
+
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
             amount_c_64 = (step2_out as u64);
@@ -284,6 +287,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -321,7 +325,6 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -340,7 +343,7 @@ module turbos_clmm::swap_router {
 			    ctx
 		    );
 
-            let (_step2_in, step2_out) = pool::swap(
+            let (step2_in, step2_out) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
@@ -350,6 +353,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -377,7 +381,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
-
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -416,7 +420,6 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
-        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -436,7 +439,7 @@ module turbos_clmm::swap_router {
 		    );
 
             //b for c
-            let (step2_out, _step2_in) = pool::swap(
+            let (step2_out, step2_in) = pool::swap(
 			    pool_b,
                 recipient,
 			    a_to_b_step_two,
@@ -446,6 +449,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
@@ -473,6 +477,7 @@ module turbos_clmm::swap_router {
                 clock,
 			    ctx
 		    );
+            assert!(step1_out == step2_in, ETwoStepSwapLackOfLiquidity);
 
             amount_a_64 = (step1_in as u64);
             amount_b_64 = (step1_out as u64);
