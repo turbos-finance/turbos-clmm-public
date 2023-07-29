@@ -134,6 +134,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -226,6 +227,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -319,6 +321,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
@@ -413,6 +416,7 @@ module turbos_clmm::swap_router {
         versioned: &Versioned,
 		ctx: &mut TxContext
     ) {
+        abort(0);
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let (amount_a_64, amount_b_64, amount_c_64);
