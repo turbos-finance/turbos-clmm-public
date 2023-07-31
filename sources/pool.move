@@ -1211,9 +1211,8 @@ module turbos_clmm::pool {
         // if we need to update the ticks, do it
         let flipped_lower = false;
         let flipped_upper = false;
+        let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         if (!i128::eq(liquidity_delta, i128::zero())) {
-            let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
-
             flipped_lower = update_tick(
                 pool,
                 tick_lower_index,
