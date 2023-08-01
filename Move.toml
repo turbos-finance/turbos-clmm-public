@@ -1,13 +1,13 @@
 [package]
 name = "TurbosCLMM"
-version = "0.0.6"
-published-at = "0x788eae6a3c6f9a03df54781d32e8e7fe3c0688ff2b75b2ba5b82c971aed1873d"
+version = "0.0.7"
+published-at = "0xeb9210e2980489154cc3c293432b9a1b1300edd0d580fe2269dd9cda34baee6d"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir="crates/sui-framework/packages/sui-framework", rev = "mainnet" }
 
 [addresses]
-turbos_clmm = "0x788eae6a3c6f9a03df54781d32e8e7fe3c0688ff2b75b2ba5b82c971aed1873d"
+turbos_clmm = "0xeb9210e2980489154cc3c293432b9a1b1300edd0d580fe2269dd9cda34baee6d"
 sui =  "0000000000000000000000000000000000000000000000000000000000000002"
 
 [dev-addresses]
