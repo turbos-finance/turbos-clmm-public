@@ -18,23 +18,23 @@ module turbos_clmm::math_tick {
     const LOG_B_P_ERR_MARGIN_UPPER_X64: u128 = 15793534762490258745; // 2^-precision / log_2_b + 0.01
 
     public fun get_min_tick(tick_sacing: u32): I32 {
-		i32::neg_from(MAX_TICK_INDEX / tick_sacing * tick_sacing)
+        i32::neg_from(MAX_TICK_INDEX / tick_sacing * tick_sacing)
     }
 
-	public fun get_max_tick(tick_sacing: u32): I32 {
-		i32::from(MAX_TICK_INDEX / tick_sacing * tick_sacing)
+    public fun get_max_tick(tick_sacing: u32): I32 {
+        i32::from(MAX_TICK_INDEX / tick_sacing * tick_sacing)
     }
 
     public fun max_liquidity_per_tick(tick_spacing: u32): u128 {
         let min_tick_index = get_min_tick(tick_spacing);
         let max_tick_index = get_max_tick(tick_spacing);
-		let num_ticks = i32::abs_u32(
+        let num_ticks = i32::abs_u32(
                 i32::div(
                     i32::sub(max_tick_index, min_tick_index),
                     i32::from(tick_spacing)
                 )
             ) + 1;
-		let liquidity = MAX_U128 / (num_ticks as u128);
+        let liquidity = MAX_U128 / (num_ticks as u128);
 
         liquidity
     }

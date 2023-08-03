@@ -13,7 +13,7 @@ module turbos_clmm::position_nft {
     use sui::tx_context::{Self, TxContext};
     use std::type_name::{TypeName};
 
-	friend turbos_clmm::position_manager;
+    friend turbos_clmm::position_manager;
 
     struct TurbosPositionNFT has key, store {
         id: UID,
@@ -90,7 +90,7 @@ module turbos_clmm::position_nft {
             name: nft.name,
         });
 
-		nft
+        nft
     }
 
     /// Permanently delete `nft`

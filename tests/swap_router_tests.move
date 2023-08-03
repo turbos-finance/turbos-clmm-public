@@ -4,10 +4,10 @@
 #[test_only]
 module turbos_clmm::swap_router_tests {
     use sui::test_utils::{assert_eq};
-	use sui::coin::{Coin};
+    use sui::coin::{Coin};
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::btc::{BTC};
-	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::usdc::{USDC};
     use turbos_clmm::eth::{ETH};
     use turbos_clmm::sui::{SUI};
     use turbos_clmm::trb::{TRB};
@@ -18,20 +18,20 @@ module turbos_clmm::swap_router_tests {
     use turbos_clmm::i32::{Self};
     use turbos_clmm::math_tick;
     use turbos_clmm::fee::{Fee};
-	use turbos_clmm::swap_router;
-	use turbos_clmm::position_manager_tests;
+    use turbos_clmm::swap_router;
+    use turbos_clmm::position_manager_tests;
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
     use turbos_clmm::math_sqrt_price::{Self};
     use sui::clock::{Clock};
 
-	const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
+    const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
     const MIN_SQRT_PRICE_X64: u128 = 4295048016;
 
     fun prepare_tests(
         admin: address,
-		player: address,
-		player2: address, 
-		scenario: &mut Scenario,
+        player: address,
+        player2: address, 
+        scenario: &mut Scenario,
     ) {
         tools_tests::init_tests_coin(
             admin,
@@ -52,10 +52,10 @@ module turbos_clmm::swap_router_tests {
         );
 
         tools_tests::set_fee_protocol(
-			admin,
-			100000,
-			scenario
-		);
+            admin,
+            100000,
+            scenario
+        );
 
         tools_tests::init_clock(
             player,
@@ -162,11 +162,11 @@ module turbos_clmm::swap_router_tests {
         };
 
         //add liquidity
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let btc = test_scenario::take_from_sender<Coin<BTC>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
@@ -195,19 +195,19 @@ module turbos_clmm::swap_router_tests {
                 test_scenario::ctx(scenario),
             );
 
-			test_scenario::return_immutable(fee_type);
+            test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-		};
+        };
 
         //add liquidity
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
+            let pool = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let sui = test_scenario::take_from_sender<Coin<SUI>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
@@ -235,19 +235,19 @@ module turbos_clmm::swap_router_tests {
                 test_scenario::ctx(scenario),
             );
 
-			test_scenario::return_immutable(fee_type);
+            test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-		};
+        };
 
         //add liquidity
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
+            let pool = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let eth = test_scenario::take_from_sender<Coin<ETH>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
@@ -275,19 +275,19 @@ module turbos_clmm::swap_router_tests {
                 test_scenario::ctx(scenario),
             );
 
-			test_scenario::return_immutable(fee_type);
+            test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-		};
+        };
 
         //add liquidity
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let trb = test_scenario::take_from_sender<Coin<TRB>>(scenario);
             let usdc = test_scenario::take_from_sender<Coin<USDC>>(scenario);
@@ -315,32 +315,32 @@ module turbos_clmm::swap_router_tests {
                 test_scenario::ctx(scenario),
             );
 
-			test_scenario::return_immutable(fee_type);
+            test_scenario::return_immutable(fee_type);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-		};
+        };
     }
 
-	#[test]
-	public fun test_swap_a_b_exact_in() {
-		let admin = @0x0;
+    #[test]
+    public fun test_swap_a_b_exact_in() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (balance_a_before, balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
             //pool balance before
@@ -351,24 +351,24 @@ module turbos_clmm::swap_router_tests {
             (coins, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<USDC>(scenario);
 
-			swap_router::swap_a_b(
-				&mut pool_a,
-				coins,
-				3, //amount_in 
-				1, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
+            swap_router::swap_a_b(
+                &mut pool_a,
+                coins,
+                3, //amount_in 
+                1, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
-		};
+            test_scenario::return_shared(pool_a);
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -385,29 +385,29 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_a);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_a_b_exact_out() {
-		let admin = @0x0;
+    public fun test_swap_a_b_exact_out() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (balance_a_before, balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
             (balance_a_before, balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -417,24 +417,24 @@ module turbos_clmm::swap_router_tests {
             (coins, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<USDC>(scenario);
 
-			swap_router::swap_a_b(
-				&mut pool_a,
-				coins,
-				3, //amount_in 
-				10, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
+            swap_router::swap_a_b(
+                &mut pool_a,
+                coins,
+                3, //amount_in 
+                10, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
                 false,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
-		};
+            test_scenario::return_shared(pool_a);
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -451,29 +451,29 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_a);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_b_a() {
-		let admin = @0x0;
+    public fun test_swap_b_a() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (balance_a_before, balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
             (balance_a_before, balance_b_before) = pool::get_pool_balance(&mut pool_a);
@@ -483,24 +483,24 @@ module turbos_clmm::swap_router_tests {
             (coins, trader_balance_b_before) = tools_tests::get_user_coin<USDC>(scenario);
             trader_balance_a_before = tools_tests::get_user_coin_balance<BTC>(scenario);
 
-			swap_router::swap_b_a(
-				&mut pool_a,
-				coins,
-				3, //amount_in 
-				1, //amount_threshold
-				MAX_SQRT_PRICE_X64 - 1,
+            swap_router::swap_b_a(
+                &mut pool_a,
+                coins,
+                3, //amount_in 
+                1, //amount_threshold
+                MAX_SQRT_PRICE_X64 - 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
-		};
+            test_scenario::return_shared(pool_a);
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -517,30 +517,30 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_a);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_a_b_b_c_exact_in() {
-		let admin = @0x0;
+    public fun test_swap_a_b_b_c_exact_in() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_c_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -552,27 +552,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_c_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
-			swap_router::swap_a_b_b_c(
-				&mut pool_a,
+            swap_router::swap_a_b_b_c(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				30, //amount_in 
-				26, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
+                coins_a,
+                30, //amount_in 
+                26, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
                 MIN_SQRT_PRICE_X64 + 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -596,19 +596,19 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_a_b_b_c_exact_out() {
-		let admin = @0x0;
+    public fun test_swap_a_b_b_c_exact_out() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
@@ -619,11 +619,11 @@ module turbos_clmm::swap_router_tests {
         let (pool_b_protocol_fee_a_before, pool_b_protocol_fee_a_after);
         let (pool_a_protocol_fee_b_before, pool_a_protocol_fee_b_after);
         let (pool_b_protocol_fee_b_before, pool_b_protocol_fee_b_after);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -637,27 +637,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_c_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
-			swap_router::swap_a_b_b_c(
-				&mut pool_a,
+            swap_router::swap_a_b_b_c(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				10000, //amount out
-				10174, //amount_threshold
+                coins_a,
+                10000, //amount out
+                10174, //amount_threshold
                 MIN_SQRT_PRICE_X64 + 1,
                 MIN_SQRT_PRICE_X64 + 1,
                 false,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -690,30 +690,30 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_a_b_c_b_exact_in() {
-		let admin = @0x0;
+    public fun test_swap_a_b_c_b_exact_in() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -725,27 +725,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
-			swap_router::swap_a_b_c_b(
-				&mut pool_a,
+            swap_router::swap_a_b_c_b(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				30, //amount_in 
-				26, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
+                coins_a,
+                30, //amount_in 
+                26, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
                 MAX_SQRT_PRICE_X64 - 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -769,19 +769,19 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_a_b_c_b_exact_out() {
-		let admin = @0x0;
+    public fun test_swap_a_b_c_b_exact_out() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
@@ -792,11 +792,11 @@ module turbos_clmm::swap_router_tests {
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<BTC, USDC, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -810,27 +810,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
-			swap_router::swap_a_b_c_b(
-				&mut pool_a,
+            swap_router::swap_a_b_c_b(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				10000, //amount_in 
-				10173, //amount_threshold
-				MIN_SQRT_PRICE_X64 + 1,
+                coins_a,
+                10000, //amount_in 
+                10173, //amount_threshold
+                MIN_SQRT_PRICE_X64 + 1,
                 MAX_SQRT_PRICE_X64 - 1,
                 false,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -864,30 +864,30 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_b_a_b_c_exact_in() {
-		let admin = @0x0;
+    public fun test_swap_b_a_b_c_exact_in() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -899,27 +899,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
-			swap_router::swap_b_a_b_c(
-				&mut pool_a,
+            swap_router::swap_b_a_b_c(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				30, //amount_in 
-				26, //amount_threshold
-				MAX_SQRT_PRICE_X64 - 1,
+                coins_a,
+                30, //amount_in 
+                26, //amount_threshold
+                MAX_SQRT_PRICE_X64 - 1,
                 MIN_SQRT_PRICE_X64 + 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -943,19 +943,19 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_b_a_b_c_exact_out() {
-		let admin = @0x0;
+    public fun test_swap_b_a_b_c_exact_out() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
@@ -966,11 +966,11 @@ module turbos_clmm::swap_router_tests {
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<USDC, SUI, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -984,27 +984,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<SUI>(scenario);
 
-			swap_router::swap_b_a_b_c(
-				&mut pool_a,
+            swap_router::swap_b_a_b_c(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				10000, //amount_in 
-				10267, //amount_threshold
-				MAX_SQRT_PRICE_X64 - 1,
+                coins_a,
+                10000, //amount_in 
+                10267, //amount_threshold
+                MAX_SQRT_PRICE_X64 - 1,
                 MIN_SQRT_PRICE_X64 + 1,
                 false,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -1038,30 +1038,30 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
-	public fun test_swap_b_a_c_b_exact_in() {
-		let admin = @0x0;
+    public fun test_swap_b_a_c_b_exact_in() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -1073,27 +1073,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
-			swap_router::swap_b_a_c_b(
-				&mut pool_a,
+            swap_router::swap_b_a_c_b(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				30, //amount_in 
-				26, //amount_threshold
-				MAX_SQRT_PRICE_X64 - 1,
-				MAX_SQRT_PRICE_X64 - 1,
+                coins_a,
+                30, //amount_in 
+                26, //amount_threshold
+                MAX_SQRT_PRICE_X64 - 1,
+                MAX_SQRT_PRICE_X64 - 1,
                 true,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -1117,19 +1117,19 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 
      #[test]
-	public fun test_swap_b_a_c_b_exact_out() {
-		let admin = @0x0;
+    public fun test_swap_b_a_c_b_exact_out() {
+        let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
 
-		position_manager_tests::init_pool_manager(admin, scenario);
+        position_manager_tests::init_pool_manager(admin, scenario);
 
         prepare_tests(admin, player, player2, scenario);
 
@@ -1140,11 +1140,11 @@ module turbos_clmm::swap_router_tests {
         let (pool_a_balance_a_before, pool_a_balance_b_before);
         let (pool_b_balance_a_before, pool_b_balance_b_before);
         let (trader_balance_a_before, trader_balance_b_before);
-		test_scenario::next_tx(scenario, player);
+        test_scenario::next_tx(scenario, player);
         {
             let clock = test_scenario::take_shared<Clock>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-			let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
+            let pool_a = test_scenario::take_shared<Pool<USDC, TRB, FEE3000BPS>>(scenario);
             let pool_b = test_scenario::take_shared<Pool<ETH, USDC, FEE3000BPS>>(scenario);
 
             //pool balance before
@@ -1158,27 +1158,27 @@ module turbos_clmm::swap_router_tests {
             (coins_a, trader_balance_a_before) = tools_tests::get_user_coin<TRB>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<ETH>(scenario);
 
-			swap_router::swap_b_a_c_b(
-				&mut pool_a,
+            swap_router::swap_b_a_c_b(
+                &mut pool_a,
                 &mut pool_b,
-				coins_a,
-				10000, //amount_in 
-				10266, //amount_threshold
-				MAX_SQRT_PRICE_X64 - 1,
-				MAX_SQRT_PRICE_X64 - 1,
+                coins_a,
+                10000, //amount_in 
+                10266, //amount_threshold
+                MAX_SQRT_PRICE_X64 - 1,
+                MAX_SQRT_PRICE_X64 - 1,
                 false,
-				player,
-				1,
+                player,
+                1,
                 &clock,
                 &versioned,
-				test_scenario::ctx(scenario),
-			);
+                test_scenario::ctx(scenario),
+            );
 
             test_scenario::return_shared(clock);
             test_scenario::return_shared(versioned);
-			test_scenario::return_shared(pool_a);
+            test_scenario::return_shared(pool_a);
             test_scenario::return_shared(pool_b);
-		};
+        };
 
         test_scenario::next_tx(scenario, player);
         {
@@ -1212,6 +1212,6 @@ module turbos_clmm::swap_router_tests {
             test_scenario::return_shared(pool_b);
         };
 
-		test_scenario::end(scenario_val);
-	}
+        test_scenario::end(scenario_val);
+    }
 }

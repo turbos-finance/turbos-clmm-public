@@ -3,13 +3,13 @@
 
 #[test_only]
 module turbos_clmm::tools_tests {
-	use sui::coin::{Coin};
+    use sui::coin::{Coin};
     use std::vector;
     use sui::object::{Self, ID};
     use sui::test_scenario::{Self, Scenario};
-	use sui::transfer;
+    use sui::transfer;
     use turbos_clmm::btc::{Self, BTC};
-	use turbos_clmm::usdc::{Self, USDC};
+    use turbos_clmm::usdc::{Self, USDC};
     use turbos_clmm::eth::{Self, ETH};
     use turbos_clmm::trb::{Self, TRB};
     use turbos_clmm::sui::{Self, SUI};
@@ -26,7 +26,7 @@ module turbos_clmm::tools_tests {
     use std::option::{Self, Option};
     use sui::clock::{Self};
 
-	const MAX_TICK_INDEX: u32 = 443636;
+    const MAX_TICK_INDEX: u32 = 443636;
 
     public fun coin_to_vec<T>(coin: Coin<T>): vector<Coin<T>> {
         let self = vector::empty<Coin<T>>();
@@ -39,12 +39,12 @@ module turbos_clmm::tools_tests {
         scenario: &mut Scenario,
     ){
         test_scenario::next_tx(scenario, admin);
-		{
+        {
             pool_factory::init_for_testing(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, admin);
-		{
+        {
             pool::init_for_testing(test_scenario::ctx(scenario));
         };
     }
@@ -62,19 +62,19 @@ module turbos_clmm::tools_tests {
     }
 
     public fun init_tests_coin(
-		admin: address,
-		player: address,
-		_player2: address, 
+        admin: address,
+        player: address,
+        _player2: address, 
         init_amount: u64,
-		scenario: &mut Scenario,
-	) {
+        scenario: &mut Scenario,
+    ) {
         // create btc coin
         test_scenario::next_tx(scenario, admin);
         {
             btc::init_for_testing(test_scenario::ctx(scenario));
         };
 
-		// create usdc coin
+        // create usdc coin
         test_scenario::next_tx(scenario, admin);
         {
             usdc::init_for_testing(test_scenario::ctx(scenario));
@@ -107,7 +107,7 @@ module turbos_clmm::tools_tests {
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
 
-		// mint usdc to player
+        // mint usdc to player
         test_scenario::next_tx(scenario, admin);
         {
             let treasury_cap = test_scenario::take_from_sender<TreasuryCap<USDC>>(scenario);
@@ -142,7 +142,7 @@ module turbos_clmm::tools_tests {
             transfer::public_transfer(coins, copy player);
             test_scenario::return_to_sender(scenario, treasury_cap);
         };
-	}
+    }
 
     public fun init_fee_type(
         admin: address,
