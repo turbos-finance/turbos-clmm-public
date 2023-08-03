@@ -8,7 +8,7 @@ module turbos_clmm::position_manager_tests {
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::pool_factory_tests;
     use turbos_clmm::btc::{BTC};
-	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::usdc::{USDC};
     use turbos_clmm::trb::{TRB};
     use turbos_clmm::fee500bps::{FEE500BPS};
     use turbos_clmm::pool::{Self, Pool, Versioned};
@@ -23,9 +23,9 @@ module turbos_clmm::position_manager_tests {
     use sui::clock::{Clock};
 
     public fun init_pool_manager(
-		admin: address,
-		scenario: &mut Scenario,
-	) {
+        admin: address,
+        scenario: &mut Scenario,
+    ) {
         tools_tests::init_clock(
             admin,
             scenario
@@ -33,17 +33,17 @@ module turbos_clmm::position_manager_tests {
 
         //init pool position manager
         test_scenario::next_tx(scenario, admin);
-		{
+        {
             position_manager::init_for_testing(test_scenario::ctx(scenario));
         };
-	}
+    }
 
     #[test]
     //#[expected_failure(abort_code = position_manager::EPositionNotCleared)]
     public fun test_mint() {
         let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
@@ -86,20 +86,20 @@ module turbos_clmm::position_manager_tests {
 
             assert_eq(position_manager::get_nft_minted(&positions), 1);
             let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
+                coin_a,
+                coin_b,
+                _,
+                _,
+                sqrt_price,
+                tick_current_index,
+                tick_spacing,
+                _,
                 fee,
                 fee_protocol,
                 fee_growth_global_a,
                 fee_growth_global_b,
                 liquidity,
-		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+            ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
             assert_eq(coin_a, 1000);
             assert_eq(coin_b, 1000);
             assert_eq(sqrt_price, 18446744073709551616);
@@ -266,20 +266,20 @@ module turbos_clmm::position_manager_tests {
             assert_eq(tokens_owed_b, 0);
 
             let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
+                coin_a,
+                coin_b,
+                _,
+                _,
+                sqrt_price,
+                tick_current_index,
+                tick_spacing,
+                _,
                 fee,
                 fee_protocol,
                 fee_growth_global_a,
                 fee_growth_global_b,
                 liquidity,
-		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+            ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
             assert_eq(coin_a, 1001);
             assert_eq(coin_b, 1001);
             assert_eq(sqrt_price, 18446744073709551616);
@@ -346,20 +346,20 @@ module turbos_clmm::position_manager_tests {
             assert_eq(tokens_owed_b, 0);
 
             let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
+                coin_a,
+                coin_b,
+                _,
+                _,
+                sqrt_price,
+                tick_current_index,
+                tick_spacing,
+                _,
                 fee,
                 fee_protocol,
                 fee_growth_global_a,
                 fee_growth_global_b,
                 liquidity,
-		    ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+            ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
             assert_eq(coin_a, 1001);
             assert_eq(coin_b, 1001);
             assert_eq(sqrt_price, 18446744073709551616);
@@ -421,20 +421,20 @@ module turbos_clmm::position_manager_tests {
 
             assert_eq(position_manager::get_nft_minted(&positions), 2);
             let (
-			    coin_a,
-			    coin_b,
-			    _,
-			    _,
-			    sqrt_price,
-			    tick_current_index,
-			    tick_spacing,
-			    _,
+                coin_a,
+                coin_b,
+                _,
+                _,
+                sqrt_price,
+                tick_current_index,
+                tick_spacing,
+                _,
                 fee,
                 fee_protocol,
                 fee_growth_global_a,
                 fee_growth_global_b,
                 liquidity,
-		    ) = pool::get_pool_info<USDC, TRB, FEE500BPS>(&pool);
+            ) = pool::get_pool_info<USDC, TRB, FEE500BPS>(&pool);
             assert_eq(coin_a, 1000);
             assert_eq(coin_b, 10);
             assert_eq(sqrt_price, 1844674407370955161);
@@ -518,20 +518,20 @@ module turbos_clmm::position_manager_tests {
         //     assert_eq(tokens_owed_b, 0);
 
         //     let (
-		// 	    coin_a,
-		// 	    coin_b,
-		// 	    _,
-		// 	    _,
-		// 	    sqrt_price,
-		// 	    tick_current_index,
-		// 	    tick_spacing,
-		// 	    _,
+        // 	    coin_a,
+        // 	    coin_b,
+        // 	    _,
+        // 	    _,
+        // 	    sqrt_price,
+        // 	    tick_current_index,
+        // 	    tick_spacing,
+        // 	    _,
         //         fee,
         //         fee_protocol,
         //         fee_growth_global_a,
         //         fee_growth_global_b,
         //         liquidity,
-		//     ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+        //     ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
         //     assert_eq(coin_a, 2);
         //     assert_eq(coin_b, 2);
         //     assert_eq(sqrt_price, 18446744073709551616);
@@ -586,20 +586,20 @@ module turbos_clmm::position_manager_tests {
         //     assert_eq(tokens_owed_b, 0);
 
         //     let (
-		// 	    coin_a,
-		// 	    coin_b,
-		// 	    _,
-		// 	    _,
-		// 	    sqrt_price,
-		// 	    tick_current_index,
-		// 	    tick_spacing,
-		// 	    _,
+        // 	    coin_a,
+        // 	    coin_b,
+        // 	    _,
+        // 	    _,
+        // 	    sqrt_price,
+        // 	    tick_current_index,
+        // 	    tick_spacing,
+        // 	    _,
         //         fee,
         //         fee_protocol,
         //         fee_growth_global_a,
         //         fee_growth_global_b,
         //         liquidity,
-		//     ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
+        //     ) = pool::get_pool_info<BTC, USDC, FEE500BPS>(&pool);
         //     assert_eq(coin_a, 2);
         //     assert_eq(coin_b, 2);
         //     assert_eq(sqrt_price, 18446744073709551616);

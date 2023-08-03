@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::position_manager {
-	use std::vector;
+    use std::vector;
     use std::type_name::{Self};
     use sui::transfer;
     use sui::event;
@@ -10,7 +10,7 @@ module turbos_clmm::position_manager {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
-	use sui::coin::{Coin};
+    use sui::coin::{Coin};
     use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::math_liquidity;
@@ -22,8 +22,8 @@ module turbos_clmm::position_manager {
     friend turbos_clmm::pool_factory;
 
     const EFeeNotExists: u64 = 0;
-	const EInvalidFee: u64 = 1;
-	const EInvalidTicKSpacing: u64 = 2;
+    const EInvalidFee: u64 = 1;
+    const EInvalidTicKSpacing: u64 = 2;
     const EFeeAlreadyExists: u64 = 3;
     const ENoCoins: u64 = 4;
     const EPriceSlippageCheck: u64 = 5;
@@ -42,7 +42,7 @@ module turbos_clmm::position_manager {
         amount_owed: u64,
     }
 
-	struct Position has key, store {
+    struct Position has key, store {
         id: UID,
         tick_lower_index: I32,
         tick_upper_index: I32,
@@ -54,9 +54,9 @@ module turbos_clmm::position_manager {
         reward_infos: vector<PositionRewardInfo>,
     }
 
-	struct Positions has key, store {
+    struct Positions has key, store {
         id: UID,
-		nft_minted: u64,
+        nft_minted: u64,
         user_position: Table<address, ID>,
         nft_name: String,
         nft_description: String,
@@ -92,31 +92,31 @@ module turbos_clmm::position_manager {
         recipient: address,
     }
 
-	fun init(ctx: &mut TxContext) {
-		init_(ctx);
+    fun init(ctx: &mut TxContext) {
+        init_(ctx);
     }
 
     fun init_(ctx: &mut TxContext) {
-		transfer::share_object(Positions {
-			id: object::new(ctx),
-			nft_minted: 0,
+        transfer::share_object(Positions {
+            id: object::new(ctx),
+            nft_minted: 0,
             user_position: table::new(ctx),
             nft_name: string::utf8(b"Turbos Position's NFT"),
             nft_description: string::utf8(b"An NFT created by Turbos CLMM"),
-			nft_img_url: string::utf8(b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png"),
-		});
+            nft_img_url: string::utf8(b"https://ipfs.io/ipfs/QmTxRsWbrLG6mkjg375wW77Lfzm38qsUQjRBj3b2K3t8q1?filename=Turbos_nft.png"),
+        });
     }
 
     public entry fun mint<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		coins_a: vector<Coin<CoinTypeA>>, 
-		coins_b: vector<Coin<CoinTypeB>>, 
-		tick_lower_index: u32,
-		tick_lower_index_is_neg: bool,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        coins_a: vector<Coin<CoinTypeA>>, 
+        coins_b: vector<Coin<CoinTypeB>>, 
+        tick_lower_index: u32,
+        tick_lower_index_is_neg: bool,
         tick_upper_index: u32,
-		tick_upper_index_is_neg: bool,
-		amount_a_desired: u64,
+        tick_upper_index_is_neg: bool,
+        amount_a_desired: u64,
         amount_b_desired: u64,
         amount_a_min: u64,
         amount_b_min: u64,
@@ -124,54 +124,54 @@ module turbos_clmm::position_manager {
         deadline: u64,
         clock: &Clock,
         versioned: &Versioned,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
-		assert!(vector::length(&coins_a) > 0, ENoCoins);
-		assert!(vector::length(&coins_b) > 0, ENoCoins);
-		let tick_lower_index_i32 = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
-		let tick_upper_index_i32 = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
+        assert!(vector::length(&coins_a) > 0, ENoCoins);
+        assert!(vector::length(&coins_b) > 0, ENoCoins);
+        let tick_lower_index_i32 = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
+        let tick_upper_index_i32 = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
         let position_id = object::new(ctx);
         let position_inner_id = object::uid_to_inner(&position_id);
 
-		//mint nft
-		let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+        //mint nft
+        let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
             object::id(pool), 
             position_inner_id, 
             positions, 
             recipient, 
             ctx
         );
-		let position_key = pool::get_position_key(nft_address, tick_lower_index_i32, tick_upper_index_i32);
+        let position_key = pool::get_position_key(nft_address, tick_lower_index_i32, tick_upper_index_i32);
 
-		let (liquidity_delta, amount_a, amount_b) = add_liquidity(
-			pool,
-			pool::merge_coin<CoinTypeA>(coins_a),
-			pool::merge_coin<CoinTypeB>(coins_b),
-			nft_address,
-			tick_lower_index_i32,
-			tick_upper_index_i32,
-			amount_a_desired,
-			amount_b_desired,
+        let (liquidity_delta, amount_a, amount_b) = add_liquidity(
+            pool,
+            pool::merge_coin<CoinTypeA>(coins_a),
+            pool::merge_coin<CoinTypeB>(coins_b),
+            nft_address,
+            tick_lower_index_i32,
+            tick_upper_index_i32,
+            amount_a_desired,
+            amount_b_desired,
             clock,
-			ctx,
-		);
+            ctx,
+        );
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
-		let position_m = Position {
-			id: position_id,
-			tick_lower_index: tick_lower_index_i32,
-        	tick_upper_index: tick_upper_index_i32,
-        	liquidity: liquidity_delta,
-        	fee_growth_inside_a: pool::get_position_fee_growth_inside_a(pool, position_key),
-        	fee_growth_inside_b: pool::get_position_fee_growth_inside_b(pool, position_key),
-        	tokens_owed_a: 0,
-        	tokens_owed_b: 0,
+        let position_m = Position {
+            id: position_id,
+            tick_lower_index: tick_lower_index_i32,
+            tick_upper_index: tick_upper_index_i32,
+            liquidity: liquidity_delta,
+            fee_growth_inside_a: pool::get_position_fee_growth_inside_a(pool, position_key),
+            fee_growth_inside_b: pool::get_position_fee_growth_inside_b(pool, position_key),
+            tokens_owed_a: 0,
+            tokens_owed_b: 0,
             reward_infos: vector::empty<PositionRewardInfo>(),
-		};
+        };
         copy_position(pool, position_key, &mut position_m);
-		dof::add<address, Position>(&mut positions.id, nft_address, position_m);
+        dof::add<address, Position>(&mut positions.id, nft_address, position_m);
         insert_user_position(positions, position_inner_id, nft_address);
 
         event::emit(IncreaseLiquidityEvent {
@@ -257,27 +257,27 @@ module turbos_clmm::position_manager {
     }
 
     public entry fun increase_liquidity<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		coins_a: vector<Coin<CoinTypeA>>, 
-		coins_b: vector<Coin<CoinTypeB>>, 
-		nft: &mut TurbosPositionNFT,
-		amount_a_desired: u64,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        coins_a: vector<Coin<CoinTypeA>>, 
+        coins_b: vector<Coin<CoinTypeB>>, 
+        nft: &mut TurbosPositionNFT,
+        amount_a_desired: u64,
         amount_b_desired: u64,
         amount_a_min: u64,
         amount_b_min: u64,
         deadline: u64,
         clock: &Clock,
         versioned: &Versioned,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
-		assert!(vector::length(&coins_a) > 0, ENoCoins);
-		assert!(vector::length(&coins_b) > 0, ENoCoins);
+        assert!(vector::length(&coins_a) > 0, ENoCoins);
+        assert!(vector::length(&coins_b) > 0, ENoCoins);
         let nft_address = object::id_address(nft);
-		let sender = tx_context::sender(ctx);
+        let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
 
         //new position key is (nft_address, tick_lower_index, tick_upper_index)
@@ -289,21 +289,21 @@ module turbos_clmm::position_manager {
             position_owner = sender;
         };
 
-		let (liquidity_delta, amount_a, amount_b) = add_liquidity(
-			pool,
-			pool::merge_coin<CoinTypeA>(coins_a),
-			pool::merge_coin<CoinTypeB>(coins_b),
-			position_owner,
-			position.tick_lower_index,
-			position.tick_upper_index,
-			amount_a_desired,
-			amount_b_desired,
+        let (liquidity_delta, amount_a, amount_b) = add_liquidity(
+            pool,
+            pool::merge_coin<CoinTypeA>(coins_a),
+            pool::merge_coin<CoinTypeB>(coins_b),
+            position_owner,
+            position.tick_lower_index,
+            position.tick_upper_index,
+            amount_a_desired,
+            amount_b_desired,
             clock,
-			ctx,
-		);
+            ctx,
+        );
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
-		let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+        let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
 
         event::emit(IncreaseLiquidityEvent {
@@ -315,22 +315,22 @@ module turbos_clmm::position_manager {
     }
 
     public entry fun decrease_liquidity<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		nft: &mut TurbosPositionNFT,
-		liquidity: u128,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
+        liquidity: u128,
         amount_a_min: u64,
         amount_b_min: u64,
         deadline: u64,
         clock: &Clock,
         versioned: &Versioned,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
-		let sender = tx_context::sender(ctx);
+        let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         assert!(position.liquidity >= liquidity, EInsufficientLiquidity);
 
@@ -341,19 +341,19 @@ module turbos_clmm::position_manager {
             position_owner = sender;
         };
 
-		let (amount_a, amount_b) = pool::burn(
-			pool,
-			position_owner,
-			position.tick_lower_index,
-			position.tick_upper_index,
-			liquidity,
+        let (amount_a, amount_b) = pool::burn(
+            pool,
+            position_owner,
+            position.tick_lower_index,
+            position.tick_upper_index,
+            liquidity,
             clock,
-			ctx,
-		);
+            ctx,
+        );
 
         assert!(amount_a >= amount_a_min && amount_b_min >= amount_b_min, EPriceSlippageCheck);
 
-		let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+        let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
 
         pool::transfer_out(
@@ -373,22 +373,22 @@ module turbos_clmm::position_manager {
     }
 
     public entry fun collect<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		nft: &mut TurbosPositionNFT,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
         amount_a_max: u64,
         amount_b_max: u64,
         recipient: address,
         deadline: u64,
         clock: &Clock,
         versioned: &Versioned,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
-		let sender = tx_context::sender(ctx);
+        let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         let position_owner;
         if (pool::check_position_exists(pool, nft_address, position.tick_lower_index, position.tick_upper_index)) {
@@ -398,14 +398,14 @@ module turbos_clmm::position_manager {
         };
         if (position.liquidity > 0) {
             pool::burn(
-			    pool,
-			    position_owner,
-			    position.tick_lower_index,
-			    position.tick_upper_index,
-			    0,
+                pool,
+                position_owner,
+                position.tick_lower_index,
+                position.tick_upper_index,
+                0,
                 clock,
-			    ctx,
-		    );
+                ctx,
+            );
             let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
             copy_position(pool, position_key, position);
         };
@@ -422,7 +422,7 @@ module turbos_clmm::position_manager {
             recipient,
             position_owner,
             position.tick_lower_index,
-			position.tick_upper_index,
+            position.tick_upper_index,
             amount_a_collect,
             amount_b_collect,
             ctx,
@@ -448,9 +448,9 @@ module turbos_clmm::position_manager {
     }
 
     public entry fun collect_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		nft: &mut TurbosPositionNFT,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
         vault: &mut PoolRewardVault<RewardCoin>,
         reward_index: u64,
         amount_max: u64,
@@ -458,13 +458,13 @@ module turbos_clmm::position_manager {
         deadline: u64,
         clock: &Clock,
         versioned: &Versioned,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         let nft_address = object::id_address(nft);
-		let sender = tx_context::sender(ctx);
+        let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
         let position_owner;
         if (pool::check_position_exists(pool, nft_address, position.tick_lower_index, position.tick_upper_index)) {
@@ -474,14 +474,14 @@ module turbos_clmm::position_manager {
         };
         if (position.liquidity > 0) {
             pool::burn(
-			    pool,
-			    position_owner,
-			    position.tick_lower_index,
-			    position.tick_upper_index,
-			    0,
+                pool,
+                position_owner,
+                position.tick_lower_index,
+                position.tick_upper_index,
+                0,
                 clock,
-			    ctx,
-		    );
+                ctx,
+            );
             let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
             copy_position(pool, position_key, position);
         };
@@ -496,7 +496,7 @@ module turbos_clmm::position_manager {
             recipient,
             position_owner,
             position.tick_lower_index,
-			position.tick_upper_index,
+            position.tick_upper_index,
             amount_collect,
             reward_index,
             ctx,
@@ -514,11 +514,11 @@ module turbos_clmm::position_manager {
     }
 
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		positions: &mut Positions,
-		nfts: vector<address>,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nfts: vector<address>,
         owned: address,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
         let base_nft_address = vector::pop_back(&mut nfts);
         let (tick_lower_index, tick_upper_index) = get_position_tick_info(positions, base_nft_address);
@@ -642,7 +642,7 @@ module turbos_clmm::position_manager {
         positions.nft_img_url = nft_img_url;
     }
 
-	fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+    fun mint_nft<CoinTypeA, CoinTypeB, FeeType>(
         pool_id: ID,
         position_id: ID,
         positions: &mut Positions,
@@ -652,7 +652,7 @@ module turbos_clmm::position_manager {
         let nft = position_nft::mint(
             positions.nft_name,
             positions.nft_description,
-			positions.nft_img_url,
+            positions.nft_img_url,
             pool_id,
             position_id,
             type_name::get<CoinTypeA>(),
@@ -660,18 +660,18 @@ module turbos_clmm::position_manager {
             type_name::get<FeeType>(),
             ctx,
         );
-		positions.nft_minted = positions.nft_minted + 1;
-		let nft_address = object::id_address(&nft);
-		transfer::public_transfer(nft, recipient);
+        positions.nft_minted = positions.nft_minted + 1;
+        let nft_address = object::id_address(&nft);
+        transfer::public_transfer(nft, recipient);
 
-		nft_address
-	}
+        nft_address
+    }
 
-	fun burn_nft(
+    fun burn_nft(
         nft: TurbosPositionNFT
     ) {
         position_nft::burn(nft);
-	}
+    }
 
     fun insert_user_position(
         positions: &mut Positions, 

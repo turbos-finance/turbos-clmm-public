@@ -2,29 +2,29 @@
 // SPDX-License-Identifier: MIT
 
 module turbos_clmm::pool {
-	use std::vector;
+    use std::vector;
     use std::type_name;
-	use sui::pay;
+    use sui::pay;
     use sui::event;
     use sui::transfer;
     use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
-	use sui::dynamic_field as df;
+    use sui::dynamic_field as df;
     use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
-	use turbos_clmm::math_tick;
-	use turbos_clmm::math_swap;
+    use turbos_clmm::math_tick;
+    use turbos_clmm::math_swap;
     use turbos_clmm::string_tools;
-	use turbos_clmm::i32::{Self, I32};
-	use turbos_clmm::i128::{Self, I128};
-	use turbos_clmm::math_liquidity;
-	use turbos_clmm::math_sqrt_price;
+    use turbos_clmm::i32::{Self, I32};
+    use turbos_clmm::i128::{Self, I128};
+    use turbos_clmm::math_liquidity;
+    use turbos_clmm::math_sqrt_price;
     use turbos_clmm::math_u64;
     use turbos_clmm::full_math_u128;
     use turbos_clmm::math_u128;
-	use turbos_clmm::math_bit;
+    use turbos_clmm::math_bit;
     use sui::table::{Self, Table};
     use sui::clock::{Self, Clock};
 
@@ -43,15 +43,15 @@ module turbos_clmm::pool {
     const EInvildMintAmount: u64 = 4;
     const EInvildTick: u64 = 5;
     const EForPokesZeroPosition: u64 = 6;
-	const ESwapAmountSpecifiedZero: u64 = 7;
-	const EPoolLocked: u64 = 8;
-	const ESwapLessThanMinSqrtPrice: u64 = 9;
-	const ESwapGatherThanMaxSqrtPrice: u64 = 10;
-	const EPoolOverflow: u64 = 11;
-	const EInvildTickIndex: u64 = 12;
+    const ESwapAmountSpecifiedZero: u64 = 7;
+    const EPoolLocked: u64 = 8;
+    const ESwapLessThanMinSqrtPrice: u64 = 9;
+    const ESwapGatherThanMaxSqrtPrice: u64 = 10;
+    const EPoolOverflow: u64 = 11;
+    const EInvildTickIndex: u64 = 12;
     const EInvalidRewardIndex: u64 = 13;
     const EInvalidRewardVault: u64 = 14;
-	const EInvalidTimestamp: u64 = 15;
+    const EInvalidTimestamp: u64 = 15;
     const EInvalidRemoveRewardAmount: u64 = 16;
     const EInvalidRewardManager: u64 = 17;
     const EInsufficientBalanceRewardVault: u64 = 18;
@@ -63,12 +63,12 @@ module turbos_clmm::pool {
     const ERepayWrongPool: u64 = 24;
     const ERepayWrongAmount: u64 = 25;
 
-	const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
-	const MAX_TICK_INDEX: u32 = 443636;
+    const MAX_U128: u128 = 0xffffffffffffffffffffffffffffffff;
+    const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
     const RESOLUTION_Q64: u8 = 64;
-	const MIN_SQRT_PRICE: u128 = 4295048016;
-	const MAX_SQRT_PRICE: u128 = 79226673515401279992447579055;
+    const MIN_SQRT_PRICE: u128 = 4295048016;
+    const MAX_SQRT_PRICE: u128 = 79226673515401279992447579055;
     const NUM_REWARDS: u64 = 3;
 
     struct Versioned has key, store {
@@ -76,12 +76,12 @@ module turbos_clmm::pool {
         version: u64,
     }
 
-	struct Tick has key, store {
-		id: UID,
+    struct Tick has key, store {
+        id: UID,
         liquidity_gross: u128,
         liquidity_net: I128,
         fee_growth_outside_a: u128,
-		fee_growth_outside_b: u128,
+        fee_growth_outside_b: u128,
         reward_growths_outside: vector<u128>,
         initialized: bool,
     }
@@ -93,12 +93,12 @@ module turbos_clmm::pool {
 
     struct Position has key, store {
         id: UID,
-		// the amount of liquidity owned by this position
+        // the amount of liquidity owned by this position
         liquidity: u128,
-		// fee growth per unit of liquidity as of the last update to liquidity or fees owed
+        // fee growth per unit of liquidity as of the last update to liquidity or fees owed
         fee_growth_inside_a: u128,
         fee_growth_inside_b: u128,
-		// the fees owed to the position owner in token0/token1
+        // the fees owed to the position owner in token0/token1
         tokens_owed_a: u64,
         tokens_owed_b: u64,
         reward_infos: vector<PositionRewardInfo>,
@@ -134,7 +134,7 @@ module turbos_clmm::pool {
         fee_growth_global_a: u128,
         fee_growth_global_b: u128,
         liquidity: u128,
-		tick_map: Table<I32, u256>,
+        tick_map: Table<I32, u256>,
         deploy_time_ms: u64,
         reward_infos: vector<PoolRewardInfo>,
         reward_last_updated_time_ms: u64,
@@ -276,13 +276,13 @@ module turbos_clmm::pool {
     struct MigratePositionEvent has copy, drop {
         pool: ID,
         old_key: String, 
-		new_key: String,
+        new_key: String,
     }
 
     struct ModifyTickRewardEvent has copy, drop {
         pool: ID,
         old_reward: u128, 
-		new_reward: u128,
+        new_reward: u128,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -340,7 +340,7 @@ module turbos_clmm::pool {
             fee_growth_global_a: 0,
             fee_growth_global_b: 0,
             liquidity: 0,
-			tick_map: table::new(ctx),
+            tick_map: table::new(ctx),
             deploy_time_ms: clock::timestamp_ms(clock),
             reward_infos: vector::empty(),
             reward_last_updated_time_ms: 0,
@@ -359,13 +359,13 @@ module turbos_clmm::pool {
         assert!(pool.unlocked, EPoolLocked);
         assert!(liquidity_delta > 0, EInvildAmount);
 
-		try_init_position(
-			pool,
-			owner,
+        try_init_position(
+            pool,
+            owner,
             tick_lower_index,
             tick_upper_index,
-			ctx
-		);
+            ctx
+        );
 
         let (amount_a, amount_b) = modify_position(
             pool,
@@ -434,7 +434,7 @@ module turbos_clmm::pool {
         (amount_a_u64, amount_b_u64)
     }
 
-	public(friend) fun swap<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun swap<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
         a_to_b: bool,
@@ -456,7 +456,7 @@ module turbos_clmm::pool {
             ctx
         );
         
-		(state.amount_a, state.amount_b)
+        (state.amount_a, state.amount_b)
     }
 
     public fun flash_swap<CoinTypeA, CoinTypeB, FeeType>(
@@ -489,7 +489,7 @@ module turbos_clmm::pool {
             (coin::from_balance(balance_a_output, ctx), coin::zero<CoinTypeB>(ctx), (state.amount_b as u64))
         };
         
-		(
+        (
             coin_a_output, 
             coin_b_output,
             FlashSwapReceipt<CoinTypeA, CoinTypeB> {
@@ -542,7 +542,7 @@ module turbos_clmm::pool {
         let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let tick_pre_index = pool.tick_current_index;
 
-		//state
+        //state
         let state = ComputeSwapState {
             amount_a: 0,
             amount_b: 0,
@@ -556,27 +556,27 @@ module turbos_clmm::pool {
             fee_amount: 0,
         };
 
-		while (state.amount_specified_remaining > 0 && state.sqrt_price !=sqrt_price_limit) {
-			let step_sqrt_price_start = state.sqrt_price;
-			let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
-				pool,
-				state.tick_current_index,
-				a_to_b
-			);
+        while (state.amount_specified_remaining > 0 && state.sqrt_price !=sqrt_price_limit) {
+            let step_sqrt_price_start = state.sqrt_price;
+            let (step_tick_next_index, step_initialized) = next_initialized_tick_within_one_word(
+                pool,
+                state.tick_current_index,
+                a_to_b
+            );
 
-			if (i32::lt(step_tick_next_index, i32::neg_from(MAX_TICK_INDEX))) {
-				step_tick_next_index = i32::neg_from(MAX_TICK_INDEX);
-			} else if (i32::gt(step_tick_next_index, i32::from(MAX_TICK_INDEX))) {
-				step_tick_next_index = i32::from(MAX_TICK_INDEX);
-			};
+            if (i32::lt(step_tick_next_index, i32::neg_from(MAX_TICK_INDEX))) {
+                step_tick_next_index = i32::neg_from(MAX_TICK_INDEX);
+            } else if (i32::gt(step_tick_next_index, i32::from(MAX_TICK_INDEX))) {
+                step_tick_next_index = i32::from(MAX_TICK_INDEX);
+            };
 
-			let step_sqrt_price_next = math_tick::sqrt_price_from_tick_index(step_tick_next_index);
-			// compute values to swap to the target tick, price limit, or point where input/output amount is exhausted
+            let step_sqrt_price_next = math_tick::sqrt_price_from_tick_index(step_tick_next_index);
+            // compute values to swap to the target tick, price limit, or point where input/output amount is exhausted
             let step_sqrt_price;
-			let step_amount_in;
-			let step_amount_out;
-			let step_fee_amount;
-			let limit = if (a_to_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
+            let step_amount_in;
+            let step_amount_out;
+            let step_fee_amount;
+            let limit = if (a_to_b) step_sqrt_price_next < sqrt_price_limit else step_sqrt_price_next > sqrt_price_limit;
             let target = if (limit) sqrt_price_limit else step_sqrt_price_next;
             (step_sqrt_price, step_amount_in, step_amount_out, step_fee_amount) = math_swap::compute_swap(
                 state.sqrt_price,
@@ -588,80 +588,80 @@ module turbos_clmm::pool {
             );
             state.sqrt_price = step_sqrt_price;
 
-			if (amount_specified_is_input) {
+            if (amount_specified_is_input) {
                 state.amount_specified_remaining = state.amount_specified_remaining - step_amount_in - step_fee_amount;
-				state.amount_calculated = state.amount_calculated + step_amount_out;
-			} else {
+                state.amount_calculated = state.amount_calculated + step_amount_out;
+            } else {
                 state.amount_specified_remaining = state.amount_specified_remaining - step_amount_out;
-				state.amount_calculated = state.amount_calculated + step_amount_in + step_fee_amount;
-			};
+                state.amount_calculated = state.amount_calculated + step_amount_in + step_fee_amount;
+            };
 
             state.fee_amount = state.fee_amount + step_fee_amount;
-			if (pool.fee_protocol > 0) {
-				let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
+            if (pool.fee_protocol > 0) {
+                let delta = step_fee_amount * (pool.fee_protocol as u128) / 1000000;
                 step_fee_amount = step_fee_amount - delta;
                 state.protocol_fee = math_u128::wrapping_add(state.protocol_fee, delta);
-			};
+            };
 
-			if (state.liquidity > 0) {
+            if (state.liquidity > 0) {
                 let fee_growth_global_delta = full_math_u128::mul_div_floor(step_fee_amount, Q64, state.liquidity);
-				state.fee_growth_global = math_u128::wrapping_add(state.fee_growth_global, fee_growth_global_delta);
-			};
+                state.fee_growth_global = math_u128::wrapping_add(state.fee_growth_global, fee_growth_global_delta);
+            };
 
-			if (state.sqrt_price == step_sqrt_price_next) {
-				if (step_initialized) {
-					let (fee_growth_global_a, fee_growth_global_b) = (pool.fee_growth_global_a, pool.fee_growth_global_b);
-					let liquidity_net = cross_tick(
-						pool,
+            if (state.sqrt_price == step_sqrt_price_next) {
+                if (step_initialized) {
+                    let (fee_growth_global_a, fee_growth_global_b) = (pool.fee_growth_global_a, pool.fee_growth_global_b);
+                    let liquidity_net = cross_tick(
+                        pool,
                         step_tick_next_index,
                         if(a_to_b) state.fee_growth_global else fee_growth_global_a,
                         if(a_to_b) fee_growth_global_b else state.fee_growth_global,
                         &reward_growths,
                         dry_run,
-						ctx
+                        ctx
                     );
                     // if we're moving leftward, we interpret liquidity_net as the opposite sign
                     // safe because liquidity_net cannot be type(int128).min
                     if (a_to_b) {
-						liquidity_net = i128::neg(liquidity_net);
-					};
+                        liquidity_net = i128::neg(liquidity_net);
+                    };
 
                     state.liquidity = math_liquidity::add_delta(state.liquidity, liquidity_net);
-				};
-				state.tick_current_index = if (a_to_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
-			} else if (state.sqrt_price != step_sqrt_price_start) {
-				state.tick_current_index = math_tick::tick_index_from_sqrt_price(state.sqrt_price);
-			};
-		};
+                };
+                state.tick_current_index = if (a_to_b) i32::sub(step_tick_next_index, i32::from(1)) else step_tick_next_index;
+            } else if (state.sqrt_price != step_sqrt_price_start) {
+                state.tick_current_index = math_tick::tick_index_from_sqrt_price(state.sqrt_price);
+            };
+        };
         
         if (!dry_run) {
             if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
                 pool.sqrt_price = state.sqrt_price;
                 pool.tick_current_index = state.tick_current_index;
             } else {
-		        pool.sqrt_price = state.sqrt_price;
+                pool.sqrt_price = state.sqrt_price;
             };
 
-		    if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
+            if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
 
-		    if (a_to_b) {
-			    pool.fee_growth_global_a = state.fee_growth_global;
-			    if (state.protocol_fee > 0) {
-				    pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
-			    };
-		    } else {
-			    pool.fee_growth_global_b = state.fee_growth_global;
-			    if (state.protocol_fee > 0) {
-				    pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
-			    };
-		    };
+            if (a_to_b) {
+                pool.fee_growth_global_a = state.fee_growth_global;
+                if (state.protocol_fee > 0) {
+                    pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
+                };
+            } else {
+                pool.fee_growth_global_b = state.fee_growth_global;
+                if (state.protocol_fee > 0) {
+                    pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
+                };
+            };
         };
 
-		let (amount_a, amount_b) = if (a_to_b == amount_specified_is_input) {
+        let (amount_a, amount_b) = if (a_to_b == amount_specified_is_input) {
             (amount_specified - state.amount_specified_remaining, state.amount_calculated)
-		} else {
-			(state.amount_calculated, amount_specified - state.amount_specified_remaining)
-		};
+        } else {
+            (state.amount_calculated, amount_specified - state.amount_specified_remaining)
+        };
         state.amount_a = amount_a;
         state.amount_b = amount_b;
 
@@ -680,7 +680,7 @@ module turbos_clmm::pool {
             is_exact_in: amount_specified_is_input,
         });
 
-		state
+        state
     }
 
     public(friend) fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
@@ -765,12 +765,12 @@ module turbos_clmm::pool {
     }
 
     public(friend) fun collect_protocol_fee<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		amount_a_requested: u64,
-		amount_b_requested: u64,
-		recipient: address,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
         ctx: &mut TxContext
-	) {
+    ) {
         let amount_a = if (amount_a_requested > pool.protocol_fees_a) pool.protocol_fees_a else amount_a_requested;
         let amount_b = if (amount_b_requested > pool.protocol_fees_b) pool.protocol_fees_b else amount_b_requested;
 
@@ -789,24 +789,24 @@ module turbos_clmm::pool {
             ctx,
         );
 
-		event::emit(CollectProtocolFeeEvent {
+        event::emit(CollectProtocolFeeEvent {
             pool: object::id(pool),
             recipient: recipient,
             amount_a: amount_a,
             amount_b: amount_b,
         });
-	}
+    }
 
     public(friend) fun update_pool_fee_protocol<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		fee_protocol: u32,
-	) {
-		pool.fee_protocol = fee_protocol;
-		event::emit(UpdatePoolFeeProtocolEvent {
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        fee_protocol: u32,
+    ) {
+        pool.fee_protocol = fee_protocol;
+        event::emit(UpdatePoolFeeProtocolEvent {
             pool: object::id(pool),
             fee_protocol: fee_protocol
         });
-	}
+    }
 
     public(friend) fun init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -1075,26 +1075,26 @@ module turbos_clmm::pool {
         growth_global_vector
     }
 
-	fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		tick_current_index: I32,
-		lte: bool
-	): (I32, bool) {
-		let compressed = i32::div(tick_current_index, i32::from(pool.tick_spacing));
+    fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_current_index: I32,
+        lte: bool
+    ): (I32, bool) {
+        let compressed = i32::div(tick_current_index, i32::from(pool.tick_spacing));
 
-		// round towards negative infinity
-		if (
-			i32::lt(tick_current_index, i32::zero()) && 
-			!i32::eq(i32::mod_euclidean(tick_current_index, pool.tick_spacing), i32::zero())
-		) {
- 			compressed = i32::sub(compressed, i32::from(1));
-		};
-		let next: I32;
-		let initialized: bool;
-		if (lte) {
+        // round towards negative infinity
+        if (
+            i32::lt(tick_current_index, i32::zero()) && 
+            !i32::eq(i32::mod_euclidean(tick_current_index, pool.tick_spacing), i32::zero())
+        ) {
+             compressed = i32::sub(compressed, i32::from(1));
+        };
+        let next: I32;
+        let initialized: bool;
+        if (lte) {
             let (word_pos, bit_pos) = position_tick(compressed);
-			try_init_tick_word(pool, word_pos);
-			let word = get_tick_word(pool, word_pos);
+            try_init_tick_word(pool, word_pos);
+            let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the right of the current bit_pos
             let mask: u256 = (1 << bit_pos) - 1 + (1 << bit_pos);
             let masked: u256 = word & mask;
@@ -1103,79 +1103,79 @@ module turbos_clmm::pool {
             initialized = masked != 0;
             // overflow/underflow is possible, but prevented externally by limiting both tickSpacing and tick
             next = if (initialized) {
-				i32::mul(
-                	i32::sub(compressed, i32::from((bit_pos - math_bit::most_significant_bit(masked) as u32))), 
-					i32::from(pool.tick_spacing)
-				)
-			} else { 
-				i32::mul(
-					i32::sub(compressed, i32::from((bit_pos as u32))),
-					i32::from(pool.tick_spacing)
-				)
-			};
+                i32::mul(
+                    i32::sub(compressed, i32::from((bit_pos - math_bit::most_significant_bit(masked) as u32))), 
+                    i32::from(pool.tick_spacing)
+                )
+            } else { 
+                i32::mul(
+                    i32::sub(compressed, i32::from((bit_pos as u32))),
+                    i32::from(pool.tick_spacing)
+                )
+            };
         } else {
             // start from the word of the next tick, since the current tick state doesn't matter
             let (word_pos, bit_pos) = position_tick(i32::add(compressed, i32::from(1)));
-			try_init_tick_word(pool, word_pos);
-			let word = get_tick_word(pool, word_pos);
+            try_init_tick_word(pool, word_pos);
+            let word = get_tick_word(pool, word_pos);
             // all the 1s at or to the left of the bit_pos
-			// like ~((1 << bit_pos) - 1)
+            // like ~((1 << bit_pos) - 1)
             let mask: u256 = ((1 << bit_pos) - 1) ^ 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
             let masked = word & mask;
 
             // if there are no initialized ticks to the left of the current tick, return leftmost in the word
             initialized = masked != 0;
             // overflow/underflow is possible, but prevented externally by limiting both tickSpacing and tick
-			next = if (initialized) {
-				i32::mul(
-                	i32::add(
-						i32::add(compressed, i32::from(1)),
-						i32::sub(i32::from((math_bit::least_significant_bit(masked) as u32)), i32::from((bit_pos as u32)))
-					), 
-					i32::from(pool.tick_spacing)
-				)
-			} else { 
-				i32::mul(
-					i32::add(
-						i32::add(compressed, i32::from(1)),
-						i32::from(((255 - bit_pos) as u32))
-					),
-					i32::from(pool.tick_spacing)
-				)
-			};
+            next = if (initialized) {
+                i32::mul(
+                    i32::add(
+                        i32::add(compressed, i32::from(1)),
+                        i32::sub(i32::from((math_bit::least_significant_bit(masked) as u32)), i32::from((bit_pos as u32)))
+                    ), 
+                    i32::from(pool.tick_spacing)
+                )
+            } else { 
+                i32::mul(
+                    i32::add(
+                        i32::add(compressed, i32::from(1)),
+                        i32::from(((255 - bit_pos) as u32))
+                    ),
+                    i32::from(pool.tick_spacing)
+                )
+            };
         };
 
-		(next, initialized)
-	}
+        (next, initialized)
+    }
 
-	public fun position_tick(tick: I32): (I32, u8) {
-		let word_pos = i32::shr(tick, 8);
+    public fun position_tick(tick: I32): (I32, u8) {
+        let word_pos = i32::shr(tick, 8);
         let bit_pos = (i32::abs_u32(i32::mod_euclidean(tick, 256)) as u8);
 
-		(word_pos, bit_pos)
+        (word_pos, bit_pos)
     }
 
     fun try_init_tick_word<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		word_pos: I32
-	) {
-		if (!table::contains(&pool.tick_map, word_pos)) {
-			table::add(&mut pool.tick_map, word_pos, 0u256);
-		};
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        word_pos: I32
+    ) {
+        if (!table::contains(&pool.tick_map, word_pos)) {
+            table::add(&mut pool.tick_map, word_pos, 0u256);
+        };
     }
 
-	fun get_tick_word<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
-		word_pos: I32
-	): u256 {
-		*table::borrow(& pool.tick_map, word_pos)
+    fun get_tick_word<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        word_pos: I32
+    ): u256 {
+        *table::borrow(& pool.tick_map, word_pos)
     }
 
-	fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		word_pos: I32
-	): &mut u256 {
-		table::borrow_mut(&mut pool.tick_map, word_pos)
+    fun get_tick_word_mut<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        word_pos: I32
+    ): &mut u256 {
+        table::borrow_mut(&mut pool.tick_map, word_pos)
     }
 
     /// @return amount_a the amount of token0 owed to the pool, negative if the pool should pay the recipient
@@ -1238,15 +1238,15 @@ module turbos_clmm::pool {
         (amount_a, amount_b)
     }
 
-	fun try_init_position<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		owner: address,
+    fun try_init_position<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
-		ctx: &mut TxContext
-	) {
-		let key = get_position_key(owner, tick_lower_index, tick_upper_index);
-		if (!dof::exists_(&pool.id, key)) {
+        ctx: &mut TxContext
+    ) {
+        let key = get_position_key(owner, tick_lower_index, tick_upper_index);
+        if (!dof::exists_(&pool.id, key)) {
             let reward_infos = vector::empty<PositionRewardInfo>();
             let i = 0;
             while (i < NUM_REWARDS) {
@@ -1256,16 +1256,16 @@ module turbos_clmm::pool {
                 });
                 i = i + 1;
             };
-			dof::add(&mut pool.id, key, Position {
-				id: object::new(ctx),
-        		liquidity: 0,
-        		fee_growth_inside_a: 0,
-        		fee_growth_inside_b: 0,
-        		tokens_owed_a: 0,
-        		tokens_owed_b: 0,
+            dof::add(&mut pool.id, key, Position {
+                id: object::new(ctx),
+                liquidity: 0,
+                fee_growth_inside_a: 0,
+                fee_growth_inside_b: 0,
+                tokens_owed_a: 0,
+                tokens_owed_b: 0,
                 reward_infos: reward_infos,
-			});
-		}
+            });
+        }
     }
 
     fun update_position<CoinTypeA, CoinTypeB, FeeType>(
@@ -1367,14 +1367,14 @@ module turbos_clmm::pool {
         ctx: &mut TxContext,
     ): bool {
         let tick;
-		let fee_growth_global_a = pool.fee_growth_global_a;
-		let fee_growth_global_b = pool.fee_growth_global_b;
-		let max_liquidity_per_tick = pool.max_liquidity_per_tick;
-		if (!df::exists_(&pool.id, tick_index)) {
-			tick = init_tick(pool, tick_index, ctx);
-		} else {
-			tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
-		};
+        let fee_growth_global_a = pool.fee_growth_global_a;
+        let fee_growth_global_b = pool.fee_growth_global_b;
+        let max_liquidity_per_tick = pool.max_liquidity_per_tick;
+        if (!df::exists_(&pool.id, tick_index)) {
+            tick = init_tick(pool, tick_index, ctx);
+        } else {
+            tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+        };
 
         let liquidity_gross_before = tick.liquidity_gross;
         let liquidity_gross_after = math_liquidity::add_delta(liquidity_gross_before, liquidity_delta);
@@ -1397,15 +1397,15 @@ module turbos_clmm::pool {
 
         // when the lower (upper) tick is crossed left to right (right to left), liquidity must be added (removed)
         tick.liquidity_net = if (is_upper) {
-			i128::sub(tick.liquidity_net, liquidity_delta)
-		} else {
-			i128::add(tick.liquidity_net, liquidity_delta)
-		};
+            i128::sub(tick.liquidity_net, liquidity_delta)
+        } else {
+            i128::add(tick.liquidity_net, liquidity_delta)
+        };
 
-		flipped
+        flipped
     }
 
-	public fun get_tick<CoinTypeA, CoinTypeB, FeeType>(
+    public fun get_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         index: I32
     ): &Tick {
@@ -1413,13 +1413,13 @@ module turbos_clmm::pool {
         let tick = df::borrow<I32, Tick>(&pool.id, index);
 
         tick
-	}
+    }
 
-	fun init_tick<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+    fun init_tick<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         index: I32,
-		ctx: &mut TxContext,
-	): &mut Tick {
+        ctx: &mut TxContext,
+    ): &mut Tick {
         let reward_growths_outside = vector::empty<u128>();
         let i = 0;
         while (i < NUM_REWARDS) {
@@ -1427,36 +1427,36 @@ module turbos_clmm::pool {
             i = i + 1;
         };
         df::add(&mut pool.id, index, Tick {
-			id: object::new(ctx),
-			liquidity_gross: 0,
-        	liquidity_net: i128::zero(),
-        	fee_growth_outside_a: 0,
-			fee_growth_outside_b: 0,
+            id: object::new(ctx),
+            liquidity_gross: 0,
+            liquidity_net: i128::zero(),
+            fee_growth_outside_a: 0,
+            fee_growth_outside_b: 0,
             reward_growths_outside: reward_growths_outside,
-        	initialized: false,
-		});
+            initialized: false,
+        });
 
-		df::borrow_mut<I32, Tick>(&mut pool.id, index)
+        df::borrow_mut<I32, Tick>(&mut pool.id, index)
     }
 
-	fun cross_tick<CoinTypeA, CoinTypeB, FeeType>(
+    fun cross_tick<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
         fee_growth_global_a: u128,
-		fee_growth_global_b: u128,
+        fee_growth_global_b: u128,
         reward_growth_global: &vector<u128>,
         dry_run: bool,
         ctx: &mut TxContext,
     ): I128 {
-		let tick;
-		if (!df::exists_(&pool.id, tick_index)) {
-			tick = init_tick(pool, tick_index, ctx);
-		} else {
-			tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
-		};
+        let tick;
+        if (!df::exists_(&pool.id, tick_index)) {
+            tick = init_tick(pool, tick_index, ctx);
+        } else {
+            tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
+        };
 
         if (!dry_run) {
-		    tick.fee_growth_outside_a = math_u128::wrapping_sub(fee_growth_global_a, tick.fee_growth_outside_a);
+            tick.fee_growth_outside_a = math_u128::wrapping_sub(fee_growth_global_a, tick.fee_growth_outside_a);
             tick.fee_growth_outside_b = math_u128::wrapping_sub(fee_growth_global_b, tick.fee_growth_outside_b);
 
             let i = 0;
@@ -1478,11 +1478,11 @@ module turbos_clmm::pool {
         _ctx: &mut TxContext,
     ) {
         let tick = df::borrow_mut<I32, Tick>(&mut pool.id, tick_index);
-		tick.liquidity_gross = 0;
-		tick.liquidity_net = i128::zero();
-		tick.fee_growth_outside_a = 0;
-		tick.fee_growth_outside_b = 0;
-		tick.initialized = false;
+        tick.liquidity_gross = 0;
+        tick.liquidity_net = i128::zero();
+        tick.fee_growth_outside_a = 0;
+        tick.fee_growth_outside_b = 0;
+        tick.initialized = false;
     }
 
     fun flip_tick<CoinTypeA, CoinTypeB, FeeType>(
@@ -1490,13 +1490,13 @@ module turbos_clmm::pool {
         tick_index: I32,
         _ctx: &mut TxContext,
     ) {
-		// ensure that the tick is spaced
-		assert!(i32::eq(i32::mod_euclidean(tick_index, pool.tick_spacing), i32::zero()), EInvildTickIndex);
-		let next = i32::div(tick_index, i32::from(pool.tick_spacing));
+        // ensure that the tick is spaced
+        assert!(i32::eq(i32::mod_euclidean(tick_index, pool.tick_spacing), i32::zero()), EInvildTickIndex);
+        let next = i32::div(tick_index, i32::from(pool.tick_spacing));
         let (word_pos, bit_pos) = position_tick(next);
         let mask: u256 = 1u256 << bit_pos;
-		try_init_tick_word(pool, word_pos);
-		let word = get_tick_word_mut(pool, word_pos);
+        try_init_tick_word(pool, word_pos);
+        let word = get_tick_word_mut(pool, word_pos);
         *word = *word^mask;
     }
 
@@ -1507,8 +1507,8 @@ module turbos_clmm::pool {
         tick_current_index: I32,
         _ctx: &mut TxContext,
     ): (u128, u128) {
-		let tick_lower = get_tick(pool, tick_lower_index);
-		let tick_upper = get_tick(pool, tick_upper_index);
+        let tick_lower = get_tick(pool, tick_lower_index);
+        let tick_upper = get_tick(pool, tick_upper_index);
         // calculate fee growth below
         let fee_growth_below_a;
         let fee_growth_below_b;
@@ -1544,7 +1544,7 @@ module turbos_clmm::pool {
             math_u128::wrapping_sub(pool.fee_growth_global_b, fee_growth_below_b), fee_growth_above_b
         );
 
-		(fee_growth_inside_a, fee_growth_inside_b)
+        (fee_growth_inside_a, fee_growth_inside_b)
     }
 
     fun next_reward_growths_inside<CoinTypeA, CoinTypeB, FeeType>(
@@ -1773,14 +1773,14 @@ module turbos_clmm::pool {
         (flash_swap_receipt.pool_id, flash_swap_receipt.a_to_b, flash_swap_receipt.pay_amount)
     }
 
-	public(friend) fun merge_coin<CoinType>(
+    public(friend) fun merge_coin<CoinType>(
         coins: vector<Coin<CoinType>>, 
     ): Coin<CoinType> {
         assert!(vector::length(&coins) > 0, EInvildCoins);
         let self = vector::pop_back(&mut coins);
         pay::join_vec(&mut self, coins);
         
-		self
+        self
     }
 
     public(friend) fun transfer_in<CoinTypeA, CoinTypeB, FeeType>(
@@ -1814,18 +1814,18 @@ module turbos_clmm::pool {
     public(friend) fun split_and_transfer<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         coin_a: Coin<CoinTypeA>, 
-		amount_a: u64,
-		coin_b: Coin<CoinTypeB>, 
-		amount_b: u64,
+        amount_a: u64,
+        coin_b: Coin<CoinTypeB>, 
+        amount_b: u64,
         ctx: &mut TxContext
     ) {
         let left_a = coin::split(&mut coin_a, amount_a, ctx);
 
         let left_b = coin::split(&mut coin_b, amount_b, ctx);
 
-		transfer_in(pool, left_a, left_b);
+        transfer_in(pool, left_a, left_b);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -1834,7 +1834,7 @@ module turbos_clmm::pool {
             );
         };
 
-		if (coin::value(&coin_b) == 0) {
+        if (coin::value(&coin_b) == 0) {
             coin::destroy_zero(coin_b);
         } else {
             transfer::public_transfer(
@@ -1844,24 +1844,24 @@ module turbos_clmm::pool {
         };
     }
 
-	public(friend) fun swap_coin_a_b<CoinTypeA, CoinTypeB, FeeType>(
+    public(friend) fun swap_coin_a_b<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         coin_a: Coin<CoinTypeA>, 
-		amount_in: u64,
-		amount_out: u64, 
-		recipient: address,
+        amount_in: u64,
+        amount_out: u64, 
+        recipient: address,
         ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_a, amount_in, ctx);
-		balance::join(&mut pool.coin_a, coin::into_balance(coin_in));
+        balance::join(&mut pool.coin_a, coin::into_balance(coin_in));
 
-		//transfer b from pool_a to recipient
-		let amount_out_balance = balance::split(&mut pool.coin_b, amount_out);
+        //transfer b from pool_a to recipient
+        let amount_out_balance = balance::split(&mut pool.coin_b, amount_out);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
         transfer::public_transfer(amount_out_coin, recipient);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -1874,21 +1874,21 @@ module turbos_clmm::pool {
     public(friend) fun swap_coin_b_a<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         coin_b: Coin<CoinTypeB>, 
-		amount_in: u64,
-		amount_out: u64, 
-		recipient: address,
+        amount_in: u64,
+        amount_out: u64, 
+        recipient: address,
         ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_b, amount_in, ctx);
-		balance::join(&mut pool.coin_b, coin::into_balance(coin_in));
+        balance::join(&mut pool.coin_b, coin::into_balance(coin_in));
 
-		//transfer b from pool_a to recipient
-		let amount_out_balance = balance::split(&mut pool.coin_a, amount_out);
+        //transfer b from pool_a to recipient
+        let amount_out_balance = balance::split(&mut pool.coin_a, amount_out);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
         transfer::public_transfer(amount_out_coin, recipient);
 
-		if (coin::value(&coin_b) == 0) {
+        if (coin::value(&coin_b) == 0) {
             coin::destroy_zero(coin_b);
         } else {
             transfer::public_transfer(
@@ -1899,31 +1899,31 @@ module turbos_clmm::pool {
     }
 
     /// swap: a=>c, pool_a: (a,b), pool_b:(b,c)
-	public(friend) fun swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
-		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+    public(friend) fun swap_coin_a_b_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
-		coin_a: Coin<CoinTypeA>, 
-		amount_in: u64,
-		amount_mid: u64,
-		amount_out: u64,
+        coin_a: Coin<CoinTypeA>, 
+        amount_in: u64,
+        amount_mid: u64,
+        amount_out: u64,
         recipient: address,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_a, amount_in, ctx);
-		balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
+        balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
 
-		//transer b from pool_a to pool_b
-		let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
-		let coin_mid = coin::from_balance(balance_mid, ctx);
-		balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
+        //transer b from pool_a to pool_b
+        let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
+        let coin_mid = coin::from_balance(balance_mid, ctx);
+        balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
 
-		//transfer c from pool_b to recipient
-		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
+        //transfer c from pool_b to recipient
+        let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
         transfer::public_transfer(coin_out, recipient);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -1931,34 +1931,34 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
-	}
+    }
 
     /// swap: a=>c, pool_a: (a,b), pool_b:(c,b)
-	public(friend) fun swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
-		pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
+    public(friend) fun swap_coin_a_b_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
-		coin_a: Coin<CoinTypeA>, 
-		amount_in: u64,
-		amount_mid: u64,
-		amount_out: u64,
+        coin_a: Coin<CoinTypeA>, 
+        amount_in: u64,
+        amount_mid: u64,
+        amount_out: u64,
         recipient: address,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_a, amount_in, ctx);
-		balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
+        balance::join(&mut pool_a.coin_a, coin::into_balance(coin_in));
 
-		//transer b from pool_a to pool_b
-		let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
-		let coin_mid = coin::from_balance(balance_mid, ctx);
-		balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
+        //transer b from pool_a to pool_b
+        let balance_mid = balance::split(&mut pool_a.coin_b, amount_mid);
+        let coin_mid = coin::from_balance(balance_mid, ctx);
+        balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
 
-		//transfer c from pool_b to recipient
-		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
+        //transfer c from pool_b to recipient
+        let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
         transfer::public_transfer(coin_out, recipient);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -1966,34 +1966,34 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
-	}
+    }
 
     /// swap: a=>c, pool_a: (b,a), pool_b:(b,c)
-	public(friend) fun swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
-		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
+    public(friend) fun swap_coin_b_a_b_c<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeB, CoinTypeC, FeeTypeB>,
-		coin_a: Coin<CoinTypeA>, 
-		amount_in: u64,
-		amount_mid: u64,
-		amount_out: u64,
+        coin_a: Coin<CoinTypeA>, 
+        amount_in: u64,
+        amount_mid: u64,
+        amount_out: u64,
         recipient: address,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_a, amount_in, ctx);
-		balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
+        balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
 
-		//transer b from pool_a to pool_b
-		let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
-		let coin_mid = coin::from_balance(balance_mid, ctx);
-		balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
+        //transer b from pool_a to pool_b
+        let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
+        let coin_mid = coin::from_balance(balance_mid, ctx);
+        balance::join(&mut pool_b.coin_a, coin::into_balance(coin_mid));
 
-		//transfer c from pool_b to recipient
-		let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
+        //transfer c from pool_b to recipient
+        let balance_out = balance::split(&mut pool_b.coin_b, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
         transfer::public_transfer(coin_out, recipient);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -2001,34 +2001,34 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
-	}
+    }
 
     /// swap: a=>c, pool_a: (b,a), pool_b:(c,b)
-	public(friend) fun swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
-		pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
+    public(friend) fun swap_coin_b_a_c_b<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool_a: &mut Pool<CoinTypeB, CoinTypeA, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
-		coin_a: Coin<CoinTypeA>, 
-		amount_in: u64,
-		amount_mid: u64,
-		amount_out: u64,
+        coin_a: Coin<CoinTypeA>, 
+        amount_in: u64,
+        amount_mid: u64,
+        amount_out: u64,
         recipient: address,
-		ctx: &mut TxContext
+        ctx: &mut TxContext
     ) {
-		//transfer a in pool_a
+        //transfer a in pool_a
         let coin_in = coin::split(&mut coin_a, amount_in, ctx);
-		balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
+        balance::join(&mut pool_a.coin_b, coin::into_balance(coin_in));
 
-		//transer b from pool_a to pool_b
-		let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
-		let coin_mid = coin::from_balance(balance_mid, ctx);
-		balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
+        //transer b from pool_a to pool_b
+        let balance_mid = balance::split(&mut pool_a.coin_a, amount_mid);
+        let coin_mid = coin::from_balance(balance_mid, ctx);
+        balance::join(&mut pool_b.coin_b, coin::into_balance(coin_mid));
 
-		//transfer c from pool_b to recipient
-		let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
+        //transfer c from pool_b to recipient
+        let balance_out = balance::split(&mut pool_b.coin_a, amount_out);
         let coin_out = coin::from_balance(balance_out, ctx);
         transfer::public_transfer(coin_out, recipient);
 
-		if (coin::value(&coin_a) == 0) {
+        if (coin::value(&coin_a) == 0) {
             coin::destroy_zero(coin_a);
         } else {
             transfer::public_transfer(
@@ -2036,21 +2036,21 @@ module turbos_clmm::pool {
                 tx_context::sender(ctx)
             );
         };
-	}
+    }
 
     public fun get_pool_balance<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
-	): (u64, u64) {
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+    ): (u64, u64) {
         (
-			balance::value<CoinTypeA>(&pool.coin_a),
-			balance::value<CoinTypeB>(&pool.coin_b),
-		)
+            balance::value<CoinTypeA>(&pool.coin_a),
+            balance::value<CoinTypeB>(&pool.coin_b),
+        )
     }
 
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>, 
         old_key: String, 
-		new_key: String,
+        new_key: String,
         ctx: &mut TxContext
     ) {
         let old_position = get_position_by_key(pool, old_key);
@@ -2066,14 +2066,14 @@ module turbos_clmm::pool {
             i = i + 1;
         };
         save_position(pool, new_key, Position {
-			id: object::new(ctx),
-        	liquidity: old_position.liquidity,
-        	fee_growth_inside_a: old_position.fee_growth_inside_a,
-        	fee_growth_inside_b: old_position.fee_growth_inside_b,
-        	tokens_owed_a: old_position.tokens_owed_a,
-        	tokens_owed_b: old_position.tokens_owed_b,
+            id: object::new(ctx),
+            liquidity: old_position.liquidity,
+            fee_growth_inside_a: old_position.fee_growth_inside_a,
+            fee_growth_inside_b: old_position.fee_growth_inside_b,
+            tokens_owed_a: old_position.tokens_owed_a,
+            tokens_owed_b: old_position.tokens_owed_b,
             reward_infos: reward_infos,
-		});
+        });
         clean_position(pool, old_key);
 
         event::emit(MigratePositionEvent {
@@ -2185,87 +2185,87 @@ module turbos_clmm::pool {
         pool.tick_current_index
     }
 
-	#[test_only]
+    #[test_only]
     public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
-	): (u64, u64, u64, u64, u128, I32, u32, u128, u32, u32, u128, u128, u128) {
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+    ): (u64, u64, u64, u64, u128, I32, u32, u128, u32, u32, u128, u128, u128) {
         (
-			balance::value<CoinTypeA>(&pool.coin_a),
-			balance::value<CoinTypeB>(&pool.coin_b),
-			pool.protocol_fees_a,
-			pool.protocol_fees_b,
-			pool.sqrt_price,
-			pool.tick_current_index,
-			pool.tick_spacing,
-			pool.max_liquidity_per_tick,
-			pool.fee,
-			pool.fee_protocol,
-			pool.fee_growth_global_a,
-			pool.fee_growth_global_b,
-			pool.liquidity
-		)
+            balance::value<CoinTypeA>(&pool.coin_a),
+            balance::value<CoinTypeB>(&pool.coin_b),
+            pool.protocol_fees_a,
+            pool.protocol_fees_b,
+            pool.sqrt_price,
+            pool.tick_current_index,
+            pool.tick_spacing,
+            pool.max_liquidity_per_tick,
+            pool.fee,
+            pool.fee_protocol,
+            pool.fee_growth_global_a,
+            pool.fee_growth_global_b,
+            pool.liquidity
+        )
     }
 
     #[test_only]
     public fun get_pool_fee_protocol<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
-	): u32 {
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
+    ): u32 {
         pool.fee_protocol
     }
 
     #[test_only]
-	public fun get_tick_info<CoinTypeA, CoinTypeB, FeeType>(
+    public fun get_tick_info<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_index: I32,
     ): (u128, I128, u128, u128, bool) {
         if (!df::exists_(&pool.id, tick_index)) return (0, i128::zero(), 0, 0, false);
 
         let tick = get_tick(pool, tick_index);
-		(
-			tick.liquidity_gross,
-			tick.liquidity_net,
-			tick.fee_growth_outside_a,
-			tick.fee_growth_outside_b,
-			tick.initialized
-		)
+        (
+            tick.liquidity_gross,
+            tick.liquidity_net,
+            tick.fee_growth_outside_a,
+            tick.fee_growth_outside_b,
+            tick.initialized
+        )
     }
 
-	#[test_only]
-	public fun get_position_info<CoinTypeA, CoinTypeB, FeeType>(
+    #[test_only]
+    public fun get_position_info<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
     ): (u128, u128, u128, u64, u64) {
         let position = get_position(pool, owner, tick_lower_index, tick_upper_index);
-		(
-			position.liquidity,
-			position.fee_growth_inside_a,
-			position.fee_growth_inside_b,
-			position.tokens_owed_a,
-			position.tokens_owed_b
-		)
+        (
+            position.liquidity,
+            position.fee_growth_inside_a,
+            position.fee_growth_inside_b,
+            position.tokens_owed_a,
+            position.tokens_owed_b
+        )
     }
 
     #[test_only]
-	public fun tick_is_initialized<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		tick_index: I32
-	): bool {
-		let (next_index, initialized) = next_initialized_tick_within_one_word(
-			pool,
-			tick_index,
-			true
-		);
-		if (i32::eq(next_index, tick_index)) initialized else false
-	}
+    public fun tick_is_initialized<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: I32
+    ): bool {
+        let (next_index, initialized) = next_initialized_tick_within_one_word(
+            pool,
+            tick_index,
+            true
+        );
+        if (i32::eq(next_index, tick_index)) initialized else false
+    }
 
     #[test_only]
     public fun next_initialized_tick_within_one_word_for_testing<CoinTypeA, CoinTypeB, FeeType>(
-		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-		tick_current_index: I32,
-		lte: bool
-	): (I32, bool) {
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_current_index: I32,
+        lte: bool
+    ): (I32, bool) {
         next_initialized_tick_within_one_word(pool, tick_current_index, lte)
     }
 

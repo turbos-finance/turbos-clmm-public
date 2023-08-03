@@ -10,7 +10,7 @@ module turbos_clmm::reward_manager_tests {
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::pool_factory_tests;
     use turbos_clmm::btc::{BTC};
-	use turbos_clmm::usdc::{USDC};
+    use turbos_clmm::usdc::{USDC};
     use turbos_clmm::eth::{ETH};
     use turbos_clmm::fee500bps::{FEE500BPS};
     use turbos_clmm::pool::{Self, Pool, PoolRewardVault};
@@ -26,9 +26,9 @@ module turbos_clmm::reward_manager_tests {
     use turbos_clmm::pool::{Versioned};
 
     public fun init_reward_manager(
-		player: address,
-		scenario: &mut Scenario,
-	) {
+        player: address,
+        scenario: &mut Scenario,
+    ) {
         tools_tests::init_clock(
             player,
             scenario
@@ -36,18 +36,18 @@ module turbos_clmm::reward_manager_tests {
 
         //init reward manager
         test_scenario::next_tx(scenario, player);
-		{
+        {
             reward_manager::init_for_testing(test_scenario::ctx(scenario));
         };
 
-	}
+    }
 
     #[test]
     //#[expected_failure(abort_code = pool::EInvalidRewardManager)]
     public fun test_reward_config() {
         let admin = @0x0;
         let player = @0x1;
-		let player2 = @0x2;
+        let player2 = @0x2;
 
         let scenario_val = test_scenario::begin(admin);
         let scenario = &mut scenario_val;
@@ -69,7 +69,7 @@ module turbos_clmm::reward_manager_tests {
 
         //init pool position manager
         test_scenario::next_tx(scenario, player);
-		{
+        {
             position_manager::init_for_testing(test_scenario::ctx(scenario));
         };
 
