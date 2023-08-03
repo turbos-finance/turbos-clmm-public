@@ -481,6 +481,32 @@ module turbos_clmm::pool_factory {
         }
     }
 
+	//just for fix pool state, should remove on next version
+	public entry fun fake_swap<CoinTypeA, CoinTypeB, FeeType>(
+		_: &PoolFactoryAdminCap,
+		pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        recipient: address,
+        a_to_b: bool,
+        amount_specified: u128,
+        is_exact_input: bool,
+        sqrt_price_limit: u128,
+        clock: &Clock,
+		versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
+		pool::check_version(versioned);
+		pool::swap(
+            pool,
+            recipient,
+            a_to_b,
+            amount_specified,
+            is_exact_input,
+            sqrt_price_limit,
+            clock,
+            ctx
+        );
+    }
+
     #[test_only]
     public fun init_for_testing(ctx: &mut TxContext) {
         init_(ctx);

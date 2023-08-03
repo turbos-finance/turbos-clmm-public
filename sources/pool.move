@@ -34,7 +34,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 5;
+    const VERSION: u64 = 7;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -1211,9 +1211,8 @@ module turbos_clmm::pool {
         // if we need to update the ticks, do it
         let flipped_lower = false;
         let flipped_upper = false;
+        let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         if (!i128::eq(liquidity_delta, i128::zero())) {
-            let reward_growths = next_pool_reward_infos(pool, clock::timestamp_ms(clock));
-
             flipped_lower = update_tick(
                 pool,
                 tick_lower_index,
