@@ -673,6 +673,12 @@ module turbos_clmm::position_manager {
         position_nft::burn(nft);
     }
 
+    public entry fun burn_nft_directly(
+        nft: TurbosPositionNFT
+    ) {
+        position_nft::burn(nft);
+    }
+
     fun insert_user_position(
         positions: &mut Positions, 
         position_id: ID, 
