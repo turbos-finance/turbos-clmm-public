@@ -475,8 +475,10 @@ module turbos_clmm::pool {
         amount_specified_is_input: bool,
         sqrt_price_limit: u128,
         clock: &Clock,
+        versioned: &Versioned,
         ctx: &mut TxContext,
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>, FlashSwapReceipt<CoinTypeA, CoinTypeB>) {
+        check_version(versioned);
         let state = compute_swap_result(
             pool,
             recipient,
@@ -512,8 +514,10 @@ module turbos_clmm::pool {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         coin_a: Coin<CoinTypeA>,
         coin_b: Coin<CoinTypeB>,
-        receipt: FlashSwapReceipt<CoinTypeA, CoinTypeB>
+        receipt: FlashSwapReceipt<CoinTypeA, CoinTypeB>,
+        versioned: &Versioned
     ) {
+        check_version(versioned);
         let FlashSwapReceipt { pool_id, a_to_b, pay_amount } = receipt;
         assert!(pool.unlocked, EPoolLocked);
         assert!(pool_id == object::id(pool), ERepayWrongPool);
