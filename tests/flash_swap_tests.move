@@ -350,6 +350,7 @@ module turbos_clmm::flash_swap_tests {
                 true,
                 MIN_SQRT_PRICE_X64 + 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (_, _, pay_amount) = pool::get_flash_swap_receipt_info<BTC, USDC>(&flash_swap_receipt);
@@ -366,6 +367,7 @@ module turbos_clmm::flash_swap_tests {
                 coin_a_repay,
                 coin::zero<USDC>(test_scenario::ctx(scenario)),
                 flash_swap_receipt,
+                &versioned,
             );
             transfer::public_transfer(coin_b, player);
 
@@ -406,6 +408,7 @@ module turbos_clmm::flash_swap_tests {
                 false,
                 MIN_SQRT_PRICE_X64 + 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (_, _, pay_amount) = pool::get_flash_swap_receipt_info<BTC, USDC>(&flash_swap_receipt);
@@ -422,6 +425,7 @@ module turbos_clmm::flash_swap_tests {
                 coin_a_repay,
                 coin::zero<USDC>(test_scenario::ctx(scenario)),
                 flash_swap_receipt,
+                &versioned,
             );
             transfer::public_transfer(coin_b, player);
 
@@ -462,6 +466,7 @@ module turbos_clmm::flash_swap_tests {
                 true,
                 MAX_SQRT_PRICE_X64 - 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (_, _, pay_amount) = pool::get_flash_swap_receipt_info<BTC, USDC>(&flash_swap_receipt);
@@ -478,6 +483,7 @@ module turbos_clmm::flash_swap_tests {
                 coin::zero<BTC>(test_scenario::ctx(scenario)),
                 coin_b_repay,
                 flash_swap_receipt,
+                &versioned,
             );
             transfer::public_transfer(coin_a, player);
 
@@ -519,6 +525,7 @@ module turbos_clmm::flash_swap_tests {
                 false,
                 MAX_SQRT_PRICE_X64 - 1,
                 &clock,
+                &versioned,
                 test_scenario::ctx(scenario),
             );
             let (_, _, pay_amount) = pool::get_flash_swap_receipt_info<BTC, USDC>(&flash_swap_receipt);
@@ -535,6 +542,7 @@ module turbos_clmm::flash_swap_tests {
                 coin::zero<BTC>(test_scenario::ctx(scenario)),
                 coin_b_repay,
                 flash_swap_receipt,
+                &versioned,
             );
             transfer::public_transfer(coin_a, player);
 
