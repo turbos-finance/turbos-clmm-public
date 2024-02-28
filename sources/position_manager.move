@@ -10,7 +10,7 @@ module turbos_clmm::position_manager {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
-    use sui::coin::{Coin};
+    use sui::coin::{Self, Coin};
     use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self, I32};
     use turbos_clmm::math_liquidity;
@@ -127,6 +127,63 @@ module turbos_clmm::position_manager {
         ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        let (nft, coin_a_left, coin_b_left) = mint_with_return_(
+            pool,
+            positions,
+            coins_a,
+            coins_b,
+            tick_lower_index,
+            tick_lower_index_is_neg,
+            tick_upper_index,
+            tick_upper_index_is_neg,
+            amount_a_desired,
+            amount_b_desired,
+            amount_a_min,
+            amount_b_min,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        );
+        if (coin::value(&coin_a_left) == 0) {
+            coin::destroy_zero(coin_a_left);
+        } else {
+            transfer::public_transfer(
+                coin_a_left,
+                tx_context::sender(ctx)
+            );
+        };
+
+        if (coin::value(&coin_b_left) == 0) {
+            coin::destroy_zero(coin_b_left);
+        } else {
+            transfer::public_transfer(
+                coin_b_left,
+                tx_context::sender(ctx)
+            );
+        };
+        transfer::public_transfer(nft, recipient)
+    }
+
+    public fun mint_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        coins_a: vector<Coin<CoinTypeA>>, 
+        coins_b: vector<Coin<CoinTypeB>>, 
+        tick_lower_index: u32,
+        tick_lower_index_is_neg: bool,
+        tick_upper_index: u32,
+        tick_upper_index_is_neg: bool,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (TurbosPositionNFT, Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         assert!(vector::length(&coins_a) > 0, ENoCoins);
         assert!(vector::length(&coins_b) > 0, ENoCoins);
@@ -135,17 +192,16 @@ module turbos_clmm::position_manager {
         let position_id = object::new(ctx);
         let position_inner_id = object::uid_to_inner(&position_id);
 
-        //mint nft
-        let nft_address = mint_nft<CoinTypeA, CoinTypeB, FeeType>(
+        let nft = mint_nft_with_return_<CoinTypeA, CoinTypeB, FeeType>(
             object::id(pool), 
             position_inner_id, 
             positions, 
-            recipient, 
-            ctx
+            ctx,
         );
+        let nft_address = object::id_address(&nft);
         let position_key = pool::get_position_key(nft_address, tick_lower_index_i32, tick_upper_index_i32);
 
-        let (liquidity_delta, amount_a, amount_b) = add_liquidity(
+        let (liquidity_delta, amount_a, amount_b, coin_a_left, coin_b_left) = add_liquidity_with_return_(
             pool,
             pool::merge_coin<CoinTypeA>(coins_a),
             pool::merge_coin<CoinTypeB>(coins_b),
@@ -180,6 +236,8 @@ module turbos_clmm::position_manager {
             amount_b: amount_b,
             liquidity: liquidity_delta,
         });
+
+        (nft, coin_a_left, coin_b_left)
     }
 
     public entry fun burn<CoinTypeA, CoinTypeB, FeeType>(
@@ -217,6 +275,21 @@ module turbos_clmm::position_manager {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (u128, u64, u64) {
+        abort(0)
+    }
+
+    fun add_liquidity_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        coin_a: Coin<CoinTypeA>,
+        coin_b: Coin<CoinTypeB>,
+        recipient: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
+        clock: &Clock,
+        ctx: &mut TxContext,
+    ): (u128, u64, u64, Coin<CoinTypeA>, Coin<CoinTypeB>) {
         let sqrt_price_a = math_tick::sqrt_price_from_tick_index(tick_lower_index);
         let sqrt_price_b = math_tick::sqrt_price_from_tick_index(tick_upper_index);
         let sqrt_price = pool::get_pool_sqrt_price(pool);
@@ -240,7 +313,7 @@ module turbos_clmm::position_manager {
         );
 
         let (balance_a_before, balance_b_before) = pool::get_pool_balance(pool);
-        pool::split_and_transfer(
+        let (coin_a_left, coin_b_left) = pool::split_and_return_(
             pool,
             coin_a,
             amount_a,
@@ -253,7 +326,7 @@ module turbos_clmm::position_manager {
         assert!(balance_a_before + amount_a <= balance_a_current, EInvildMintAmount);
         assert!(balance_b_before + amount_b <= balance_b_current, EInvildMintAmount);
 
-        (liquidity_delta, amount_a, amount_b)
+        (liquidity_delta, amount_a, amount_b, coin_a_left, coin_b_left)
     }
 
     public entry fun increase_liquidity<CoinTypeA, CoinTypeB, FeeType>(
@@ -272,6 +345,56 @@ module turbos_clmm::position_manager {
         ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
+        let (coin_a_left, coin_b_left) = increase_liquidity_with_return_(
+            pool,
+            positions,
+            coins_a,
+            coins_b,
+            nft,
+            amount_a_desired,
+            amount_b_desired,
+            amount_a_min,
+            amount_b_min,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        );
+        if (coin::value(&coin_a_left) == 0) {
+            coin::destroy_zero(coin_a_left);
+        } else {
+            transfer::public_transfer(
+                coin_a_left,
+                tx_context::sender(ctx)
+            );
+        };
+
+        if (coin::value(&coin_b_left) == 0) {
+            coin::destroy_zero(coin_b_left);
+        } else {
+            transfer::public_transfer(
+                coin_b_left,
+                tx_context::sender(ctx)
+            );
+        };
+    }
+
+     public fun increase_liquidity_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        coins_a: vector<Coin<CoinTypeA>>, 
+        coins_b: vector<Coin<CoinTypeB>>, 
+        nft: &mut TurbosPositionNFT,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
         assert!(vector::length(&coins_a) > 0, ENoCoins);
@@ -289,7 +412,7 @@ module turbos_clmm::position_manager {
             position_owner = sender;
         };
 
-        let (liquidity_delta, amount_a, amount_b) = add_liquidity(
+        let (liquidity_delta, amount_a, amount_b, coin_a_left, coin_b_left) = add_liquidity_with_return_(
             pool,
             pool::merge_coin<CoinTypeA>(coins_a),
             pool::merge_coin<CoinTypeB>(coins_b),
@@ -312,6 +435,8 @@ module turbos_clmm::position_manager {
             amount_b: amount_b,
             liquidity: liquidity_delta,
         });
+
+        (coin_a_left, coin_b_left)
     }
 
     public entry fun decrease_liquidity<CoinTypeA, CoinTypeB, FeeType>(
@@ -326,6 +451,37 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        pool::check_version(versioned);
+        let (coin_a, coin_b) = decrease_liquidity_with_return_(
+            pool,
+            positions,
+            nft,
+            liquidity,
+            amount_a_min,
+            amount_b_min,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        );
+        let sender = tx_context::sender(ctx);
+        transfer::public_transfer(coin_a, sender);
+        transfer::public_transfer(coin_b, sender);
+
+    }
+
+    public fun decrease_liquidity_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
+        liquidity: u128,
+        amount_a_min: u64,
+        amount_b_min: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
@@ -356,11 +512,10 @@ module turbos_clmm::position_manager {
         let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
 
-        pool::transfer_out(
+        let (coin_a, coin_b) = pool::split_out_and_return_(
             pool,
             amount_a,
             amount_b,
-            sender,
             ctx
         );
 
@@ -370,6 +525,8 @@ module turbos_clmm::position_manager {
             amount_b: amount_b,
             liquidity: liquidity,
         });
+
+        (coin_a, coin_b)
     }
 
     public entry fun collect<CoinTypeA, CoinTypeB, FeeType>(
@@ -384,6 +541,36 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        pool::check_version(versioned);
+        let (coin_a, coin_b) = collect_with_return_(
+            pool,
+            positions,
+            nft,
+            amount_a_max,
+            amount_b_max,
+            recipient,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        );
+
+        transfer::public_transfer(coin_a, recipient);
+        transfer::public_transfer(coin_b, recipient);
+    }
+
+    public fun collect_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
+        amount_a_max: u64,
+        amount_b_max: u64,
+        recipient: address,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
@@ -428,11 +615,10 @@ module turbos_clmm::position_manager {
             ctx,
         );
 
-        pool::transfer_out(
+        let (coin_a, coin_b) = pool::split_out_and_return_(
             pool,
             amount_a,
             amount_b,
-            recipient,
             ctx
         );
 
@@ -445,6 +631,8 @@ module turbos_clmm::position_manager {
             amount_b: amount_b,
             recipient: recipient,
         });
+
+        (coin_a, coin_b)
     }
 
     public entry fun collect_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
@@ -460,6 +648,37 @@ module turbos_clmm::position_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        pool::check_version(versioned);
+        let coin_reward = collect_reward_with_return_(
+            pool,
+            positions,
+            nft,
+            vault,
+            reward_index,
+            amount_max,
+            recipient,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        );
+
+        transfer::public_transfer(coin_reward, recipient);
+    }
+
+    public fun collect_reward_with_return_<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: &mut TurbosPositionNFT,
+        vault: &mut PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        amount_max: u64,
+        recipient: address,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): Coin<RewardCoin> {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
@@ -490,7 +709,7 @@ module turbos_clmm::position_manager {
         let reward_info = vector::borrow_mut(&mut position.reward_infos, reward_index);
         let amount_collect = if (amount_max > reward_info.amount_owed) reward_info.amount_owed else amount_max;
 
-        let amount = pool::collect_reward_v2(
+        let coin_reward = pool::collect_reward_with_return_(
             pool,
             vault,
             recipient,
@@ -501,6 +720,7 @@ module turbos_clmm::position_manager {
             reward_index,
             ctx,
         );
+        let amount = coin::value(&coin_reward);
 
         reward_info.amount_owed = reward_info.amount_owed - amount_collect;
 
@@ -511,6 +731,8 @@ module turbos_clmm::position_manager {
             reward_index: reward_index,
             recipient: recipient,
         });
+        
+        coin_reward
     }
 
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
@@ -649,6 +871,24 @@ module turbos_clmm::position_manager {
         recipient: address,
         ctx: &mut TxContext
     ): address {
+        let nft = mint_nft_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+            pool_id,
+            position_id,
+            positions,
+            ctx,
+        );
+        let nft_address = object::id_address(&nft);
+        transfer::public_transfer(nft, recipient);
+
+        nft_address
+    }
+
+    fun mint_nft_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool_id: ID,
+        position_id: ID,
+        positions: &mut Positions,
+        ctx: &mut TxContext
+    ): TurbosPositionNFT {
         let nft = position_nft::mint(
             positions.nft_name,
             positions.nft_description,
@@ -661,10 +901,8 @@ module turbos_clmm::position_manager {
             ctx,
         );
         positions.nft_minted = positions.nft_minted + 1;
-        let nft_address = object::id_address(&nft);
-        transfer::public_transfer(nft, recipient);
 
-        nft_address
+        nft
     }
 
     fun burn_nft(
