@@ -1970,7 +1970,7 @@ module turbos_clmm::pool {
     }
 
     /// swap: a=>c, pool_a: (a,b), pool_b:(c,b)
-    public(friend) fun swap_coin_a_b_c_b_with_return<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+    public(friend) fun swap_coin_a_b_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
         pool_a: &mut Pool<CoinTypeA, CoinTypeB, FeeTypeA>,
         pool_b: &mut Pool<CoinTypeC, CoinTypeB, FeeTypeB>,
         coin_a: Coin<CoinTypeA>, 

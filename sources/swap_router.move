@@ -457,7 +457,7 @@ module turbos_clmm::swap_router {
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
-        pool::swap_coin_a_b_c_b_with_return<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
+        pool::swap_coin_a_b_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
             pool::merge_coin(coins_a),
