@@ -843,6 +843,14 @@ module turbos_clmm::position_manager {
         dof::borrow_mut<address, Position>(&mut positions.id, nft_address)
     }
 
+    public fun get_position_info(
+        positions: &Positions,
+        nft_address: address,
+    ): (I32, I32, u128) {
+        let position = dof::borrow<address, Position>(&positions.id, nft_address);
+        (position.tick_lower_index, position.tick_upper_index, position.liquidity)
+    }
+
     public(friend) fun update_nft_name(
         positions: &mut Positions,
         nft_name: String,
