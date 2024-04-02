@@ -1732,6 +1732,18 @@ module turbos_clmm::pool {
         pool.sqrt_price
     }
 
+    public fun get_pool_tick_spacing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): u32 {
+        pool.tick_spacing
+    }
+
+    public fun get_pool_current_index<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): I32 {
+        pool.tick_current_index
+    }
+
     public fun get_position_fee_growth_inside_a<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
