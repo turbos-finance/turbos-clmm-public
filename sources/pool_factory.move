@@ -323,13 +323,35 @@ module turbos_clmm::pool_factory {
         ctx: &mut TxContext
     ) {
         pool::check_version(versioned);
-        pool::collect_protocol_fee(
+        let (coin_a, coin_b) = pool::collect_protocol_fee_with_return_(
             pool,
             amount_a_requested,
             amount_b_requested,
             recipient,
             ctx
         );
+
+        transfer::public_transfer(coin_a, recipient);
+        transfer::public_transfer(coin_b, recipient);
+    }
+
+    public fun collect_protocol_fee_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        _: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        pool::check_version(versioned);
+        pool::collect_protocol_fee_with_return_(
+            pool,
+            amount_a_requested,
+            amount_b_requested,
+            recipient,
+            ctx
+        )
     }
 
     public entry fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
@@ -411,17 +433,18 @@ module turbos_clmm::pool_factory {
 
     }
 
-    // public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
-    // 	_: &PoolFactoryAdminCap,
-    //     pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
-    //     tick_index: u32,
-    // 	tick_index_is_neg: bool,
-    // 	clock: &Clock,
-    // 	versioned: &Versioned,
-    //     ctx: &mut TxContext,
-    // ) {
-        
-    // }
+    /// deprecated
+    public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
+    	_: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        tick_index: u32,
+    	tick_index_is_neg: bool,
+    	clock: &Clock,
+    	versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
+        abort(0)
+    }
 
     public entry fun modify_tick<CoinTypeA, CoinTypeB, FeeType>(
         _: &PoolFactoryAdminCap,
