@@ -34,7 +34,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 8;
+    const VERSION: u64 = 9;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -479,6 +479,7 @@ module turbos_clmm::pool {
         ctx: &mut TxContext,
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>, FlashSwapReceipt<CoinTypeA, CoinTypeB>) {
         check_version(versioned);
+        assert!(pool.unlocked, EPoolLocked);
         let state = compute_swap_result(
             pool,
             recipient,
