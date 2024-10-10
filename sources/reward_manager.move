@@ -37,6 +37,21 @@ module turbos_clmm::reward_manager {
         transfer::public_share_object(vault);
     }
 
+    public entry fun reset_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        _: &RewardManagerAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
+        pool::check_version(versioned);
+        pool::reset_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+            pool,
+            reward_index,
+            ctx,
+        );
+    }
+
     public entry fun update_reward_manager<CoinTypeA, CoinTypeB, FeeType>(
         _: &RewardManagerAdminCap,
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,

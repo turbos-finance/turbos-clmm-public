@@ -779,6 +779,7 @@ module turbos_clmm::position_manager {
         let reward_infos = &mut position.reward_infos;
         let reward_info = vector::borrow_mut(reward_infos, tick_reward_index);
         reward_info.reward_growth_inside = vaule;
+        reward_info.amount_owed = 0;
     }
 
     fun get_position_tick_info(

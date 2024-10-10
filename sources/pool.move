@@ -865,6 +865,18 @@ module turbos_clmm::pool {
         vault
     }
 
+    public(friend) fun reset_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        ctx: &mut TxContext
+    ) {
+        assert!(reward_index < NUM_REWARDS, EInvalidRewardIndex);
+
+        let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
+        reward_info.growth_global = 0;
+        reward_info.emissions_per_second = 0;
+    }
+
     public(friend) fun update_reward_manager<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         reward_index: u64,
