@@ -18,6 +18,8 @@ module turbos_clmm::position_manager {
     use turbos_clmm::pool::{Self, Pool, PositionRewardInfo as PositionRewardInfoInPool, PoolRewardVault, Versioned};
     use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use sui::clock::{Self, Clock};
+    use sui::url::{Self, Url};
+    use std::type_name::{TypeName};
     
     friend turbos_clmm::pool_factory;
 
@@ -36,6 +38,22 @@ module turbos_clmm::position_manager {
     const EPositionAlreadyExists: u64 = 12;
     const EPositionMigrateFail: u64 = 14;
     const EInvalidPool: u64 = 15;
+    const EInvalidBurnTickRange: u64 = 16;
+
+    const TICK_SIZE: u32 = 443636;
+    
+    struct TurbosPositionBurnNFT has store, key {
+        id: UID,
+        name: String,
+        description: String,
+        img_url: Url,
+        position_nft: TurbosPositionNFT,
+        position_id: ID,
+        pool_id: ID,
+        coin_type_a: TypeName,
+        coin_type_b: TypeName,
+        fee_type: TypeName,
+    }
 
     struct PositionRewardInfo has store {
         reward_growth_inside: u128,
@@ -90,6 +108,13 @@ module turbos_clmm::position_manager {
         vault: ID,
         reward_index: u64,
         recipient: address,
+    }
+
+    struct BurnPositionEvent has copy, drop {
+        nft_address: address,
+        position_id: ID,
+        pool_id: ID,
+        burn_nft_address: address,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -735,6 +760,101 @@ module turbos_clmm::position_manager {
         coin_reward
     }
 
+    public fun burn_position_nft_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        nft: TurbosPositionNFT, 
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): TurbosPositionBurnNFT {
+        pool::check_version(versioned);
+        let pool_id = position_nft::pool_id(&nft);
+        assert!(object::id(pool) == position_nft::pool_id(&nft), EInvalidPool);
+        let nft_address = object::id_address(&nft);
+        let position_inner = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
+        let tick_spacing = pool::get_pool_tick_spacing(pool);
+        let mod = i32::from(TICK_SIZE % tick_spacing);
+
+        //check full range
+        assert!(i32::eq(i32::sub(position_inner.tick_lower_index, mod), i32::neg_from(TICK_SIZE)), EInvalidBurnTickRange);
+        assert!(i32::eq(i32::add(position_inner.tick_upper_index, mod), i32::from(TICK_SIZE)), EInvalidBurnTickRange);
+        
+        let position_id = position_nft::position_id(&nft);
+        let burn_nft = TurbosPositionBurnNFT{
+            id: object::new(ctx), 
+            name: string::utf8(b"Proof of Turbos Position Burn"), 
+            description: string::utf8(b"Proof of Turbos Position Burn"), 
+            img_url: url::new_unsafe(string::to_ascii(string::utf8(b"https://app.turbos.finance/icon/turbos-position-burn-nft.png"))), 
+            position_nft: nft,
+            position_id: position_id,
+            pool_id: pool_id,
+            coin_type_a: type_name::get<CoinTypeA>(),
+            coin_type_b: type_name::get<CoinTypeB>(),
+            fee_type: type_name::get<FeeType>(),
+        };
+        
+        event::emit(BurnPositionEvent {
+            nft_address: nft_address,
+            position_id: position_id,
+            pool_id: pool_id,
+            burn_nft_address: object::id_address(&burn_nft),
+        });
+        burn_nft
+    }
+
+    public fun burn_nft_collect_reward_with_return_<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        burn_nft: &mut TurbosPositionBurnNFT,
+        vault: &mut PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        amount_max: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): Coin<RewardCoin> {
+        pool::check_version(versioned);
+        collect_reward_with_return_(
+            pool,
+            positions,
+            &mut burn_nft.position_nft,
+            vault,
+            reward_index,
+            amount_max,
+            @0x0,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        )
+    }
+
+    public fun burn_nft_collect_fee_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        burn_nft: &mut TurbosPositionBurnNFT,
+        amount_a_max: u64,
+        amount_b_max: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        collect_with_return_(
+            pool,
+            positions,
+            &mut burn_nft.position_nft,
+            amount_a_max,
+            amount_b_max,
+            @0x0,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        )
+    }
+
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         positions: &mut Positions,
@@ -779,6 +899,7 @@ module turbos_clmm::position_manager {
         let reward_infos = &mut position.reward_infos;
         let reward_info = vector::borrow_mut(reward_infos, tick_reward_index);
         reward_info.reward_growth_inside = vaule;
+        reward_info.amount_owed = 0;
     }
 
     fun get_position_tick_info(
