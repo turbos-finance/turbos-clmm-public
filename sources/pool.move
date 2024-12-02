@@ -646,8 +646,11 @@ module turbos_clmm::pool {
             } else if (state.sqrt_price != step_sqrt_price_start) {
                 state.tick_current_index = math_tick::tick_index_from_sqrt_price(state.sqrt_price);
             };
+            if (state.liquidity == 0) {
+                break
+            };
         };
-        assert!(state.liquidity > 0, EInsufficientLiquidity);
+        //assert!(state.liquidity > 0, EInsufficientLiquidity);
         
         if (!dry_run) {
             if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {

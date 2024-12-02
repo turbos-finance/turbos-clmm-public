@@ -23,6 +23,14 @@ module turbos_clmm::math_swap {
         amount_specified_is_input: bool,
         fee_rate: u32,
     ): (u128, u128, u128, u128) {
+        if (liquidity == 0) {
+            return (
+                sqrt_price_target,
+                0,
+                0,
+                0,
+            )
+        };
         let a_to_b = sqrt_price_current >= sqrt_price_target;
         let fee_amount;
 
