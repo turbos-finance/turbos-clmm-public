@@ -23,15 +23,11 @@ module turbos_clmm::position_manager {
     
     friend turbos_clmm::pool_factory;
 
-    const EFeeNotExists: u64 = 0;
-    const EInvalidFee: u64 = 1;
-    const EInvalidTicKSpacing: u64 = 2;
-    const EFeeAlreadyExists: u64 = 3;
     const ENoCoins: u64 = 4;
     const EPriceSlippageCheck: u64 = 5;
     const EPositionNotCleared: u64 = 6;
     const EInvildMintAmount: u64 = 7;
-    const ETransactionToOld: u64 = 8;
+    const ETransactionTooOld: u64 = 8;
     const EInsufficientLiquidity: u64 = 9;
     const EInvalidRewardIndex: u64 = 10;
     const EPositionNotExists: u64 = 11;
@@ -209,7 +205,7 @@ module turbos_clmm::position_manager {
         ctx: &mut TxContext
     ): (TurbosPositionNFT, Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         assert!(vector::length(&coins_a) > 0, ENoCoins);
         assert!(vector::length(&coins_b) > 0, ENoCoins);
         let tick_lower_index_i32 = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
@@ -245,8 +241,8 @@ module turbos_clmm::position_manager {
             tick_lower_index: tick_lower_index_i32,
             tick_upper_index: tick_upper_index_i32,
             liquidity: liquidity_delta,
-            fee_growth_inside_a: pool::get_position_fee_growth_inside_a(pool, position_key),
-            fee_growth_inside_b: pool::get_position_fee_growth_inside_b(pool, position_key),
+            fee_growth_inside_a: 0,
+            fee_growth_inside_b: 0,
             tokens_owed_a: 0,
             tokens_owed_b: 0,
             reward_infos: vector::empty<PositionRewardInfo>(),
@@ -421,7 +417,7 @@ module turbos_clmm::position_manager {
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         assert!(vector::length(&coins_a) > 0, ENoCoins);
         assert!(vector::length(&coins_b) > 0, ENoCoins);
         let nft_address = object::id_address(nft);
@@ -509,7 +505,7 @@ module turbos_clmm::position_manager {
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let nft_address = object::id_address(nft);
         let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
@@ -532,7 +528,7 @@ module turbos_clmm::position_manager {
             ctx,
         );
 
-        assert!(amount_a >= amount_a_min && amount_b_min >= amount_b_min, EPriceSlippageCheck);
+        assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
         let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
@@ -598,7 +594,7 @@ module turbos_clmm::position_manager {
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let nft_address = object::id_address(nft);
         let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
@@ -706,7 +702,7 @@ module turbos_clmm::position_manager {
     ): Coin<RewardCoin> {
         pool::check_version(versioned);
         assert!(object::id(pool) == position_nft::pool_id(nft), EInvalidPool);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let nft_address = object::id_address(nft);
         let sender = tx_context::sender(ctx);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
