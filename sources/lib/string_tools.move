@@ -19,9 +19,9 @@ module turbos_clmm::string_tools {
     ): String {
         let address_str = address_to_hexstring(&owner);
         let tick_lower_index_str = u64_to_string((tick_lower_index as u64));
-        let tick_lower_index_is_neg_str = if(tick_lower_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
+        let tick_lower_index_is_neg_str = if(tick_lower_index ==0 || tick_lower_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
         let tick_upper_index_str = u64_to_string((tick_upper_index as u64));
-        let tick_upper_index_is_neg_str = if(tick_upper_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
+        let tick_upper_index_is_neg_str = if(tick_upper_index ==0 || tick_upper_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
         string::append(&mut address_str, tick_lower_index_is_neg_str);
         string::append(&mut address_str, tick_lower_index_str);
         string::append(&mut address_str, tick_upper_index_is_neg_str);

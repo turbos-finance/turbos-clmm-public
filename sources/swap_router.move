@@ -8,15 +8,11 @@ module turbos_clmm::swap_router {
     use sui::coin::{Self, Coin};
     use sui::clock::{Self, Clock};
 
-    const MAX_SQRT_PRICE_X64: u128 = 79226673515401279992447579055;
-    const MIN_SQRT_PRICE_X64: u128 = 4295048016;
-
-    const ECoinsVectorMustBeEmpty: u64 = 1;
-    const ETransactionToOld: u64 = 2;
-    const ETooLittleReceived: u64 = 3; 
+    const ETransactionTooOld: u64 = 2;
     const EAmountOutBelowMinimum: u64 = 4; 
     const EAmountInAboveMaximum: u64 = 5; 
     const ETwoStepSwapLackOfLiquidity: u64 = 6; 
+    const ECoinsNotGatherThanAmount: u64 = 7; 
     
     public entry fun swap_a_b<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
@@ -71,7 +67,9 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeB>, Coin<CoinTypeA>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_a =pool::merge_coin(coins_a);
+        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
         let (amount_a, amount_b) = pool::swap(
             pool,
             recipient,
@@ -88,7 +86,7 @@ module turbos_clmm::swap_router {
 
         pool::swap_coin_a_b_with_return_(
             pool,
-            pool::merge_coin(coins_a),
+            coin_a,
             amount_a_64,
             amount_b_64,
             ctx
@@ -148,7 +146,9 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_b =pool::merge_coin(coins_b);
+        assert!(coin::value(&coin_b) >= amount, ECoinsNotGatherThanAmount);
         let (amount_a, amount_b) = pool::swap(
             pool,
             recipient,
@@ -165,7 +165,7 @@ module turbos_clmm::swap_router {
 
         pool::swap_coin_b_a_with_return_(
             pool,
-            pool::merge_coin(coins_b),
+            coin_b,
             amount_b_64,
             amount_a_64,
             ctx
@@ -256,7 +256,10 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeC>, Coin<CoinTypeA>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_a =pool::merge_coin(coins_a);
+        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = true;
@@ -322,7 +325,7 @@ module turbos_clmm::swap_router {
         pool::swap_coin_a_b_b_c_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
-            pool::merge_coin(coins_a),
+            coin_a,
             amount_a_64,
             amount_b_64,
             amount_c_64,
@@ -392,7 +395,10 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeC>, Coin<CoinTypeA>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_a =pool::merge_coin(coins_a);
+        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = true;
@@ -460,7 +466,7 @@ module turbos_clmm::swap_router {
         pool::swap_coin_a_b_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
-            pool::merge_coin(coins_a),
+            coin_a,
             amount_a_64,
             amount_b_64,
             amount_c_64,
@@ -530,7 +536,9 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeC>, Coin<CoinTypeA>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_a =pool::merge_coin(coins_a);
+        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = false;
@@ -597,7 +605,7 @@ module turbos_clmm::swap_router {
         pool::swap_coin_b_a_b_c_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
-            pool::merge_coin(coins_a),
+            coin_a,
             amount_a_64,
             amount_b_64,
             amount_c_64,
@@ -667,7 +675,9 @@ module turbos_clmm::swap_router {
         ctx: &mut TxContext
     ): (Coin<CoinTypeC>, Coin<CoinTypeA>) {
         pool::check_version(versioned);
-        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionToOld);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let coin_a =pool::merge_coin(coins_a);
+        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = false;
@@ -734,7 +744,7 @@ module turbos_clmm::swap_router {
         pool::swap_coin_b_a_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
-            pool::merge_coin(coins_a),
+            coin_a,
             amount_a_64,
             amount_b_64,
             amount_c_64,
