@@ -17,7 +17,7 @@ module turbos_clmm::pool_fetcher {
         ctx: &mut TxContext,
     ): ComputeSwapState {
         pool::check_version(versioned);
-        pool::compute_swap_result(
+        let state = pool::compute_swap_result(
             pool,
             tx_context::sender(ctx),
             a_to_b,
@@ -25,8 +25,10 @@ module turbos_clmm::pool_fetcher {
             amount_specified_is_input,
             sqrt_price_limit,
             true,
+            0,
             clock,
             ctx,
-        )
+        );
+        pool::convert_state_v2_to_v1(&state)
     }
 }
