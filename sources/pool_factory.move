@@ -13,12 +13,14 @@ module turbos_clmm::pool_factory {
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Coin};
     use turbos_clmm::position_manager::{Self, Positions};
+    use turbos_clmm::position_nft::{Self, TurbosPositionNFT};
     use turbos_clmm::fee::{Self, Fee};
     use sui::clock::{Clock};
     use turbos_clmm::pool::{Self, Pool, Versioned};
     use std::string::{Self, String};
     use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self};
+    use std::option::{Self, Option};
     
     const EFeeNotExists: u64 = 0;
     const EInvalidFee: u64 = 1;
@@ -168,6 +170,94 @@ module turbos_clmm::pool_factory {
 
     }
 
+    public fun deploy_pool_and_mint_with_return_<CoinTypeA, CoinTypeB, FeeType>(
+        pool_config: &mut PoolConfig,
+        feeType: &Fee<FeeType>,
+        sqrt_price: u128,
+        positions: &mut Positions,
+        coins_a: vector<Coin<CoinTypeA>>,
+        coins_b: vector<Coin<CoinTypeB>>,
+        tick_lower_index: u32,
+        tick_lower_index_is_neg: bool,
+        tick_upper_index: u32,
+        tick_upper_index_is_neg: bool,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (TurbosPositionNFT, Coin<CoinTypeA>, Coin<CoinTypeB>, ID) {
+        pool::check_version(versioned);
+
+        let coin_type_a = type_name::get<CoinTypeA>();
+        let coin_type_b = type_name::get<CoinTypeB>();
+        assert!(coin_type_a != coin_type_b, ERepeatedType);
+
+        let fee_type = type_name::get<FeeType>();
+        let fee_type_str = string::from_ascii(type_name::into_string(fee_type));
+        assert!(vec_map::contains(&pool_config.fee_map, &fee_type_str), EFeeNotExists);
+
+        let pool_key = pool_key<CoinTypeA, CoinTypeB, FeeType>(coin_type_a, coin_type_b, fee_type);
+        assert!(!table::contains(&pool_config.pools, pool_key), EPoolAlreadyExists);
+
+        let fee = fee::get_fee(feeType);
+        let tick_spacing = fee::get_tick_spacing(feeType);
+
+        let pool = pool::deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
+            fee,
+            tick_spacing,
+            sqrt_price,
+            pool_config.fee_protocol,
+            clock,
+            ctx,
+        );
+
+        event::emit(PoolCreatedEvent {
+            account: tx_context::sender(ctx),
+            pool: object::id(&pool),
+            fee: fee,
+            tick_spacing: tick_spacing,
+            fee_protocol: pool_config.fee_protocol,
+            sqrt_price: sqrt_price,
+        });
+
+        let (nft, coin_a_left, coin_b_left) = position_manager::mint_with_return_(
+            &mut pool,
+            positions,
+            coins_a,
+            coins_b,
+            tick_lower_index,
+            tick_lower_index_is_neg,
+            tick_upper_index,
+            tick_upper_index_is_neg,
+            amount_a_desired,
+            amount_b_desired,
+            amount_a_min,
+            amount_b_min,
+            deadline,
+            clock,
+            versioned,
+            ctx
+        );
+
+        let pool_id = object::id(&pool);
+        table::add(&mut pool_config.pools, pool_key, PoolSimpleInfo {
+            pool_id: pool_id,
+            pool_key: pool_key,
+            coin_type_a: coin_type_a,
+            coin_type_b: coin_type_b,
+            fee_type: fee_type,
+            fee: fee,
+            tick_spacing: tick_spacing,
+        });
+        transfer::public_share_object(pool);
+
+        (nft, coin_a_left, coin_b_left, pool_id)
+    }
+
     public entry fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
         pool_config: &mut PoolConfig,
         feeType: &Fee<FeeType>,
@@ -219,6 +309,21 @@ module turbos_clmm::pool_factory {
             sqrt_price: sqrt_price,
         });
         transfer::public_share_object(pool);
+    }
+
+    public fun get_pool_id<CoinTypeA, CoinTypeB, FeeType>(
+        pool_config: &mut PoolConfig,
+    ): Option<ID> {
+        let coin_type_a = type_name::get<CoinTypeA>();
+        let coin_type_b = type_name::get<CoinTypeB>();
+        let fee_type = type_name::get<FeeType>();
+        let pool_key = pool_key<CoinTypeA, CoinTypeB, FeeType>(coin_type_a, coin_type_b, fee_type);
+        if (table::contains(&pool_config.pools, pool_key)) {
+            let pool_info = table::borrow(&pool_config.pools, pool_key);
+            option::some(pool_info.pool_id)
+        } else {
+            option::none()
+        }
     }
 
     fun pool_key<CoinTypeA, CoinTypeB, FeeType>(
