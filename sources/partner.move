@@ -11,6 +11,8 @@ module turbos_clmm::partner {
     use sui::clock::{Self, Clock};
 	use sui::coin::{Self, Coin};
 
+    friend turbos_clmm::pool_factory;
+
 	struct PartnerAdminCap has key, store { 
 		id: UID
 	}
@@ -75,6 +77,9 @@ module turbos_clmm::partner {
 
 
     fun init(ctx: &mut TxContext) {
+    }
+
+    public(friend) fun init_partners(ctx: &mut TxContext) {
         let partners = Partners{
             id       : object::new(ctx),
             partners : vec_map::empty<String, ID>(),

@@ -111,11 +111,6 @@ module turbos_clmm::swap_router {
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
-        if (a_to_b) {
-            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
-        } else {
-            assert!(coin::value(&coin_b) >= amount, ECoinsNotGatherThanAmount);
-        };
         let (coin_a_return, coin_b_return, receipt) = pool::flash_swap_partner(
             pool,
             partner,
@@ -130,9 +125,9 @@ module turbos_clmm::swap_router {
 
         let pay_amount = pool::flash_swap_pay_amount<CoinTypeA, CoinTypeB>(&receipt);
         let receive_amount = if (a_to_b) {
-            coin::value<CoinTypeB>(&coin_b_return)
+            coin::value(&coin_b_return)
         } else {
-            coin::value<CoinTypeA>(&coin_a_return)
+            coin::value(&coin_a_return)
         };
         if (is_exact_in) {
             assert!(pay_amount == amount, ECoinsNotGatherThanAmount);

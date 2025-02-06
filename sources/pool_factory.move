@@ -21,6 +21,7 @@ module turbos_clmm::pool_factory {
     use sui::table::{Self, Table};
     use turbos_clmm::i32::{Self};
     use std::option::{Self, Option};
+    use turbos_clmm::partner::{Self};
     
     const EFeeNotExists: u64 = 0;
     const EInvalidFee: u64 = 1;
@@ -633,6 +634,13 @@ module turbos_clmm::pool_factory {
             clock,
             ctx
         );
+    }
+
+    public entry fun init_partners(
+        _: &PoolFactoryAdminCap,
+        ctx: &mut TxContext
+    ) {
+        partner::init_partners(ctx)
     }
 
     #[test_only]
