@@ -59,7 +59,8 @@ module turbos_clmm::pool {
     const EWrongVersion: u64 = 23;
     const ERepayWrongPool: u64 = 24;
     const ERepayWrongAmount: u64 = 25;
-    const ERepayWrongPartner: u64 = 26;
+    const EInsufficientLiquidity: u64 = 26;
+    const ERepayWrongPartner: u64 = 27;
 
     const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
@@ -757,6 +758,7 @@ module turbos_clmm::pool {
         };
 
         if (!dry_run) {
+            assert!(state.liquidity > 0, EInsufficientLiquidity);
             if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
                 pool.sqrt_price = state.sqrt_price;
                 pool.tick_current_index = state.tick_current_index;
