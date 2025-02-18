@@ -3,13 +3,20 @@ module turbos_clmm::partner {
 	use sui::event;
 	use sui::transfer;
 	use sui::object::{Self, UID, ID};
-    use sui::vec_map::{Self, VecMap};
+    use sui::vec_map::{Self};
     use std::string::{Self, String};
-    use sui::bag::{Self, Bag};
-    use sui::balance::{Self, Balance};
+    use sui::bag::{Self};
+    use sui::balance::{Self};
     use sui::tx_context::{Self, TxContext};
     use sui::clock::{Self, Clock};
 	use sui::coin::{Self, Coin};
+
+    const EPartnerAlreadyExists: u64 = 1;
+    const EInvalidReferralFeeRate: u64 = 2;
+    const EPartnerNameEmpty: u64 = 3;
+    const EInvalidTime: u64 = 4;
+    const EInvalidPartner: u64 = 5;
+    const EEmptyPartnerFee: u64 = 6;
 
     friend turbos_clmm::pool_factory;
 
@@ -76,7 +83,7 @@ module turbos_clmm::partner {
     }
 
 
-    fun init(ctx: &mut TxContext) {
+    fun init(_ctx: &mut TxContext) {
     }
 
     public(friend) fun init_partners(ctx: &mut TxContext) {
@@ -92,9 +99,9 @@ module turbos_clmm::partner {
     }
 
     public fun claim_ref_fee<CoinType>(partner_cap: &PartnerCap, partner: &mut Partner, ctx: &mut TxContext) {
-        assert!(partner_cap.partner_id == object::id<Partner>(partner), 4);
+        assert!(partner_cap.partner_id == object::id<Partner>(partner), EInvalidPartner);
         let coin_name = string::from_ascii(type_name::into_string(type_name::get<CoinType>()));
-        assert!(bag::contains<String>(&partner.balances, coin_name), 5);
+        assert!(bag::contains<String>(&partner.balances, coin_name), EEmptyPartnerFee);
 		let balance = bag::remove<String, balance::Balance<CoinType>>(&mut partner.balances, coin_name);
 		let amount = balance::value<CoinType>(&balance);
         transfer::public_transfer<Coin<CoinType>>(coin::from_balance<CoinType>(balance, ctx), tx_context::sender(ctx));
@@ -117,11 +124,11 @@ module turbos_clmm::partner {
 		clock: &Clock, 
 		ctx: &mut TxContext
 	) {
-        assert!(end_time > start_time, 2);
-        assert!(start_time >= clock::timestamp_ms(clock) / 1000, 2);
-        assert!(ref_fee_rate < 10000, 3);
-        assert!(!string::is_empty(&name), 6);
-        assert!(!vec_map::contains<String, ID>(&partners.partners, &name), 1);
+        assert!(end_time > start_time, EInvalidTime);
+        assert!(end_time >= clock::timestamp_ms(clock) / 1000, EInvalidTime);
+        assert!(ref_fee_rate < 10000, EInvalidReferralFeeRate);
+        assert!(!string::is_empty(&name), EPartnerNameEmpty);
+        assert!(!vec_map::contains<String, ID>(&partners.partners, &name), EPartnerAlreadyExists);
         let partner = Partner{
             id           : object::new(ctx),
             name         : name,
@@ -200,9 +207,9 @@ module turbos_clmm::partner {
 		_admin_cap: &PartnerAdminCap, 
 		partner: &mut Partner, 
 		new_fee_rate: u64, 
-		ctx: &TxContext
+		_ctx: &TxContext
 	) {
-        assert!(new_fee_rate < 10000, 3);
+        assert!(new_fee_rate < 10000, EInvalidReferralFeeRate);
         let old_fee_rate = partner.ref_fee_rate;
         partner.ref_fee_rate = new_fee_rate;
         let event = UpdateRefFeeRateEvent{
@@ -219,10 +226,10 @@ module turbos_clmm::partner {
 		start_time: u64, 
 		end_time: u64, 
 		clock: &Clock, 
-		ctx: &mut TxContext
+		_ctx: &mut TxContext
 	) {
-        assert!(end_time > start_time, 2);
-        assert!(end_time > clock::timestamp_ms(clock) / 1000, 2);
+        assert!(end_time > start_time, EInvalidTime);
+        assert!(end_time > clock::timestamp_ms(clock) / 1000, EInvalidTime);
         partner.start_time = start_time;
         partner.end_time = end_time;
         let event = UpdateTimeRangeEvent{
