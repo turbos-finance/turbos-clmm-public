@@ -27,6 +27,7 @@ module turbos_clmm::pool {
     use turbos_clmm::math_bit;
     use sui::table::{Self, Table};
     use sui::clock::{Self, Clock};
+    use turbos_clmm::partner::{Self, Partner};
 
     friend turbos_clmm::position_manager;
     friend turbos_clmm::pool_factory;
@@ -34,7 +35,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 9;
+    const VERSION: u64 = 10;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -58,6 +59,8 @@ module turbos_clmm::pool {
     const EWrongVersion: u64 = 23;
     const ERepayWrongPool: u64 = 24;
     const ERepayWrongAmount: u64 = 25;
+    const EInsufficientLiquidity: u64 = 26;
+    const ERepayWrongPartner: u64 = 27;
 
     const MAX_TICK_INDEX: u32 = 443636;
     const Q64: u128 = 0x10000000000000000;
@@ -148,10 +151,32 @@ module turbos_clmm::pool {
         fee_amount: u128,
     }
 
+    struct ComputeSwapStateV2 has copy, drop {
+        amount_a: u128,
+        amount_b: u128, 
+        amount_specified_remaining: u128,
+        amount_calculated: u128,
+        sqrt_price: u128,
+        tick_current_index: I32,
+        fee_growth_global: u128,
+        protocol_fee: u128,
+        liquidity: u128,
+        fee_amount: u128,
+        partner_fee_amount: u128,
+    }
+
     struct FlashSwapReceipt<phantom CoinTypeA, phantom CoinTypeB> {
         pool_id: ID,
         a_to_b: bool,
         pay_amount: u64,
+    }
+
+    struct FlashSwapReceiptPartner<phantom CoinTypeA, phantom CoinTypeB> {
+        pool_id: ID,
+        a_to_b: bool,
+        pay_amount: u64,
+        partner_id: ID,
+        partner_fee_amount: u64,
     }
 
     struct SwapEvent has copy, drop {
@@ -455,6 +480,7 @@ module turbos_clmm::pool {
             amount_specified_is_input,
             sqrt_price_limit,
             false,
+            0,
             clock,
             ctx
         );
@@ -483,6 +509,7 @@ module turbos_clmm::pool {
             amount_specified_is_input,
             sqrt_price_limit,
             false,
+            0,
             clock,
             ctx
         );
@@ -502,6 +529,53 @@ module turbos_clmm::pool {
                 pool_id: object::id(pool),
                 a_to_b: a_to_b,
                 pay_amount: pay_amount,
+            }
+        )
+    }
+
+    public fun flash_swap_partner<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        partner: &Partner,
+        a_to_b: bool,
+        amount_specified: u128,
+        amount_specified_is_input: bool,
+        sqrt_price_limit: u128,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>, FlashSwapReceiptPartner<CoinTypeA, CoinTypeB>) {
+        check_version(versioned);
+        assert!(pool.unlocked, EPoolLocked);
+        let state = compute_swap_result(
+            pool,
+            @0x0,
+            a_to_b,
+            amount_specified,
+            amount_specified_is_input,
+            sqrt_price_limit,
+            false,
+            partner::current_ref_fee_rate(partner, clock::timestamp_ms(clock) / 1000),
+            clock,
+            ctx
+        );
+
+        let (coin_a_output, coin_b_output, pay_amount) = if (a_to_b) {
+            let balance_b_output = balance::split(&mut pool.coin_b, (state.amount_b as u64));
+            (coin::zero<CoinTypeA>(ctx), coin::from_balance(balance_b_output, ctx), (state.amount_a as u64))
+        } else {
+            let balance_a_output = balance::split(&mut pool.coin_a, (state.amount_a as u64));
+            (coin::from_balance(balance_a_output, ctx), coin::zero<CoinTypeB>(ctx), (state.amount_b as u64))
+        };
+        
+        (
+            coin_a_output, 
+            coin_b_output,
+            FlashSwapReceiptPartner<CoinTypeA, CoinTypeB> {
+                pool_id: object::id(pool),
+                a_to_b: a_to_b,
+                pay_amount: pay_amount,
+                partner_id: object::id(partner),
+                partner_fee_amount: (state.partner_fee_amount as u64)
             }
         )
     }
@@ -530,6 +604,42 @@ module turbos_clmm::pool {
         }
     }
 
+    public fun repay_flash_swap_partner<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        partner: &mut Partner,
+        coin_a: Coin<CoinTypeA>,
+        coin_b: Coin<CoinTypeB>,
+        receipt: FlashSwapReceiptPartner<CoinTypeA, CoinTypeB>,
+        versioned: &Versioned,
+    ) {
+        check_version(versioned);
+        let FlashSwapReceiptPartner { pool_id, a_to_b, pay_amount, partner_id, partner_fee_amount } = receipt;
+        assert!(pool.unlocked, EPoolLocked);
+        assert!(pool_id == object::id(pool), ERepayWrongPool);
+        assert!(partner_id == object::id(partner), ERepayWrongPartner);
+        let coin_a_balance = coin::into_balance(coin_a);
+        let coin_b_balance = coin::into_balance(coin_b);
+        if (a_to_b) {
+            assert!(balance::value(&coin_a_balance) == pay_amount, ERepayWrongAmount);
+            if (partner_fee_amount > 0) {
+                partner::receive_ref_fee(partner, balance::split<CoinTypeA>(&mut coin_a_balance, partner_fee_amount));
+            };
+            balance::join(&mut pool.coin_a, coin_a_balance);
+            balance::destroy_zero(coin_b_balance);
+        } else {
+            assert!(balance::value(&coin_b_balance) == pay_amount, ERepayWrongAmount);
+            if (partner_fee_amount > 0) {
+                partner::receive_ref_fee(partner, balance::split<CoinTypeB>(&mut coin_b_balance, partner_fee_amount));
+            };
+            balance::join(&mut pool.coin_b, coin_b_balance);
+            balance::destroy_zero(coin_a_balance);
+        }
+    }
+
+    public fun flash_swap_pay_amount<CoinTypeA, CoinTypeB>(swap_receipt: &FlashSwapReceiptPartner<CoinTypeA, CoinTypeB>): u64 {
+        swap_receipt.pay_amount
+    }
+
     public(friend) fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
@@ -538,9 +648,10 @@ module turbos_clmm::pool {
         amount_specified_is_input: bool,
         sqrt_price_limit: u128,
         dry_run: bool,
+        partner_ref_fee_rate: u64,
         clock: &Clock,
         ctx: &mut TxContext,
-    ): ComputeSwapState {
+    ): ComputeSwapStateV2 {
         assert!(pool.unlocked, EPoolLocked);
         assert!(amount_specified != 0, ESwapAmountSpecifiedZero);
         if (sqrt_price_limit < MIN_SQRT_PRICE || sqrt_price_limit > MAX_SQRT_PRICE) abort ESqrtPriceOutOfBounds;
@@ -551,7 +662,7 @@ module turbos_clmm::pool {
         let tick_pre_index = pool.tick_current_index;
 
         //state
-        let state = ComputeSwapState {
+        let state = ComputeSwapStateV2 {
             amount_a: 0,
             amount_b: 0,
             amount_specified_remaining: amount_specified,
@@ -562,6 +673,7 @@ module turbos_clmm::pool {
             protocol_fee: 0,
             liquidity: pool.liquidity,
             fee_amount: 0,
+            partner_fee_amount: 0,
         };
 
         while (state.amount_specified_remaining > 0 && state.sqrt_price !=sqrt_price_limit) {
@@ -644,9 +756,9 @@ module turbos_clmm::pool {
                 break
             };
         };
-        //assert!(state.liquidity > 0, EInsufficientLiquidity);
-        
+
         if (!dry_run) {
+            assert!(state.liquidity > 0, EInsufficientLiquidity);
             if (!i32::eq(state.tick_current_index, pool.tick_current_index)) {
                 pool.sqrt_price = state.sqrt_price;
                 pool.tick_current_index = state.tick_current_index;
@@ -655,16 +767,19 @@ module turbos_clmm::pool {
             };
 
             if (pool.liquidity != state.liquidity) pool.liquidity = state.liquidity;
-
+       
+            if (partner_ref_fee_rate > 0) {
+                state.partner_fee_amount = full_math_u128::mul_div_floor(state.protocol_fee, (partner_ref_fee_rate as u128), 10000);
+            };
             if (a_to_b) {
                 pool.fee_growth_global_a = state.fee_growth_global;
                 if (state.protocol_fee > 0) {
-                    pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64);
+                    pool.protocol_fees_a = pool.protocol_fees_a + (state.protocol_fee as u64) - (state.partner_fee_amount as u64);
                 };
             } else {
                 pool.fee_growth_global_b = state.fee_growth_global;
                 if (state.protocol_fee > 0) {
-                    pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64);
+                    pool.protocol_fees_b = pool.protocol_fees_b + (state.protocol_fee as u64) - (state.partner_fee_amount as u64);
                 };
             };
         };
@@ -693,6 +808,21 @@ module turbos_clmm::pool {
         });
 
         state
+    }
+
+    public(friend) fun convert_state_v2_to_v1(state: &ComputeSwapStateV2): ComputeSwapState {
+        ComputeSwapState {
+            amount_a: state.amount_a,
+            amount_b: state.amount_b,
+            amount_specified_remaining: state.amount_specified_remaining,
+            amount_calculated: state.amount_calculated,
+            sqrt_price: state.sqrt_price,
+            tick_current_index: state.tick_current_index,
+            fee_growth_global: state.fee_growth_global,
+            protocol_fee: state.protocol_fee,
+            liquidity: state.liquidity,
+            fee_amount: state.fee_amount,
+        }
     }
 
     public(friend) fun toggle_pool_status<CoinTypeA, CoinTypeB, FeeType>(
