@@ -220,7 +220,7 @@ module turbos_clmm::position_manager {
             ctx,
         );
         let nft_address = object::id_address(&nft);
-        let position_key = pool::get_position_key(nft_address, tick_lower_index_i32, tick_upper_index_i32);
+        let position_key = pool::get_position_key_fix(pool, nft_address, tick_lower_index_i32, tick_upper_index_i32);
 
         let (liquidity_delta, amount_a, amount_b, coin_a_left, coin_b_left) = add_liquidity_with_return_(
             pool,
@@ -447,7 +447,7 @@ module turbos_clmm::position_manager {
         );
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
-        let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+        let position_key =  pool::get_position_key_fix(pool, position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
 
         event::emit(IncreaseLiquidityEvent {
@@ -530,7 +530,7 @@ module turbos_clmm::position_manager {
 
         assert!(amount_a >= amount_a_min && amount_b >= amount_b_min, EPriceSlippageCheck);
 
-        let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+        let position_key =  pool::get_position_key_fix(pool, position_owner, position.tick_lower_index, position.tick_upper_index);
         copy_position(pool, position_key, position);
 
         let (coin_a, coin_b) = pool::split_out_and_return_(
@@ -614,7 +614,7 @@ module turbos_clmm::position_manager {
                 clock,
                 ctx,
             );
-            let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+            let position_key = pool::get_position_key_fix(pool, position_owner, position.tick_lower_index, position.tick_upper_index);
             copy_position(pool, position_key, position);
         };
         let (tokens_owed_a, tokens_owed_b) = (position.tokens_owed_a, position.tokens_owed_b);
@@ -722,7 +722,7 @@ module turbos_clmm::position_manager {
                 clock,
                 ctx,
             );
-            let position_key = pool::get_position_key(position_owner, position.tick_lower_index, position.tick_upper_index);
+            let position_key =  pool::get_position_key_fix(pool, position_owner, position.tick_lower_index, position.tick_upper_index);
             copy_position(pool, position_key, position);
         };
 
@@ -851,6 +851,56 @@ module turbos_clmm::position_manager {
         )
     }
 
+    public(friend) fun decrease_liquidity_admin<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        position_owner: address,
+        liquidity: u128,
+        tick_lower_index: u32,
+        tick_lower_index_is_neg: bool,
+        tick_upper_index: u32,
+        tick_upper_index_is_neg: bool,
+        user_address: address,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        let tick_lower_index_i32 = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
+        let tick_upper_index_i32 = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
+        let position_key =  pool::get_position_key_fix(pool, position_owner, tick_lower_index_i32, tick_upper_index_i32);
+
+        let (amount_a, amount_b) = pool::burn(
+            pool,
+            position_owner,
+            tick_lower_index_i32,
+            tick_upper_index_i32,
+            liquidity,
+            clock,
+            ctx,
+        );
+
+        if (dof::exists_(&positions.id, position_owner)) {
+            let position = dof::borrow_mut<address, Position>(&mut positions.id, position_owner);
+            copy_position(pool, position_key, position);
+        };
+
+        let (coin_a, coin_b) = pool::split_out_and_return_(
+            pool,
+            amount_a,
+            amount_b,
+            ctx
+        );
+
+        event::emit(DecreaseLiquidityEvent {
+            pool: object::id(pool),
+            amount_a: amount_a,
+            amount_b: amount_b,
+            liquidity: liquidity,
+        });
+
+        transfer::public_transfer(coin_a, user_address);
+        transfer::public_transfer(coin_b, user_address);
+    }
+
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         positions: &mut Positions,
@@ -865,8 +915,8 @@ module turbos_clmm::position_manager {
         //base nft possition must not exist in pool
         assert!(!pool::check_position_exists(pool, base_nft_address, tick_lower_index, tick_upper_index), EPositionAlreadyExists);
 
-        let old_key = pool::get_position_key(owned, tick_lower_index, tick_upper_index);
-        let new_key = pool::get_position_key(base_nft_address, tick_lower_index, tick_upper_index);
+        let old_key =  pool::get_position_key_fix(pool,owned, tick_lower_index, tick_upper_index);
+        let new_key =  pool::get_position_key_fix(pool,base_nft_address, tick_lower_index, tick_upper_index);
 
         //copy pool position to base nft position
         copy_position_with_address(pool, positions, old_key, base_nft_address); 

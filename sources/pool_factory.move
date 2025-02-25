@@ -539,6 +539,36 @@ module turbos_clmm::pool_factory {
 
     }
 
+    public entry fun decrease_liquidity_admin<CoinTypeA, CoinTypeB, FeeType>(
+         _: &PoolFactoryAdminCap,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        positions: &mut Positions,
+        position_owner: address,
+        liquidity: u128,
+        tick_lower_index: u32,
+        tick_lower_index_is_neg: bool,
+        tick_upper_index: u32,
+        tick_upper_index_is_neg: bool,
+        user_address: address,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
+        pool::check_version(versioned);
+        position_manager::decrease_liquidity_admin(
+            pool,
+            positions,
+            position_owner,
+            liquidity,
+            tick_lower_index,
+            tick_lower_index_is_neg,
+            tick_upper_index,
+            tick_upper_index_is_neg,
+            user_address,
+            clock,
+            ctx,
+        );
+    }
     /// deprecated
     public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
     	_: &PoolFactoryAdminCap,

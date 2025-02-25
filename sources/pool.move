@@ -1398,7 +1398,7 @@ module turbos_clmm::pool {
         tick_upper_index: I32,
         ctx: &mut TxContext
     ) {
-        let key = get_position_key(owner, tick_lower_index, tick_upper_index);
+        let key = get_position_key_fix(pool, owner, tick_lower_index, tick_upper_index);
         if (!dof::exists_(&pool.id, key)) {
             let reward_infos = vector::empty<PositionRewardInfo>();
             let i = 0;
@@ -1480,9 +1480,10 @@ module turbos_clmm::pool {
             ctx
         );
 
+        let key = get_position_key_fix(pool, owner, tick_lower_index, tick_upper_index);
         update_position_metadata(
             pool, 
-            get_position_key(owner, tick_lower_index, tick_upper_index),
+            key,
             liquidity_delta, 
             fee_growth_inside_a, 
             fee_growth_inside_b, 
@@ -1812,7 +1813,8 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
     ): &Position {
-        get_position_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
+        let key = get_position_key_fix(pool, owner, tick_lower_index, tick_upper_index);
+        get_position_by_key(pool, key)
     }
 
     public fun check_position_exists<CoinTypeA, CoinTypeB, FeeType>(
@@ -1821,7 +1823,17 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
     ): bool {
-        let key = get_position_key(owner, tick_lower_index, tick_upper_index);
+        let key = get_position_key_fix(pool, owner, tick_lower_index, tick_upper_index);
+        return dof::exists_(&pool.id, key)
+    }
+
+    public fun check_position_exists_old<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+    ): bool {
+        let key = get_position_key_old(owner, tick_lower_index, tick_upper_index);
         return dof::exists_(&pool.id, key)
     }
 
@@ -1831,7 +1843,8 @@ module turbos_clmm::pool {
         tick_lower_index: I32,
         tick_upper_index: I32,
     ): &mut Position {
-        get_position_mut_by_key(pool, get_position_key(owner, tick_lower_index, tick_upper_index))
+        let key = get_position_key_fix(pool, owner, tick_lower_index, tick_upper_index);
+        get_position_mut_by_key(pool, key)
     }
 
     fun get_position_by_key<CoinTypeA, CoinTypeB, FeeType>(
@@ -1848,12 +1861,51 @@ module turbos_clmm::pool {
         dof::borrow_mut<String, Position>(&mut pool.id, key)
     }
 
+    public fun get_position_key_fix<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+    ): String {
+        let old_key =  string_tools::get_position_key_old(
+            owner, 
+            i32::abs_u32(tick_lower_index),
+            i32::is_neg(tick_lower_index),
+            i32::abs_u32(tick_upper_index),
+            i32::is_neg(tick_upper_index)
+        );
+        if (dof::exists_(&pool.id, old_key)) {
+            return old_key
+        };
+        return string_tools::get_position_key(
+            owner, 
+            i32::abs_u32(tick_lower_index),
+            i32::is_neg(tick_lower_index),
+            i32::abs_u32(tick_upper_index),
+            i32::is_neg(tick_upper_index)
+        )
+    }
+
     public fun get_position_key(
         owner: address,
         tick_lower_index: I32,
         tick_upper_index: I32,
     ): String {
         string_tools::get_position_key(
+            owner, 
+            i32::abs_u32(tick_lower_index),
+            i32::is_neg(tick_lower_index),
+            i32::abs_u32(tick_upper_index),
+            i32::is_neg(tick_upper_index)
+        )
+    }
+
+    public fun get_position_key_old(
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+    ): String {
+        string_tools::get_position_key_old(
             owner, 
             i32::abs_u32(tick_lower_index),
             i32::is_neg(tick_lower_index),
