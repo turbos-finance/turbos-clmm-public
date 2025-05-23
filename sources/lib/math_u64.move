@@ -3,9 +3,11 @@ module turbos_clmm::math_u64 {
 
     const HI_64_MASK: u128 = 0xffffffffffffffff0000000000000000;
     const LO_64_MASK: u128 = 0x0000000000000000ffffffffffffffff;
+    const EOverflow: u64 = 0;
 
     public fun wrapping_add(n1: u64, n2: u64): u64 {
-        let (sum, _) = overflowing_add(n1, n2);
+        let (sum, o) = overflowing_add(n1, n2);
+        assert!(!o, EOverflow);
         sum
     }
 

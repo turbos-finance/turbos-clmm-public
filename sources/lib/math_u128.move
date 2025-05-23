@@ -6,10 +6,12 @@ module turbos_clmm::math_u128 {
     const HI_64_MASK: u128 = 0xffffffffffffffff0000000000000000;
     const LO_64_MASK: u128 = 0x0000000000000000ffffffffffffffff;
 
+    const EOverflow: u64 = 0;
     const DIV_BY_ZERO: u64 = 1;
 
     public fun wrapping_add(n1: u128, n2: u128): u128 {
-        let (sum, _) = overflowing_add(n1, n2);
+        let (sum, o) = overflowing_add(n1, n2);
+        assert!(!o, EOverflow);
         sum
     }
 
