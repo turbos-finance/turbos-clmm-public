@@ -84,6 +84,16 @@ module turbos_clmm::pool {
         initialized: bool,
     }
 
+    struct TickInfo has copy, drop {
+        id: ID,
+        liquidity_gross: u128,
+        liquidity_net: I128,
+        fee_growth_outside_a: u128,
+        fee_growth_outside_b: u128,
+        reward_growths_outside: vector<u128>,
+        initialized: bool,
+    }
+
     struct PositionRewardInfo has store {
         reward_growth_inside: u128,
         amount_owed: u64,
@@ -1859,6 +1869,45 @@ module turbos_clmm::pool {
         key: String
     ): &mut Position {
         dof::borrow_mut<String, Position>(&mut pool.id, key)
+    }
+
+    public fun fetch_ticks<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        start_index: I32,
+        limit: u64,
+        versioned: &Versioned,
+    ): vector<TickInfo> {
+        check_version(versioned);
+        let tick_end_index = i32::from_u32(MAX_TICK_INDEX);
+        let tick_spacing = pool.tick_spacing;
+        start_index = i32::sub(start_index, i32::mod_euclidean(start_index, tick_spacing));
+
+        let ticks = vector::empty<TickInfo>();
+        let current_tick = start_index;
+        let i = 0;
+        while (i32::lte(current_tick, tick_end_index) && i < limit) {
+            let (next_tick, initialized) = next_initialized_tick_within_one_word(
+                pool,
+                current_tick,
+                false  // right search
+            );
+            
+            if (initialized) {
+                let tick_ref = df::borrow<I32, Tick>(&pool.id, next_tick);
+                vector::push_back(&mut ticks, TickInfo {
+                    id: object::id(tick_ref),
+                    liquidity_gross: tick_ref.liquidity_gross,
+                    liquidity_net: tick_ref.liquidity_net,
+                    fee_growth_outside_a: tick_ref.fee_growth_outside_a,
+                    fee_growth_outside_b: tick_ref.fee_growth_outside_b,
+                    reward_growths_outside: tick_ref.reward_growths_outside,
+                    initialized: tick_ref.initialized,
+                });
+            };
+            current_tick = next_tick;
+            i = i + 1;
+        };
+        ticks
     }
 
     public fun get_position_key_fix<CoinTypeA, CoinTypeB, FeeType>(
