@@ -156,6 +156,15 @@ module turbos_clmm::math_u128 {
         res
     }
 
+    public fun checked_shlw(n: u128): (u128, bool) {
+        let mask = 1 << 64;
+        if (n >= mask) {
+            (0, true)
+        } else {
+            (n << 64, false)
+        }
+    }
+
     #[test]
     fun test_overflowing_add() {
         let (m, o) = overflowing_add(10, 10);

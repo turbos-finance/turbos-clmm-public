@@ -4,8 +4,10 @@
 module turbos_clmm::math_liquidity {
     use turbos_clmm::full_math_u128;
     use turbos_clmm::i128::{Self, I128};
+    use turbos_clmm::math_u128;
 
     const EAddDelta: u64 = 0;
+    const EOverflow: u64 = 1;
 
     const Q64: u128 = 0x10000000000000000;
     const RESOLUTION: u8 = 64;
@@ -101,9 +103,11 @@ module turbos_clmm::math_liquidity {
         liquidity: u128
     ): u128 {
         if (sqrt_price_a > sqrt_price_b) (sqrt_price_a, sqrt_price_b) = (sqrt_price_b, sqrt_price_a);
+        let (shifted_liquidity, overflow) = math_u128::checked_shlw(liquidity);
+        assert!(!overflow, EOverflow);
 
         full_math_u128::mul_div_floor(
-            liquidity << RESOLUTION,
+            shifted_liquidity,
             sqrt_price_b - sqrt_price_a,
             sqrt_price_b
         ) / sqrt_price_a
