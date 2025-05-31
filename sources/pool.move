@@ -340,7 +340,7 @@ module turbos_clmm::pool {
     }
 
     public fun check_version(versioned: &Versioned) {
-        assert!(versioned.version == VERSION, EWrongVersion);
+        assert!(VERSION >= versioned.version, EWrongVersion);
     }
 
     public(friend) fun deploy_pool<CoinTypeA, CoinTypeB, FeeType>(
