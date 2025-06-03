@@ -8,9 +8,11 @@ module turbos_clmm::pool_fetcher {
     use turbos_clmm::pool::{Self, Pool, ComputeSwapState, Versioned, TickInfo};
     use turbos_clmm::i32::{Self, I32};
     use sui::event;
+    use std::option::{Option};
 
     struct FetchTicksResultEvent has copy, drop {
         ticks: vector<TickInfo>,
+        next_cursor: Option<I32>,
     }
 
     public entry fun compute_swap_result<CoinTypeA, CoinTypeB, FeeType>(
@@ -52,7 +54,7 @@ module turbos_clmm::pool_fetcher {
         } else {
             i32::from_u32_neg(*vector::borrow(&start, 0), start_index_is_neg)
         };
-        let ticks = pool::fetch_ticks(pool, start_index, limit, versioned);
-        event::emit(FetchTicksResultEvent { ticks: ticks });
+        let (ticks, next_cursor) = pool::fetch_ticks(pool, start_index, limit);
+        event::emit(FetchTicksResultEvent { ticks: ticks, next_cursor });
     }
 }
