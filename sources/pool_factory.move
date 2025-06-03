@@ -528,15 +528,7 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned);
-        position_manager::migrate_position(
-            pool,
-            positions,
-            nfts,
-            owned,
-            ctx
-        ); 
-
+        abort(0)
     }
 
     public entry fun decrease_liquidity_admin<CoinTypeA, CoinTypeB, FeeType>(
@@ -554,20 +546,7 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned);
-        position_manager::decrease_liquidity_admin(
-            pool,
-            positions,
-            position_owner,
-            liquidity,
-            tick_lower_index,
-            tick_lower_index_is_neg,
-            tick_upper_index,
-            tick_upper_index_is_neg,
-            user_address,
-            clock,
-            ctx,
-        );
+        abort(0)
     }
     /// deprecated
     public entry fun modify_tick_reward<CoinTypeA, CoinTypeB, FeeType>(
@@ -589,12 +568,7 @@ module turbos_clmm::pool_factory {
         tick_index_is_neg: bool,
         versioned: &Versioned,
     ) {
-        pool::check_version(versioned);
-        let tick = i32::from_u32_neg(tick_index, tick_index_is_neg);
-        pool::modify_tick(
-            pool,
-            tick,
-        );
+        abort(0)
     } 
 
     public entry fun modify_reward<CoinTypeA, CoinTypeB, FeeType>(
@@ -610,34 +584,7 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext,
     ) {
-        pool::check_version(versioned);
-        let tick_lower = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
-        let tick_upper = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
-        pool::modify_tick_reward(
-            pool,
-            tick_lower,
-            tick_upper,
-        );
-        while(vector::length(&owners) > 0) {
-            let owner_address = vector::pop_back(&mut owners);
-            pool::modify_position_reward_inside(
-                pool, 
-                tick_lower, 
-                tick_upper, 
-                owner_address,
-                0,
-                0
-            );
-        };
-        while(vector::length(&nfts) > 0) {
-            let nft_address = vector::pop_back(&mut nfts);
-            position_manager::modify_position_reward_inside(
-                positions,
-                nft_address, 
-                0,
-                0
-            );
-        }
+        abort(0)
     }
 
     //just for fix pool state, should remove on next version
@@ -653,17 +600,7 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned);
-        pool::swap(
-            pool,
-            recipient,
-            a_to_b,
-            amount_specified,
-            is_exact_input,
-            sqrt_price_limit,
-            clock,
-            ctx
-        );
+        abort(0)
     }
 
     public entry fun init_partners(

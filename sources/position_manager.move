@@ -864,41 +864,7 @@ module turbos_clmm::position_manager {
         clock: &Clock,
         ctx: &mut TxContext
     ) {
-        let tick_lower_index_i32 = i32::from_u32_neg(tick_lower_index, tick_lower_index_is_neg);
-        let tick_upper_index_i32 = i32::from_u32_neg(tick_upper_index, tick_upper_index_is_neg);
-        let position_key =  pool::get_position_key_fix(pool, position_owner, tick_lower_index_i32, tick_upper_index_i32);
-
-        let (amount_a, amount_b) = pool::burn(
-            pool,
-            position_owner,
-            tick_lower_index_i32,
-            tick_upper_index_i32,
-            liquidity,
-            clock,
-            ctx,
-        );
-
-        if (dof::exists_(&positions.id, position_owner)) {
-            let position = dof::borrow_mut<address, Position>(&mut positions.id, position_owner);
-            copy_position(pool, position_key, position);
-        };
-
-        let (coin_a, coin_b) = pool::split_out_and_return_(
-            pool,
-            amount_a,
-            amount_b,
-            ctx
-        );
-
-        event::emit(DecreaseLiquidityEvent {
-            pool: object::id(pool),
-            amount_a: amount_a,
-            amount_b: amount_b,
-            liquidity: liquidity,
-        });
-
-        transfer::public_transfer(coin_a, user_address);
-        transfer::public_transfer(coin_b, user_address);
+        abort(0)
     }
 
     public(friend) fun migrate_position<CoinTypeA, CoinTypeB, FeeType>(
@@ -908,31 +874,7 @@ module turbos_clmm::position_manager {
         owned: address,
         ctx: &mut TxContext
     ) {
-        let base_nft_address = vector::pop_back(&mut nfts);
-        let (tick_lower_index, tick_upper_index) = get_position_tick_info(positions, base_nft_address);
-        //owned possition must exist in pool
-        assert!(pool::check_position_exists(pool, owned, tick_lower_index, tick_upper_index), EPositionNotExists);
-        //base nft possition must not exist in pool
-        assert!(!pool::check_position_exists(pool, base_nft_address, tick_lower_index, tick_upper_index), EPositionAlreadyExists);
-
-        let old_key =  pool::get_position_key_fix(pool,owned, tick_lower_index, tick_upper_index);
-        let new_key =  pool::get_position_key_fix(pool,base_nft_address, tick_lower_index, tick_upper_index);
-
-        //copy pool position to base nft position
-        copy_position_with_address(pool, positions, old_key, base_nft_address); 
-        //migrate position in pool
-        pool::migrate_position(
-            pool,
-            old_key,
-            new_key,
-            ctx,
-        );
-
-        //clean other position
-        while(vector::length(&nfts) > 0) {
-            let nft_address = vector::pop_back(&mut nfts);
-            clean_position(positions, tick_lower_index, tick_upper_index, nft_address);
-        }
+        abort(0)
     }
 
     public(friend) fun modify_position_reward_inside(
