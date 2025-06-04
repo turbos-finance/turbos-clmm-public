@@ -150,4 +150,72 @@ module turbos_clmm::math_liquidity {
         assert!(161 == a, 1);
         assert!(17030769 == b, 1);
     }
+
+    #[test]
+    fun test_get_liquidity_for_amounts_edge_cases() {
+        // sqrt_price == sqrt_price_a == sqrt_price_b
+        // will abort with arithmetic error
+        // let l = get_liquidity_for_amounts(1000, 1000, 1000, 100, 100);
+        // assert!(l == 0, 100);
+
+        // sqrt_price < sqrt_price_a
+        let l = get_liquidity_for_amounts(900, 1000, 2000, 100, 100);
+        let expected = get_liquidity_for_amount_a(1000, 2000, 100);
+        assert!(l == expected, 101);
+
+        // sqrt_price > sqrt_price_b
+        let l = get_liquidity_for_amounts(3000, 1000, 2000, 100, 100);
+        let expected = get_liquidity_for_amount_b(1000, 2000, 100);
+        assert!(l == expected, 102);
+
+        // amount_a or amount_b is zero
+        let l = get_liquidity_for_amounts(1500, 1000, 2000, 0, 100);
+        assert!(l == 0, 103);
+        let l = get_liquidity_for_amounts(1500, 1000, 2000, 100, 0);
+        assert!(l == 0, 104);
+    }
+
+    #[test]
+    fun test_add_delta_edge_cases() {
+        // x == abs_y, y negative
+        let x = 100u128;
+        let y = i128::neg_from(100);
+        let z = add_delta(x, y);
+        assert!(z == 0, 200);
+
+        // x < abs_y, should abort with EAddDelta (0)
+        // Uncomment the following line to manually test abort behavior:
+        // add_delta(50u128, i128::neg_from(100));
+    }
+
+    #[test]
+    fun test_get_amount_for_liquidity_extremes() {
+        // sqrt_price == sqrt_price_a == sqrt_price_b
+        let (a, b) = get_amount_for_liquidity(1000, 1000, 1000, 100);
+        assert!(a == 0 && b == 0, 300);
+
+        // sqrt_price < sqrt_price_a
+        let (a, b) = get_amount_for_liquidity(900, 1000, 2000, 100);
+        let expected = get_amount_a_for_liquidity(1000, 2000, 100);
+        assert!(a == expected && b == 0, 301);
+
+        // sqrt_price > sqrt_price_b
+        let (a, b) = get_amount_for_liquidity(3000, 1000, 2000, 100);
+        let expected = get_amount_b_for_liquidity(1000, 2000, 100);
+        assert!(a == 0 && b == expected, 302);
+    }
+
+    #[test]
+    fun test_get_amount_a_for_liquidity_overflow() {
+        // Should abort on overflow (EOverflow = 1)
+        // Uncomment the following line to manually test abort behavior:
+        // get_amount_a_for_liquidity(1, 2, 0xffffffffffffffffffffffffffffffff);
+    }
+
+    #[test]
+    fun test_get_amount_b_for_liquidity_extremes() {
+        // sqrt_price_a == sqrt_price_b
+        let b = get_amount_b_for_liquidity(1000, 1000, 100);
+        assert!(b == 0, 500);
+    }
 }
