@@ -75,6 +75,7 @@ module turbos_clmm::i64 {
     }
 
     public fun sub(num1: I64, num2: I64): I64 {
+        assert!(num2.bits != MIN_AS_U64, EOverflow);
         let sub_num = wrapping_add(I64 {
             bits: u64_neg(num2.bits)
         }, from(1));
@@ -492,6 +493,11 @@ module turbos_clmm::i64 {
 
         i = mod(from(2), neg_from(5));
         assert!(cmp(i, from(2)) == EQ, 0);
+    }
+
+    #[test, expected_failure(abort_code = EOverflow)]
+    fun test_sub_min_i64() {
+        sub(from(1),neg_from(MIN_AS_U64));
     }
 }
 

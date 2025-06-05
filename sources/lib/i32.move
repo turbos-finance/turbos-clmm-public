@@ -82,6 +82,7 @@ module turbos_clmm::i32 {
     }
 
     public fun sub(num1: I32, num2: I32): I32 {
+        assert!(num2.bits != MIN_AS_U32, EOverflow);
         let sub_num = wrapping_add(I32 {
             bits: u32_neg(num2.bits)
         }, from(1));
@@ -513,5 +514,11 @@ module turbos_clmm::i32 {
         i = mod_euclidean(from(2), 5);
         assert!(cmp(i, from(2)) == EQ, 0);
     }
+
+    #[test, expected_failure(abort_code = EOverflow)]
+    fun test_sub_min_i32() {
+        sub(from(1),neg_from(MIN_AS_U32));
+    }
+
 }
 
