@@ -3,9 +3,11 @@ module turbos_clmm::math_u64 {
 
     const HI_64_MASK: u128 = 0xffffffffffffffff0000000000000000;
     const LO_64_MASK: u128 = 0x0000000000000000ffffffffffffffff;
+    const EOverflow: u64 = 0;
 
     public fun wrapping_add(n1: u64, n2: u64): u64 {
-        let (sum, _) = overflowing_add(n1, n2);
+        let (sum, o) = overflowing_add(n1, n2);
+        assert!(!o, EOverflow);
         sum
     }
 
@@ -19,7 +21,8 @@ module turbos_clmm::math_u64 {
     }
 
     public fun wrapping_sub(n1: u64, n2: u64): u64 {
-        let (result, _) = overflowing_sub(n1, n2);
+        let (result, o) = overflowing_sub(n1, n2);
+        assert!(!o, EOverflow);
         result
     }
 
@@ -32,7 +35,8 @@ module turbos_clmm::math_u64 {
     }
 
     public fun wrapping_mul(n1: u64, n2: u64): u64 {
-        let (m, _) = overflowing_mul(n1, n2);
+        let (m, o) = overflowing_mul(n1, n2);
+        assert!(!o, EOverflow);
         m
     }
 

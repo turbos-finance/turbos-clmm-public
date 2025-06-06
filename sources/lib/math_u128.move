@@ -6,10 +6,12 @@ module turbos_clmm::math_u128 {
     const HI_64_MASK: u128 = 0xffffffffffffffff0000000000000000;
     const LO_64_MASK: u128 = 0x0000000000000000ffffffffffffffff;
 
+    const EOverflow: u64 = 0;
     const DIV_BY_ZERO: u64 = 1;
 
     public fun wrapping_add(n1: u128, n2: u128): u128 {
-        let (sum, _) = overflowing_add(n1, n2);
+        let (sum, o) = overflowing_add(n1, n2);
+        assert!(!o, EOverflow);
         sum
     }
 
@@ -20,7 +22,8 @@ module turbos_clmm::math_u128 {
     }
     
     public fun wrapping_sub(n1: u128, n2: u128): u128 {
-        let (result, _) = overflowing_sub(n1, n2);
+        let (result, o) = overflowing_sub(n1, n2);
+        assert!(!o, EOverflow);
         result
     }
     
@@ -33,7 +36,8 @@ module turbos_clmm::math_u128 {
     }
     
     public fun wrapping_mul(n1: u128, n2: u128): u128 {
-        let (m, _) = overflowing_mul(n1, n2);
+        let (m, o) = overflowing_mul(n1, n2);
+        assert!(!o, EOverflow);
         m
     }
     
@@ -154,6 +158,15 @@ module turbos_clmm::math_u128 {
         res
     }
 
+    public fun checked_shlw(n: u128): (u128, bool) {
+        let mask = 1 << 64;
+        if (n >= mask) {
+            (0, true)
+        } else {
+            (n << 64, false)
+        }
+    }
+
     #[test]
     fun test_overflowing_add() {
         let (m, o) = overflowing_add(10, 10);
@@ -198,9 +211,10 @@ module turbos_clmm::math_u128 {
         assert!(wrapping_mul(99999, 10) == 10 * 99999, 0);
         assert!(wrapping_mul(MAX_U128, 0) == 0, 0);
         assert!(wrapping_mul(MAX_U128, 1) == MAX_U128, 0);
-        assert!(wrapping_mul(MAX_U128, 10) == 0xfffffffffffffffffffffffffffffff6, 0);
-        assert!(wrapping_mul(10, MAX_U128) == 0xfffffffffffffffffffffffffffffff6, 0);
-        assert!(wrapping_mul(MAX_U128, MAX_U128) == 1, 0);
+        // will abort with overflow error
+        // assert!(wrapping_mul(MAX_U128, 10) == 0xfffffffffffffffffffffffffffffff6, 0);
+        // assert!(wrapping_mul(10, MAX_U128) == 0xfffffffffffffffffffffffffffffff6, 0);
+        // assert!(wrapping_mul(MAX_U128, MAX_U128) == 1, 0);
     }
 
     #[test]

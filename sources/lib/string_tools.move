@@ -30,6 +30,26 @@ module turbos_clmm::string_tools {
         address_str
     }
 
+    public fun get_position_key_old(
+        owner: address, 
+        tick_lower_index: u32, 
+        tick_lower_index_is_neg: bool, 
+        tick_upper_index: u32, 
+        tick_upper_index_is_neg: bool, 
+    ): String {
+        let address_str = address_to_hexstring(&owner);
+        let tick_lower_index_str = u64_to_string((tick_lower_index as u64));
+        let tick_lower_index_is_neg_str = if(tick_lower_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
+        let tick_upper_index_str = u64_to_string((tick_upper_index as u64));
+        let tick_upper_index_is_neg_str = if(tick_upper_index_is_neg) string::utf8(b"-") else string::utf8(b"+");
+        string::append(&mut address_str, tick_lower_index_is_neg_str);
+        string::append(&mut address_str, tick_lower_index_str);
+        string::append(&mut address_str, tick_upper_index_is_neg_str);
+        string::append(&mut address_str, tick_upper_index_str);
+
+        address_str
+    }
+
     public fun address_to_hexstring(addr: &address): String {
         let bytes = bcs::to_bytes(addr);
         let char_mappping = &b"0123456789abcdef";

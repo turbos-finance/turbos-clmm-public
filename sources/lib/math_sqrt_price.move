@@ -10,6 +10,7 @@ module turbos_clmm::math_sqrt_price {
     const EInvildSqrtPrice: u64 = 0;
     const ELiquidity: u64 = 1;
     const EDenominatorOverflow: u64 = 2;
+    const EOverflow: u64 = 3;
 
     const RESOLUTION: u8 = 64;
     const Q64: u128 = 0x10000000000000000;
@@ -181,7 +182,8 @@ module turbos_clmm::math_sqrt_price {
         let p = amount_u256 * sqrt_price_u256;
         let numerator = (liquidity_u256 * sqrt_price_u256) << RESOLUTION;
         //todo check numerator overflow u256
-        let liquidity_shl = liquidity_u256 << RESOLUTION;
+        let (liquidity_shl, overflow) = math_u256::checked_shlw(liquidity_u256);
+        assert!(!overflow, EOverflow);
         let denominator = if (add) liquidity_shl + p else liquidity_shl - p;
 
         (math_u256::div_round(numerator, denominator, true) as u128)

@@ -5,6 +5,7 @@ module turbos_clmm::swap_router {
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
     use turbos_clmm::pool::{Self, Pool, Versioned};
+    use turbos_clmm::partner::{Self, Partner};
     use sui::coin::{Self, Coin};
     use sui::clock::{Self, Clock};
 
@@ -90,6 +91,126 @@ module turbos_clmm::swap_router {
             amount_a_64,
             amount_b_64,
             ctx
+        )
+    }
+
+    public fun swap_with_partner<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        partner: &mut Partner,
+        coin_a: Coin<CoinTypeA>,
+        coin_b: Coin<CoinTypeB>,
+        a_to_b: bool,
+        amount: u64,
+        amount_threshold: u64,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        pool::check_version(versioned);
+        assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
+        let (coin_a_return, coin_b_return, receipt) = pool::flash_swap_partner(
+            pool,
+            partner,
+            a_to_b,
+            (amount as u128),
+            is_exact_in,
+            sqrt_price_limit,
+            clock,
+            versioned,
+            ctx
+        );
+
+        let pay_amount = pool::flash_swap_pay_amount<CoinTypeA, CoinTypeB>(&receipt);
+        let receive_amount = if (a_to_b) {
+            coin::value(&coin_b_return)
+        } else {
+            coin::value(&coin_a_return)
+        };
+        if (is_exact_in) {
+            assert!(pay_amount == amount, ECoinsNotGatherThanAmount);
+            assert!(receive_amount >= amount_threshold, EAmountOutBelowMinimum);
+        } else {
+            assert!(receive_amount == amount, ECoinsNotGatherThanAmount);
+            assert!(pay_amount <= amount_threshold, EAmountInAboveMaximum);
+        };
+
+        let (repay_coin_a, repay_coin_b) = if (a_to_b) {
+            (
+                coin::split<CoinTypeA>(&mut coin_a, pay_amount, ctx),
+                coin::zero<CoinTypeB>(ctx)
+            )
+        } else {
+            (
+                coin::zero<CoinTypeA>(ctx),
+                coin::split<CoinTypeB>(&mut coin_b, pay_amount, ctx)
+            )
+        };
+        coin::join<CoinTypeB>(&mut coin_b, coin_b_return);
+        coin::join<CoinTypeA>(&mut coin_a, coin_a_return);
+        pool::repay_flash_swap_partner<CoinTypeA, CoinTypeB, FeeType>(pool, partner, repay_coin_a, repay_coin_b, receipt, versioned);
+        (coin_a, coin_b)
+    }
+
+    public fun swap_a_b_with_partner<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        partner: &mut Partner,
+        coin_a: Coin<CoinTypeA>,
+        amount: u64,
+        amount_threshold: u64,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        swap_with_partner(
+            pool,
+            partner,
+            coin_a,
+            coin::zero(ctx),
+            true,
+            amount,
+            amount_threshold,
+            sqrt_price_limit,
+            is_exact_in,
+            deadline,
+            clock,
+            versioned,
+            ctx,
+        )
+    }
+
+    public fun swap_b_a_with_partner<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        partner: &mut Partner,
+        coin_b: Coin<CoinTypeB>,
+        amount: u64,
+        amount_threshold: u64,
+        sqrt_price_limit: u128,
+        is_exact_in: bool,
+        deadline: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        swap_with_partner(
+            pool,
+            partner,
+            coin::zero(ctx),
+            coin_b,
+            false,
+            amount,
+            amount_threshold,
+            sqrt_price_limit,
+            is_exact_in,
+            deadline,
+            clock,
+            versioned,
+            ctx,
         )
     }
 

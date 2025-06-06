@@ -84,6 +84,7 @@ module turbos_clmm::i128 {
     }
     
     public fun sub(num1: I128, num2: I128): I128 {
+        assert!(num2.bits != MIN_AS_U128, EOverflow);
         let sub_num = wrapping_add(I128 {
             bits: u128_neg(num2.bits)
         }, from(1));
@@ -528,6 +529,11 @@ module turbos_clmm::i128 {
     #[test]
     fun test_castdown() {
         assert!((1u128 as u8) == 1u8, 0);
+    }
+
+    #[test, expected_failure(abort_code = EOverflow)]
+    fun test_sub_min_i128() {
+        sub(from(1),neg_from(MIN_AS_U128));
     }
 }
 
