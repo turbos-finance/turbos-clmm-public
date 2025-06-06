@@ -84,11 +84,10 @@ module turbos_clmm::i128 {
     }
     
     public fun sub(num1: I128, num2: I128): I128 {
-        assert!(num2.bits != MIN_AS_U128, EOverflow);
-        let sub_num = wrapping_add(I128 {
-            bits: u128_neg(num2.bits)
-        }, from(1));
-        add(num1, sub_num)
+        let diff = wrapping_sub(num1, num2);
+        let overflow = sign(num1) != sign(num2) && sign(num1) != sign(diff);
+        assert!(!overflow, EOverflow);
+        diff
     }
 
     public fun overflowing_sub(num1: I128, num2: I128): (I128, bool) {

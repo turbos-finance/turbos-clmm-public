@@ -75,11 +75,10 @@ module turbos_clmm::i64 {
     }
 
     public fun sub(num1: I64, num2: I64): I64 {
-        assert!(num2.bits != MIN_AS_U64, EOverflow);
-        let sub_num = wrapping_add(I64 {
-            bits: u64_neg(num2.bits)
-        }, from(1));
-        add(num1, sub_num)
+        let diff = wrapping_sub(num1, num2);
+        let overflow = sign(num1) != sign(num2) && sign(num1) != sign(diff);
+        assert!(!overflow, EOverflow);
+        diff
     }
 
     public fun mul(num1: I64, num2: I64): I64 {
