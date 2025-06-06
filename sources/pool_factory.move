@@ -536,7 +536,6 @@ module turbos_clmm::pool_factory {
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         positions: &mut Positions,
         position_owner: address,
-        liquidity: u128,
         tick_lower_index: u32,
         tick_lower_index_is_neg: bool,
         tick_upper_index: u32,
