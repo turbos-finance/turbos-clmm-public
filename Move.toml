@@ -1,6 +1,6 @@
 [package]
 name = "TurbosCLMM"
-version = "0.1.3"
+version = "0.1.4"
 published-at = "0xb9f08ca97c04948721c4aedb65046e0168104df92f57b90e793b15e52620e960"
 
 [dependencies]
