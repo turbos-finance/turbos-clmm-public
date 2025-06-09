@@ -21,8 +21,7 @@ module turbos_clmm::math_u64 {
     }
 
     public fun wrapping_sub(n1: u64, n2: u64): u64 {
-        let (result, o) = overflowing_sub(n1, n2);
-        assert!(!o, EOverflow);
+        let (result, _) = overflowing_sub(n1, n2);
         result
     }
 

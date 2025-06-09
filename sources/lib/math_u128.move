@@ -22,8 +22,7 @@ module turbos_clmm::math_u128 {
     }
     
     public fun wrapping_sub(n1: u128, n2: u128): u128 {
-        let (result, o) = overflowing_sub(n1, n2);
-        assert!(!o, EOverflow);
+        let (result, _) = overflowing_sub(n1, n2);
         result
     }
     
