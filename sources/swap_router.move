@@ -70,7 +70,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_a =pool::merge_coin(coins_a);
-        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        };
         let (amount_a, amount_b) = pool::swap(
             pool,
             recipient,
@@ -84,7 +86,9 @@ module turbos_clmm::swap_router {
         let amount_a_64 = (amount_a as u64);
         let amount_b_64 = (amount_b as u64);
         check_amount_threshold(is_exact_in, true, amount_a_64, amount_b_64, amount_threshold);
-
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount_a_64, ECoinsNotGatherThanAmount);
+        };
         pool::swap_coin_a_b_with_return_(
             pool,
             coin_a,
@@ -269,7 +273,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_b =pool::merge_coin(coins_b);
-        assert!(coin::value(&coin_b) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_b) >= amount, ECoinsNotGatherThanAmount);
+        };
         let (amount_a, amount_b) = pool::swap(
             pool,
             recipient,
@@ -284,6 +290,9 @@ module turbos_clmm::swap_router {
         let amount_b_64 = (amount_b as u64);
         check_amount_threshold(is_exact_in, false, amount_a_64, amount_b_64, amount_threshold);
 
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_b) >= amount_b_64, ECoinsNotGatherThanAmount);
+        };
         pool::swap_coin_b_a_with_return_(
             pool,
             coin_b,
@@ -379,7 +388,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_a =pool::merge_coin(coins_a);
-        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        };
 
         let (amount_a_64, amount_b_64, amount_c_64);
 
@@ -441,6 +452,10 @@ module turbos_clmm::swap_router {
             amount_b_64 = (step1_out as u64);
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
+        };
+
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount_a_64, ECoinsNotGatherThanAmount);
         };
 
         pool::swap_coin_a_b_b_c_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
@@ -518,7 +533,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_a =pool::merge_coin(coins_a);
-        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        };
 
         let (amount_a_64, amount_b_64, amount_c_64);
 
@@ -584,6 +601,9 @@ module turbos_clmm::swap_router {
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
         };
 
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount_a_64, ECoinsNotGatherThanAmount);
+        };
         pool::swap_coin_a_b_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -659,7 +679,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_a =pool::merge_coin(coins_a);
-        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        };
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = false;
@@ -723,6 +745,9 @@ module turbos_clmm::swap_router {
 
         };
 
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount_a_64, ECoinsNotGatherThanAmount);
+        };
         pool::swap_coin_b_a_b_c_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
             pool_a,
             pool_b,
@@ -798,7 +823,9 @@ module turbos_clmm::swap_router {
         pool::check_version(versioned);
         assert!(clock::timestamp_ms(clock) <= deadline, ETransactionTooOld);
         let coin_a =pool::merge_coin(coins_a);
-        assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        if (is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount, ECoinsNotGatherThanAmount);
+        };
         let (amount_a_64, amount_b_64, amount_c_64);
 
         let a_to_b_step_one = false;
@@ -860,6 +887,10 @@ module turbos_clmm::swap_router {
             amount_b_64 = (step1_out as u64);
             amount_c_64 = (step2_out as u64);
             assert!(amount_threshold >= amount_a_64, EAmountInAboveMaximum);
+        };
+
+        if (!is_exact_in) {
+            assert!(coin::value(&coin_a) >= amount_a_64, ECoinsNotGatherThanAmount);
         };
 
         pool::swap_coin_b_a_c_b_with_return_<CoinTypeA, FeeTypeA, CoinTypeB, FeeTypeB, CoinTypeC>(
