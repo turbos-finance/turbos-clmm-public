@@ -1209,6 +1209,10 @@ module turbos_clmm::pool {
         let time_delta = (next_time_ms - curr_time_ms) / 1000;
         let len = vector::length(&pool.reward_infos);
         let i = 0;
+        
+        // Track whether rewards were actually calculated
+        let rewards_calculated = false;
+        
         while (i < len) {
             let reward_info = vector::borrow_mut(&mut pool.reward_infos, i);
             if (pool.liquidity == 0 || time_delta == 0) {
@@ -1224,6 +1228,7 @@ module turbos_clmm::pool {
                 let curr_growth_global = reward_info.growth_global;
                 reward_info.growth_global = math_u128::wrapping_add(curr_growth_global, reward_growth_delta);
                 vector::insert(&mut growth_global_vector, reward_info.growth_global, i);
+                rewards_calculated = true;
             };
 
             i = i + 1;
@@ -1235,7 +1240,11 @@ module turbos_clmm::pool {
             i = i + 1;
         };
 
-        pool.reward_last_updated_time_ms = next_time_ms;
+        // Only update timestamp if rewards were actually calculated
+        // This prevents DoS attacks by frequent calls that reset the timestamp
+        if (rewards_calculated) {
+            pool.reward_last_updated_time_ms = next_time_ms;
+        };
 
         growth_global_vector
     }
