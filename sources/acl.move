@@ -4,11 +4,13 @@ module turbos_clmm::acl {
     use std::vector;
     use sui::tx_context::{TxContext};
     use sui::linked_table::{Self, LinkedTable};
+    use sui::object::{Self, UID};
 
     // === Errors ===
     const EInvalidRole: u64 = 0;
 
-    struct ACL has store {
+    struct ACL has key, store {
+        id: UID,
         permissions: LinkedTable<address, u128>,
     }
 
@@ -18,7 +20,10 @@ module turbos_clmm::acl {
     }
 
     public fun new(ctx: &mut TxContext): ACL {
-        ACL{permissions: linked_table::new<address, u128>(ctx)}
+        ACL{
+            id: object::new(ctx),
+            permissions: linked_table::new<address, u128>(ctx)
+        }
     }
 
     public fun add_role(acl: &mut ACL, addr: address, role: u8) {
