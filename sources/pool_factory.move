@@ -416,7 +416,18 @@ module turbos_clmm::pool_factory {
         feeType: &Fee<FeeType>,
         versioned: &Versioned,
     ) {
+        abort(0)
+    }
+
+    public entry fun set_fee_tier_v2<FeeType>(
+        acl_config: &AclConfig,
+        pool_config: &mut PoolConfig,
+        feeType: &Fee<FeeType>,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
 
         let type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
         assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists);
@@ -436,7 +447,18 @@ module turbos_clmm::pool_factory {
         fee_protocol: u32,
         versioned: &Versioned,
     ) {
+        abort(0)
+    }
+
+    public entry fun set_fee_protocol_v2(
+        acl_config: &AclConfig,
+        pool_config: &mut PoolConfig,
+        fee_protocol: u32,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
 
         assert!(fee_protocol < 1000000, EInvalidFee);
         pool_config.fee_protocol = fee_protocol;
@@ -450,7 +472,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_pool_fee_protocol_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        fee_protocol: u32,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         assert!(fee_protocol < 1000000, EInvalidFee);
 
         pool::update_pool_fee_protocol(pool, fee_protocol);
@@ -466,7 +499,20 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun collect_protocol_fee_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_claim_protocol_fee_manager_role(acl_config, tx_context::sender(ctx));
         let (coin_a, coin_b) = pool::collect_protocol_fee_with_return_(
             pool,
             amount_a_requested,
@@ -488,7 +534,20 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        abort(0)
+    }
+
+    public fun collect_protocol_fee_with_return_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
+        check_claim_protocol_fee_manager_role(acl_config, tx_context::sender(ctx));
         pool::collect_protocol_fee_with_return_(
             pool,
             amount_a_requested,
@@ -504,7 +563,17 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext,
     ) {
+        abort(0)
+    }
+
+    public entry fun toggle_pool_status_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_pause_pool_manager_role(acl_config, tx_context::sender(ctx));
         pool::toggle_pool_status(pool, ctx);
     }
 
@@ -515,7 +584,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_name_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        name: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_name(
             positions,
             name,
@@ -536,7 +616,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_description_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        nft_description: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_description(
             positions,
             nft_description,
@@ -550,7 +641,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_img_url_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        nft_img_url: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_img_url(
             positions,
             nft_img_url,

@@ -8,6 +8,7 @@ module turbos_clmm::reward_manager {
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Coin};
     use sui::clock::{Clock};
+    use turbos_clmm::pool_factory::{Self, AclConfig};
 
     struct RewardManagerAdminCap has key, store { id: UID }
 
@@ -27,7 +28,19 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun init_reward_v2<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        manager: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        pool_factory::check_reward_manager_role(acl_config, tx_context::sender(ctx));
         let vault = pool::init_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
             pool,
             reward_index,
@@ -44,7 +57,18 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun reset_reward_v2<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        pool_factory::check_reward_manager_role(acl_config, tx_context::sender(ctx));
         pool::reset_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
             pool,
             reward_index,
@@ -60,13 +84,7 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
-        pool::check_version(versioned);
-        pool::update_reward_manager(
-            pool,
-            reward_index,
-            new_manager,
-            ctx,
-        )
+        abort(0)
     }
 
     public entry fun add_reward<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
@@ -79,7 +97,22 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun add_reward_v2<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        vault: &mut  PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        coins: vector<Coin<RewardCoin>>,
+        amount: u64,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        pool_factory::check_reward_manager_role(acl_config, tx_context::sender(ctx));
         pool::add_reward(
             pool,
             vault,
@@ -101,7 +134,22 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun remove_reward_v2<CoinTypeA, CoinTypeB, FeeType, RewardCoin>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        vault: &mut  PoolRewardVault<RewardCoin>,
+        reward_index: u64,
+        amount: u64,
+        recipient: address,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        pool_factory::check_reward_manager_role(acl_config, tx_context::sender(ctx));
         pool::remove_reward(
             pool,
             vault,
@@ -123,7 +171,20 @@ module turbos_clmm::reward_manager {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_reward_emissions_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        reward_index: u64,
+        emissions_per_second: u128,
+        clock: &Clock,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        pool_factory::check_reward_manager_role(acl_config, tx_context::sender(ctx));
         pool::update_reward_emissions(
             pool,
             reward_index,

@@ -3,7 +3,7 @@
 
 #[test_only]
 module turbos_clmm::pool_factory_tests {
-    use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig};
+    use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig, AclConfig};
     use sui::test_scenario::{Self, Scenario};
     use turbos_clmm::btc::{BTC};
     use turbos_clmm::usdc::{USDC};
@@ -326,35 +326,35 @@ module turbos_clmm::pool_factory_tests {
         //init BTCBTC pool
         test_scenario::next_tx(scenario, admin);
         {
-            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let acl_config = test_scenario::take_shared<AclConfig>(scenario);
             let positions = test_scenario::take_shared<Positions>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
 
-            pool_factory::update_nft_name(
-                &admin_cap,
+            pool_factory::update_nft_name_v2(
+                &acl_config,
                 &mut positions,
                 string::utf8(b"name"),
                 &versioned,
                 test_scenario::ctx(scenario),
             );
 
-            pool_factory::update_nft_description(
-                &admin_cap,
+            pool_factory::update_nft_description_v2(
+                &acl_config,
                 &mut positions,
                 string::utf8(b"description"),
                 &versioned,
                 test_scenario::ctx(scenario),
             );
 
-            pool_factory::update_nft_img_url(
-                &admin_cap,
+            pool_factory::update_nft_img_url_v2(
+                &acl_config,
                 &mut positions,
                 string::utf8(b"imgurl"),
                 &versioned,
                 test_scenario::ctx(scenario),
             );
             //std::debug::print(&positions);
-            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(acl_config);
             test_scenario::return_shared(positions);
             test_scenario::return_shared(versioned);
         };
@@ -385,13 +385,15 @@ module turbos_clmm::pool_factory_tests {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEE500BPS>>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
 
-            pool_factory::update_pool_fee_protocol(
-                &admin_cap,
+            let acl_config = test_scenario::take_shared<AclConfig>(scenario);
+            pool_factory::update_pool_fee_protocol_v2(
+                &acl_config,
                 &mut pool,
                 300000,
                 &versioned,
                 test_scenario::ctx(scenario),
             );
+            test_scenario::return_shared(acl_config);
 
             assert_eq(pool::get_pool_fee_protocol(&pool), 300000);
             test_scenario::return_to_sender(scenario, admin_cap);
