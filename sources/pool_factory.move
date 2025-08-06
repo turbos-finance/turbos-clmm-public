@@ -22,6 +22,7 @@ module turbos_clmm::pool_factory {
     use turbos_clmm::i32::{Self};
     use std::option::{Self, Option};
     use turbos_clmm::partner::{Self};
+    use turbos_clmm::acl;
     
     const EFeeNotExists: u64 = 0;
     const EInvalidFee: u64 = 1;
@@ -29,6 +30,15 @@ module turbos_clmm::pool_factory {
     const EFeeAlreadyExists: u64 = 3;
     const ERepeatedType: u64 = 4;
     const EPoolAlreadyExists: u64 = 5;
+    const EInvalidClmmManagerRole: u64 = 6;
+    const EInvalidRewardManagerRole: u64 = 7;
+    const EInvalidClaimProtocolFeeRoleManager: u64 = 8;
+    const EInvalidPausePoolManagerRole: u64 = 9;
+
+    const ACL_CLMM_MANAGER: u8 = 0;
+    const ACL_REWARD_MANAGER: u8 = 1;
+    const ACL_CLAIM_PROTOCOL_FEE_MANAGER: u8 = 2;
+    const ACL_PAUSE_POOL_MANAGER: u8 = 3;
 
     struct PoolFactoryAdminCap has key, store { id: UID }
 
@@ -49,6 +59,11 @@ module turbos_clmm::pool_factory {
         pools: Table<ID, PoolSimpleInfo>,
     }
 
+    struct AclConfig has key, store {
+        id: UID,
+        acl: acl::ACL,
+    }
+
     struct PoolCreatedEvent has copy, drop {
         account: address,
         pool: ID,
@@ -65,6 +80,29 @@ module turbos_clmm::pool_factory {
 
     struct SetFeeProtocolEvent has copy, drop {
         fee_protocol: u32,
+    }
+
+    /// Emit when set roles
+    struct SetRolesEvent has copy, drop {
+        member: address,
+        roles: u128,
+    }
+
+    /// Emit when add member a role
+    struct AddRoleEvent has copy, drop {
+        member: address,
+        role: u8,
+    }
+
+    /// Emit when remove member a role
+    struct RemoveRoleEvent has copy, drop {
+        member: address,
+        role: u8,
+    }
+
+    /// Emit remove member
+    struct RemoveMemberEvent has copy, drop {
+        member: address,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -607,6 +645,112 @@ module turbos_clmm::pool_factory {
         ctx: &mut TxContext
     ) {
         partner::init_partners(ctx)
+    }
+
+    /// acl
+    public entry fun init_acl_config(
+        _: &PoolFactoryAdminCap,
+        ctx: &mut TxContext
+    ) {
+        let acl_config = AclConfig{
+            id                : object::new(ctx), 
+            acl               : acl::new(ctx), 
+        };
+        //todo set default roles to admin cap
+        transfer::share_object(acl_config);
+    }
+
+    public fun acl(config: &AclConfig): &acl::ACL {
+        &config.acl
+    }
+
+    public fun add_role(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        role: u8,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::add_role(&mut config.acl, member, role);
+        let add_role_event = AddRoleEvent{
+            member : member, 
+            role   : role,
+        };
+        event::emit<AddRoleEvent>(add_role_event);
+    }
+
+    public fun get_members(config: &AclConfig): vector<acl::Member> {
+        acl::get_members(&config.acl)
+    }
+
+    public fun remove_member(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::remove_member(&mut config.acl, member);
+        let remove_member_event = RemoveMemberEvent{member: member};
+        event::emit<RemoveMemberEvent>(remove_member_event);
+    }
+
+    public fun remove_role(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        role: u8,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::remove_role(&mut config.acl, member, role);
+        let remove_role_event = RemoveRoleEvent{
+            member : member, 
+            role   : role,
+        };
+        event::emit<RemoveRoleEvent>(remove_role_event);
+    }
+
+    public fun set_roles(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        roles: u128,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::set_roles(&mut config.acl, member, roles);
+        let set_roles_event = SetRolesEvent{
+            member : member, 
+            roles  : roles,
+        };
+        event::emit<SetRolesEvent>(set_roles_event);
+    }
+
+    public fun check_clmm_manager_role(config: &AclConfig, member: address) {
+        assert!(acl::has_role(&config.acl, member, ACL_CLMM_MANAGER), EInvalidClmmManagerRole);
+    }
+
+    public fun check_reward_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_REWARD_MANAGER), EInvalidRewardManagerRole);
+    }
+
+    public fun check_claim_protocol_fee_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_CLAIM_PROTOCOL_FEE_MANAGER), EInvalidClaimProtocolFeeRoleManager);
+    }
+
+    public fun check_pause_pool_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_PAUSE_POOL_MANAGER), EInvalidPausePoolManagerRole);
     }
 
     #[test_only]
