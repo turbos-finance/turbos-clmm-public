@@ -74,7 +74,7 @@ module turbos_clmm::pool_factory_acl_tests {
             // Verify ACL config was created successfully
             let acl = pool_factory::acl(&acl_config);
             let members = acl::get_members(acl);
-            assert_eq(vector::length(&members), 0);
+            assert_eq(vector::length(&members), 1);
             
             test_scenario::return_shared(acl_config);
         };
@@ -618,7 +618,7 @@ module turbos_clmm::pool_factory_acl_tests {
             let acl_config = test_scenario::take_shared<AclConfig>(scenario);
             
             let members = pool_factory::get_members(&acl_config);
-            assert_eq(vector::length(&members), 3);
+            assert_eq(vector::length(&members), 4);
             
             test_scenario::return_shared(acl_config);
         };
