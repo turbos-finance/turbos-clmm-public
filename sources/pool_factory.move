@@ -758,7 +758,15 @@ module turbos_clmm::pool_factory {
             id                : object::new(ctx), 
             acl               : acl::new(ctx), 
         };
-        //todo set default roles to admin cap
+        
+        // Set all roles for the admin (transaction sender)
+        let admin_address = tx_context::sender(ctx);
+        let all_roles = (1u128 << ACL_CLMM_MANAGER) | 
+                       (1u128 << ACL_REWARD_MANAGER) | 
+                       (1u128 << ACL_CLAIM_PROTOCOL_FEE_MANAGER) | 
+                       (1u128 << ACL_PAUSE_POOL_MANAGER);
+        acl::set_roles(&mut acl_config.acl, admin_address, all_roles);
+        
         transfer::share_object(acl_config);
     }
 
