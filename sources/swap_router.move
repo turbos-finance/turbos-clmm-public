@@ -863,7 +863,7 @@ module turbos_clmm::swap_router {
             let (step2_out, step2_in) = pool::swap(
                 pool_b,
                 recipient,
-                a_to_b_step_one,
+                a_to_b_step_two,
                 (amount as u128),
                 is_exact_in,
                 sqrt_price_limit_two,
@@ -874,7 +874,7 @@ module turbos_clmm::swap_router {
             let (step1_out, step1_in) = pool::swap(
                 pool_a,
                 recipient,
-                a_to_b_step_two,
+                a_to_b_step_one,
                 step2_in,
                 is_exact_in,
                 sqrt_price_limit_one,

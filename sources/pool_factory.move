@@ -22,6 +22,7 @@ module turbos_clmm::pool_factory {
     use turbos_clmm::i32::{Self};
     use std::option::{Self, Option};
     use turbos_clmm::partner::{Self};
+    use turbos_clmm::acl;
     
     const EFeeNotExists: u64 = 0;
     const EInvalidFee: u64 = 1;
@@ -29,6 +30,15 @@ module turbos_clmm::pool_factory {
     const EFeeAlreadyExists: u64 = 3;
     const ERepeatedType: u64 = 4;
     const EPoolAlreadyExists: u64 = 5;
+    const EInvalidClmmManagerRole: u64 = 6;
+    const EInvalidRewardManagerRole: u64 = 7;
+    const EInvalidClaimProtocolFeeRoleManager: u64 = 8;
+    const EInvalidPausePoolManagerRole: u64 = 9;
+
+    const ACL_CLMM_MANAGER: u8 = 0;
+    const ACL_REWARD_MANAGER: u8 = 1;
+    const ACL_CLAIM_PROTOCOL_FEE_MANAGER: u8 = 2;
+    const ACL_PAUSE_POOL_MANAGER: u8 = 3;
 
     struct PoolFactoryAdminCap has key, store { id: UID }
 
@@ -49,6 +59,11 @@ module turbos_clmm::pool_factory {
         pools: Table<ID, PoolSimpleInfo>,
     }
 
+    struct AclConfig has key, store {
+        id: UID,
+        acl: acl::ACL,
+    }
+
     struct PoolCreatedEvent has copy, drop {
         account: address,
         pool: ID,
@@ -65,6 +80,29 @@ module turbos_clmm::pool_factory {
 
     struct SetFeeProtocolEvent has copy, drop {
         fee_protocol: u32,
+    }
+
+    /// Emit when set roles
+    struct SetRolesEvent has copy, drop {
+        member: address,
+        roles: u128,
+    }
+
+    /// Emit when add member a role
+    struct AddRoleEvent has copy, drop {
+        member: address,
+        role: u8,
+    }
+
+    /// Emit when remove member a role
+    struct RemoveRoleEvent has copy, drop {
+        member: address,
+        role: u8,
+    }
+
+    /// Emit remove member
+    struct RemoveMemberEvent has copy, drop {
+        member: address,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -378,7 +416,18 @@ module turbos_clmm::pool_factory {
         feeType: &Fee<FeeType>,
         versioned: &Versioned,
     ) {
+        abort(0)
+    }
+
+    public entry fun set_fee_tier_v2<FeeType>(
+        acl_config: &AclConfig,
+        pool_config: &mut PoolConfig,
+        feeType: &Fee<FeeType>,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
 
         let type = string::from_ascii(type_name::into_string(type_name::get<FeeType>()));
         assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists);
@@ -398,7 +447,18 @@ module turbos_clmm::pool_factory {
         fee_protocol: u32,
         versioned: &Versioned,
     ) {
+        abort(0)
+    }
+
+    public entry fun set_fee_protocol_v2(
+        acl_config: &AclConfig,
+        pool_config: &mut PoolConfig,
+        fee_protocol: u32,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
 
         assert!(fee_protocol < 1000000, EInvalidFee);
         pool_config.fee_protocol = fee_protocol;
@@ -412,7 +472,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_pool_fee_protocol_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        fee_protocol: u32,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         assert!(fee_protocol < 1000000, EInvalidFee);
 
         pool::update_pool_fee_protocol(pool, fee_protocol);
@@ -428,7 +499,20 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun collect_protocol_fee_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_claim_protocol_fee_manager_role(acl_config, tx_context::sender(ctx));
         let (coin_a, coin_b) = pool::collect_protocol_fee_with_return_(
             pool,
             amount_a_requested,
@@ -450,7 +534,20 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext
     ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
+        abort(0)
+    }
+
+    public fun collect_protocol_fee_with_return_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        amount_a_requested: u64,
+        amount_b_requested: u64,
+        recipient: address,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ): (Coin<CoinTypeA>, Coin<CoinTypeB>) {
         pool::check_version(versioned);
+        check_claim_protocol_fee_manager_role(acl_config, tx_context::sender(ctx));
         pool::collect_protocol_fee_with_return_(
             pool,
             amount_a_requested,
@@ -466,7 +563,17 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         ctx: &mut TxContext,
     ) {
+        abort(0)
+    }
+
+    public entry fun toggle_pool_status_v2<CoinTypeA, CoinTypeB, FeeType>(
+        acl_config: &AclConfig,
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        versioned: &Versioned,
+        ctx: &mut TxContext,
+    ) {
         pool::check_version(versioned);
+        check_pause_pool_manager_role(acl_config, tx_context::sender(ctx));
         pool::toggle_pool_status(pool, ctx);
     }
 
@@ -477,7 +584,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_name_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        name: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_name(
             positions,
             name,
@@ -498,7 +616,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_description_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        nft_description: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_description(
             positions,
             nft_description,
@@ -512,7 +641,18 @@ module turbos_clmm::pool_factory {
         versioned: &Versioned,
         _ctx: &mut TxContext
     ) {
+        abort(0)
+    }
+
+    public entry fun update_nft_img_url_v2(
+        acl_config: &AclConfig,
+        positions: &mut Positions,
+        nft_img_url: String,
+        versioned: &Versioned,
+        ctx: &mut TxContext
+    ) {
         pool::check_version(versioned);
+        check_clmm_manager_role(acl_config, tx_context::sender(ctx));
         position_manager::update_nft_img_url(
             positions,
             nft_img_url,
@@ -607,6 +747,120 @@ module turbos_clmm::pool_factory {
         ctx: &mut TxContext
     ) {
         partner::init_partners(ctx)
+    }
+
+    /// acl
+    public entry fun init_acl_config(
+        _: &PoolFactoryAdminCap,
+        ctx: &mut TxContext
+    ) {
+        let acl_config = AclConfig{
+            id                : object::new(ctx), 
+            acl               : acl::new(ctx), 
+        };
+        
+        // Set all roles for the admin (transaction sender)
+        let admin_address = tx_context::sender(ctx);
+        let all_roles = (1u128 << ACL_CLMM_MANAGER) | 
+                       (1u128 << ACL_REWARD_MANAGER) | 
+                       (1u128 << ACL_CLAIM_PROTOCOL_FEE_MANAGER) | 
+                       (1u128 << ACL_PAUSE_POOL_MANAGER);
+        acl::set_roles(&mut acl_config.acl, admin_address, all_roles);
+        
+        transfer::share_object(acl_config);
+    }
+
+    public fun acl(config: &AclConfig): &acl::ACL {
+        &config.acl
+    }
+
+    public fun add_role(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        role: u8,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::add_role(&mut config.acl, member, role);
+        let add_role_event = AddRoleEvent{
+            member : member, 
+            role   : role,
+        };
+        event::emit<AddRoleEvent>(add_role_event);
+    }
+
+    public fun get_members(config: &AclConfig): vector<acl::Member> {
+        acl::get_members(&config.acl)
+    }
+
+    public fun remove_member(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::remove_member(&mut config.acl, member);
+        let remove_member_event = RemoveMemberEvent{member: member};
+        event::emit<RemoveMemberEvent>(remove_member_event);
+    }
+
+    public fun remove_role(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        role: u8,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::remove_role(&mut config.acl, member, role);
+        let remove_role_event = RemoveRoleEvent{
+            member : member, 
+            role   : role,
+        };
+        event::emit<RemoveRoleEvent>(remove_role_event);
+    }
+
+    public fun set_roles(
+        _: &PoolFactoryAdminCap,
+        config: &mut AclConfig,
+        member: address,
+        roles: u128,
+        versioned: &Versioned,
+    ) {
+        pool::check_version(versioned);
+        acl::set_roles(&mut config.acl, member, roles);
+        let set_roles_event = SetRolesEvent{
+            member : member, 
+            roles  : roles,
+        };
+        event::emit<SetRolesEvent>(set_roles_event);
+    }
+
+    public fun check_clmm_manager_role(config: &AclConfig, member: address) {
+        assert!(acl::has_role(&config.acl, member, ACL_CLMM_MANAGER), EInvalidClmmManagerRole);
+    }
+
+    public fun check_reward_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_REWARD_MANAGER), EInvalidRewardManagerRole);
+    }
+
+    public fun check_claim_protocol_fee_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_CLAIM_PROTOCOL_FEE_MANAGER), EInvalidClaimProtocolFeeRoleManager);
+    }
+
+    public fun check_pause_pool_manager_role(
+        config: &AclConfig,
+        member: address,
+    ) {
+        assert!(acl::has_role(&config.acl, member, ACL_PAUSE_POOL_MANAGER), EInvalidPausePoolManagerRole);
     }
 
     #[test_only]

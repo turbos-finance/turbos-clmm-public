@@ -10,6 +10,7 @@ module turbos_clmm::protocol_fee_tests {
     use turbos_clmm::usdc::{USDC};
     use turbos_clmm::feemock10000bps::{FEEMOCK10000BPS};
     use turbos_clmm::pool::{Self, Pool, Versioned};
+    use turbos_clmm::pool_factory::{AclConfig};
     use turbos_clmm::tools_tests;
     use turbos_clmm::math_tick;
     use turbos_clmm::fee::{Fee};
@@ -178,11 +179,11 @@ module turbos_clmm::protocol_fee_tests {
         {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let acl_config = test_scenario::take_shared<AclConfig>(scenario);
             trader_balance_a_before = tools_tests::get_user_coin_balance<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<USDC>(scenario);
-            pool_factory::collect_protocol_fee(
-                &admin_cap,
+            pool_factory::collect_protocol_fee_v2(
+                &acl_config,
                 &mut pool,
                 100,
                 200,
@@ -191,7 +192,7 @@ module turbos_clmm::protocol_fee_tests {
                 test_scenario::ctx(scenario),
             );
 
-            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(acl_config);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(versioned);
         };
@@ -209,11 +210,11 @@ module turbos_clmm::protocol_fee_tests {
         {
             let pool = test_scenario::take_shared<Pool<BTC, USDC, FEEMOCK10000BPS>>(scenario);
             let versioned = test_scenario::take_shared<Versioned>(scenario);
-            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let acl_config = test_scenario::take_shared<AclConfig>(scenario);
             trader_balance_a_before = tools_tests::get_user_coin_balance<BTC>(scenario);
             trader_balance_b_before = tools_tests::get_user_coin_balance<USDC>(scenario);
-            pool_factory::collect_protocol_fee(
-                &admin_cap,
+            pool_factory::collect_protocol_fee_v2(
+                &acl_config,
                 &mut pool,
                 100000000,
                 100000000,
@@ -222,7 +223,7 @@ module turbos_clmm::protocol_fee_tests {
                 test_scenario::ctx(scenario),
             );
 
-            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(acl_config);
             test_scenario::return_shared(pool);
             test_scenario::return_shared(versioned);
         };
