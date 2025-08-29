@@ -388,11 +388,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext,
     ): (u64, u64) {
-        let skip_check_pool_address = sui::address::from_u256(0x84fa8fe46a41151396beeabc9167a114c06e1f882d827c4a7f5ab8676de63e14);
-        let pool_address = object::id_address(pool);
-        if (pool_address != skip_check_pool_address) {
-            assert!(pool.unlocked, EPoolLocked);
-        };
+        assert!(pool.unlocked, EPoolLocked);
         assert!(liquidity_delta > 0, EInvildAmount);
 
         try_init_position(
@@ -438,11 +434,7 @@ module turbos_clmm::pool {
         clock: &Clock,
         ctx: &mut TxContext
     ): (u64, u64) {
-        let skip_check_pool_address = sui::address::from_u256(0x84fa8fe46a41151396beeabc9167a114c06e1f882d827c4a7f5ab8676de63e14);
-        let pool_address = object::id_address(pool);
-        if (pool_address != skip_check_pool_address) {
-            assert!(pool.unlocked, EPoolLocked);
-        };
+        assert!(pool.unlocked, EPoolLocked);
         let (amount_a, amount_b) = modify_position(
             pool,
             owner,
@@ -1241,11 +1233,14 @@ module turbos_clmm::pool {
         growth_global_vector
     }
 
-    fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
+    public fun next_initialized_tick_within_one_word<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         tick_current_index: I32,
         lte: bool
     ): (I32, bool) {
+        assert!(i32::gte(tick_current_index, i32::neg_from(MAX_TICK_INDEX)), EInvildTick);
+        assert!(i32::lte(tick_current_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
+
         let compressed = i32::div(tick_current_index, i32::from(pool.tick_spacing));
 
         // round towards negative infinity
@@ -1879,6 +1874,9 @@ module turbos_clmm::pool {
         start_index: I32,
         limit: u64,
     ): (vector<TickInfo>, Option<I32>) {
+        assert!(i32::gte(start_index, i32::neg_from(MAX_TICK_INDEX)), EInvildTick);
+        assert!(i32::lte(start_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
+
         let tick_end_index = i32::from_u32(MAX_TICK_INDEX);
         let tick_spacing = pool.tick_spacing;
         start_index = i32::sub(start_index, i32::mod_euclidean(start_index, tick_spacing));
@@ -1971,6 +1969,12 @@ module turbos_clmm::pool {
         pool.fee
     }
 
+    public fun get_pool_unlocked<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): bool {
+        pool.unlocked
+    }
+
     public fun get_pool_sqrt_price<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
     ): u128 {
@@ -1989,6 +1993,54 @@ module turbos_clmm::pool {
         pool.tick_current_index
     }
 
+    public fun get_pool_liquidity<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): u128 {
+        pool.liquidity
+    }
+
+    public fun get_tick_liquidity_gross(
+        tick: &Tick,
+    ): u128 {
+        tick.liquidity_gross
+    }
+
+    public fun get_tick_liquidity_net(
+        tick: &Tick,
+    ): I128 {
+        tick.liquidity_net
+    }
+
+    public fun get_tick_initialized(
+        tick: &Tick,
+    ): bool {
+        tick.initialized
+    }
+
+    public fun get_tick_fee_growth_outside(
+        tick: &Tick,
+    ): (u128, u128) {
+        (tick.fee_growth_outside_a, tick.fee_growth_outside_b)
+    }
+
+    public fun get_tick_reward_growths_outside(
+        tick: &Tick,
+    ): vector<u128> {
+        tick.reward_growths_outside
+    }
+
+    public fun get_pool_fee_growth_global<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): (u128, u128) {
+        (pool.fee_growth_global_a, pool.fee_growth_global_b)
+    }
+
+    public fun get_pool_reward_last_updated_time_ms<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
+    ): u64 {
+        pool.reward_last_updated_time_ms
+    }
+    
     public fun get_position_fee_growth_inside_a<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>,
         key: String
