@@ -36,7 +36,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 14;
+    const VERSION: u64 = 15;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
