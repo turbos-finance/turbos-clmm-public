@@ -36,7 +36,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 16;
+    const VERSION: u64 = 17;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -1040,7 +1040,6 @@ module turbos_clmm::pool {
         let pool_id = object::id(pool);
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         let reward_info = vector::borrow_mut(&mut pool.reward_infos, reward_index);
-        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
 
         reward_info.emissions_per_second = emissions_per_second << RESOLUTION_Q64;
 
@@ -1065,7 +1064,6 @@ module turbos_clmm::pool {
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
-        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
         assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
         
         let coin_in = coin::split(&mut coin, amount, ctx);
@@ -1101,7 +1099,6 @@ module turbos_clmm::pool {
         assert!(reward_index < vector::length(&pool.reward_infos),EInvalidRewardIndex);
         next_pool_reward_infos(pool, clock::timestamp_ms(clock));
         let reward_info = vector::borrow(&pool.reward_infos, reward_index);
-        assert!(reward_info.manager == tx_context::sender(ctx), EInvalidRewardManager);
         assert!(reward_info.vault == object::id_address(vault), EInvalidRewardVault);
         assert!(amount <= balance::value(&vault.coin), EInvalidRemoveRewardAmount);
 
