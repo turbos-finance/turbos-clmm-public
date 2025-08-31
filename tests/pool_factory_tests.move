@@ -11,6 +11,7 @@ module turbos_clmm::pool_factory_tests {
     use turbos_clmm::fee::{Fee};
     use turbos_clmm::tools_tests;
     use turbos_clmm::fee500bps::{FEE500BPS};
+    use turbos_clmm::fee3000bps::{FEE3000BPS};
     use turbos_clmm::math_sqrt_price::{Self};
     use turbos_clmm::i32::{Self};
     use turbos_clmm::math_tick;
@@ -61,6 +62,31 @@ module turbos_clmm::pool_factory_tests {
             //price=1 1btc = 1usdc
             let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
             pool_factory::deploy_pool<BTC, USDC, FEE500BPS>(
+                &mut pool_config,
+                &fee_type,
+                sqrt_price,
+                &clock,
+                &versioned,
+                test_scenario::ctx(scenario),
+            );
+            test_scenario::return_to_sender(scenario, admin_cap);
+            test_scenario::return_shared(pool_config);
+            test_scenario::return_shared(clock);
+            test_scenario::return_immutable(fee_type);
+            test_scenario::return_shared(versioned);
+        };
+
+        //init BTCUSDC pool
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(scenario);
+            let pool_config = test_scenario::take_shared<PoolConfig>(scenario);
+            let fee_type = test_scenario::take_immutable<Fee<FEE3000BPS>>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            let versioned = test_scenario::take_shared<Versioned>(scenario);
+            //price=1 1btc = 1usdc
+            let sqrt_price = math_sqrt_price::encode_price_sqrt(1, 1);
+            pool_factory::deploy_pool<BTC, USDC, FEE3000BPS>(
                 &mut pool_config,
                 &fee_type,
                 sqrt_price,

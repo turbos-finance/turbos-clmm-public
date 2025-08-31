@@ -36,7 +36,7 @@ module turbos_clmm::pool {
     friend turbos_clmm::reward_manager;
     friend turbos_clmm::pool_fetcher;
 
-    const VERSION: u64 = 15;
+    const VERSION: u64 = 16;
 
     const TickNotFound: u64 = 0;
     const EInvildAmount: u64 = 1;
@@ -1879,14 +1879,14 @@ module turbos_clmm::pool {
 
         let tick_end_index = i32::from_u32(MAX_TICK_INDEX);
         let tick_spacing = pool.tick_spacing;
-        start_index = i32::sub(start_index, i32::mod_euclidean(start_index, tick_spacing));
+        start_index = i32::mul(i32::from(tick_spacing), i32::div(start_index, i32::from(tick_spacing)));
 
         let ticks = vector::empty<TickInfo>();
         let current_tick = start_index;
         let i = 0;
         while (i32::lt(current_tick, tick_end_index) && i < limit) {
             let (next_tick, initialized) = next_initialized_tick_within_one_word(pool, current_tick, false);
-            
+
             if (initialized) {
                 let tick_ref = df::borrow<I32, Tick>(&pool.id, next_tick);
                 vector::push_back(&mut ticks, TickInfo {
