@@ -1,9 +1,9 @@
 [package]
 name = "TurbosCLMM"
 version = "0.1.7"
-published-at = "0x963c66e8e945b04b66f428849387e1a1e1e3c7018e4e668e62b15917e04a38ee"
+published-at = "0x7a6d1c22f05092c07490003e747fff8db4c78ceffc5cfb84a66d71a3a1417d51"
 
 [dependencies]
 
 [addresses]
-turbos_clmm = "0x0"
+turbos_clmm = "0x91bfbc386a41afcfd9b2533058d7e915a1d3829089cc268ff4333d54d6339ca1"
