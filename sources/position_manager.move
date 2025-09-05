@@ -296,11 +296,6 @@ module turbos_clmm::position_manager {
 
         delete_user_position(positions, nft_address);
         burn_nft(nft);
-        event::emit(BurnNftEvent {
-            nft_address: nft_address,
-            position_id: position_id,
-            pool_id: pool_id,
-        });
     }
 
     fun add_liquidity<CoinTypeA, CoinTypeB, FeeType>(
@@ -1050,13 +1045,23 @@ module turbos_clmm::position_manager {
     fun burn_nft(
         nft: TurbosPositionNFT
     ) {
+        let nft_address = object::id_address(&nft);
+        let position_id = position_nft::position_id(&nft);
+        let pool_id = position_nft::pool_id(&nft);
+
         position_nft::burn(nft);
+
+        event::emit(BurnNftEvent {
+            nft_address: nft_address,
+            position_id: position_id,
+            pool_id: pool_id,
+        });
     }
 
     public entry fun burn_nft_directly(
         nft: TurbosPositionNFT
     ) {
-        position_nft::burn(nft);
+        burn_nft(nft);
     }
 
     fun insert_user_position(

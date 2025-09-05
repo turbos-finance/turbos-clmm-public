@@ -84,11 +84,11 @@ module turbos_clmm::position_nft {
             fee_type,
         };
         let sender = tx_context::sender(ctx);
-        event::emit(MintNFTEvent {
-            object_id: object::uid_to_inner(&nft.id),
-            creator: sender,
-            name: nft.name,
-        });
+        // event::emit(MintNFTEvent {
+        //     object_id: object::uid_to_inner(&nft.id),
+        //     creator: sender,
+        //     name: nft.name,
+        // });
 
         nft
     }
