@@ -113,6 +113,18 @@ module turbos_clmm::position_manager {
         burn_nft_address: address,
     }
 
+    struct MintNftEvent has copy, drop {
+        nft_address: address,
+        position_id: ID,
+        pool_id: ID,
+    }
+
+    struct BurnNftEvent has copy, drop {
+        nft_address: address,
+        position_id: ID,
+        pool_id: ID,
+    }
+
     fun init(ctx: &mut TxContext) {
         init_(ctx);
     }
@@ -270,6 +282,8 @@ module turbos_clmm::position_manager {
         pool::check_version(versioned);
         let nft_address = object::id_address(&nft);
         let position = dof::borrow_mut<address, Position>(&mut positions.id, nft_address);
+        let position_id = object::id(position);
+        let pool_id = position_nft::pool_id(&nft);
         assert!(position.liquidity == 0 && position.tokens_owed_a == 0 && position.tokens_owed_b == 0, EPositionNotCleared);
         
         let i = 0;
@@ -282,6 +296,11 @@ module turbos_clmm::position_manager {
 
         delete_user_position(positions, nft_address);
         burn_nft(nft);
+        event::emit(BurnNftEvent {
+            nft_address: nft_address,
+            position_id: position_id,
+            pool_id: pool_id,
+        });
     }
 
     fun add_liquidity<CoinTypeA, CoinTypeB, FeeType>(
@@ -646,12 +665,12 @@ module turbos_clmm::position_manager {
         position.tokens_owed_a = position.tokens_owed_a - amount_a_collect;
         position.tokens_owed_b = position.tokens_owed_b - amount_b_collect;
 
-        event::emit(CollectEvent {
-            pool: object::id(pool),
-            amount_a: amount_a,
-            amount_b: amount_b,
-            recipient: recipient,
-        });
+        // event::emit(CollectEvent {
+        //     pool: object::id(pool),
+        //     amount_a: amount_a,
+        //     amount_b: amount_b,
+        //     recipient: recipient,
+        // });
 
         (coin_a, coin_b)
     }
@@ -745,13 +764,13 @@ module turbos_clmm::position_manager {
 
         reward_info.amount_owed = reward_info.amount_owed - amount_collect;
 
-        event::emit(CollectRewardEvent {
-            pool: object::id(pool),
-            amount: amount,
-            vault: object::id(vault),
-            reward_index: reward_index,
-            recipient: recipient,
-        });
+        // event::emit(CollectRewardEvent {
+        //     pool: object::id(pool),
+        //     amount: amount,
+        //     vault: object::id(vault),
+        //     reward_index: reward_index,
+        //     recipient: recipient,
+        // });
         
         coin_reward
     }
@@ -1018,6 +1037,12 @@ module turbos_clmm::position_manager {
             ctx,
         );
         positions.nft_minted = positions.nft_minted + 1;
+
+        event::emit(MintNftEvent {
+            nft_address: object::id_address(&nft),
+            position_id: position_id,
+            pool_id: pool_id,
+        });
 
         nft
     }

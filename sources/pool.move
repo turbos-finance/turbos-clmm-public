@@ -3,7 +3,7 @@
 
 module turbos_clmm::pool {
     use std::vector;
-    use std::type_name;
+    use std::type_name::{Self, TypeName};
     use sui::pay;
     use sui::event;
     use sui::transfer;
@@ -259,6 +259,28 @@ module turbos_clmm::pool {
         tick_upper_index: I32,
         amount: u64,
         vault: ID,
+        reward_index: u64,
+    }
+
+    struct CollectEventV2 has copy, drop {
+        pool: ID,
+        owner: address,
+        recipient: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount_a: u64,
+        amount_b: u64,
+    }
+
+    struct CollectRewardEventV2 has copy, drop {
+        pool: ID,
+        recipient: address,
+        owner: address,
+        tick_lower_index: I32,
+        tick_upper_index: I32,
+        amount: u64,
+        vault: ID,
+        reward_type: TypeName,
         reward_index: u64,
     }
 
@@ -841,7 +863,7 @@ module turbos_clmm::pool {
         });
     }
 
-
+    ///deprecated
     public(friend) fun collect<CoinTypeA, CoinTypeB, FeeType>(
         pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
         recipient: address,
@@ -851,29 +873,7 @@ module turbos_clmm::pool {
         amount_b_requested: u64,
         ctx: &mut TxContext
     ): (u64, u64) {
-        let owner = tx_context::sender(ctx);
-        let position = get_position_mut(pool, owner, tick_lower_index, tick_upper_index);
-
-        let amount_a = if (amount_a_requested > position.tokens_owed_a) position.tokens_owed_a else amount_a_requested;
-        let amount_b = if (amount_b_requested > position.tokens_owed_b) position.tokens_owed_b else amount_b_requested;
-
-        if (amount_a > 0) {
-            position.tokens_owed_a = position.tokens_owed_a - amount_a;
-        };
-        if (amount_b > 0) {
-            position.tokens_owed_b = position.tokens_owed_b - amount_b;
-        };
-
-        event::emit(CollectEvent {
-            pool: object::id(pool),
-            recipient: recipient,
-            tick_lower_index: tick_lower_index,
-            tick_upper_index: tick_upper_index,
-            amount_a: amount_a,
-            amount_b: amount_b,
-        });
-
-        (amount_a, amount_b)
+        abort(0)
     }
 
      public(friend) fun collect_v2<CoinTypeA, CoinTypeB, FeeType>(
@@ -898,8 +898,9 @@ module turbos_clmm::pool {
             position.tokens_owed_b = position.tokens_owed_b - amount_b;
         };
 
-        event::emit(CollectEvent {
+        event::emit(CollectEventV2 {
             pool: object::id(pool),
+            owner: position_owner,
             recipient: recipient,
             tick_lower_index: tick_lower_index,
             tick_upper_index: tick_upper_index,
@@ -1172,13 +1173,15 @@ module turbos_clmm::pool {
         let amount_out_balance = balance::split(&mut vault.coin, amount);
         let amount_out_coin = coin::from_balance(amount_out_balance, ctx);
 
-        event::emit(CollectRewardEvent {
+        event::emit(CollectRewardEventV2 {
             pool: object::id(pool),
             recipient: recipient,
+            owner: position_owner,
             tick_lower_index: tick_lower_index,
             tick_upper_index: tick_upper_index,
             amount: amount,
             vault: object::id(vault),
+            reward_type: type_name::get<RewardCoin>(),
             reward_index: reward_index,
         });
 
@@ -1875,8 +1878,8 @@ module turbos_clmm::pool {
         assert!(i32::lte(start_index, i32::from(MAX_TICK_INDEX)), EInvildTick);
 
         let tick_end_index = i32::from_u32(MAX_TICK_INDEX);
-        let tick_spacing = pool.tick_spacing;
-        start_index = i32::mul(i32::from(tick_spacing), i32::div(start_index, i32::from(tick_spacing)));
+        //let tick_spacing = pool.tick_spacing;
+        //start_index = i32::mul(i32::from(tick_spacing), i32::div(start_index, i32::from(tick_spacing)));
 
         let ticks = vector::empty<TickInfo>();
         let current_tick = start_index;
@@ -2488,6 +2491,21 @@ module turbos_clmm::pool {
     }
 
     #[test_only]
+    public fun get_tick_info_tick_index(tick_info: &TickInfo): I32 {
+        tick_info.tick_index
+    }
+
+    #[test_only]
+    public fun get_tick_info_liquidity_gross(tick_info: &TickInfo): u128 {
+        tick_info.liquidity_gross
+    }
+
+    #[test_only]
+    public fun get_tick_info_liquidity_net(tick_info: &TickInfo): I128 {
+        tick_info.liquidity_net
+    }
+
+    #[test_only]
     public fun get_pool_info<CoinTypeA, CoinTypeB, FeeType>(
         pool: &Pool<CoinTypeA, CoinTypeB, FeeType>, 
     ): (u64, u64, u64, u64, u128, I32, u32, u128, u32, u32, u128, u128, u128) {
@@ -2590,8 +2608,9 @@ module turbos_clmm::pool {
         amount_b_requested: u64,
         ctx: &mut TxContext
     ): (u64, u64) {
-        collect(
+        collect_v2(
             pool, 
+            recipient,
             recipient,
             tick_lower_index, 
             tick_upper_index, 

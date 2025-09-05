@@ -57,4 +57,21 @@ module turbos_clmm::pool_fetcher {
         let (ticks, next_cursor) = pool::fetch_ticks(pool, start_index, limit);
         event::emit(FetchTicksResultEvent { ticks: ticks, next_cursor });
     }
+
+    #[test_only]
+    public fun fetch_ticks_for_testing<CoinTypeA, CoinTypeB, FeeType>(
+        pool: &mut Pool<CoinTypeA, CoinTypeB, FeeType>,
+        start: vector<u32>,
+        start_index_is_neg: bool,
+        limit: u64,
+        versioned: &Versioned,
+    ): (vector<TickInfo>, Option<I32>) {
+        pool::check_version(versioned);
+        let start_index= if (vector::is_empty(&start)) {
+            i32::neg_from(443636)
+        } else {
+            i32::from_u32_neg(*vector::borrow(&start, 0), start_index_is_neg)
+        };
+        pool::fetch_ticks(pool, start_index, limit)
+    }
 }
