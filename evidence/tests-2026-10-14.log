@@ -1,0 +1,860 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+Running Move unit tests
+[ PASS    ] turbos_clmm::math_u128::test_full_mul
+[ PASS    ] turbos_clmm::i32::test_abs
+[ PASS    ] turbos_clmm::math_bit_tests::test_least_significant_bit
+[ PASS    ] turbos_clmm::i32::test_abs_overflow
+[ PASS    ] turbos_clmm::math_u128::test_leading_zeros
+[ PASS    ] turbos_clmm::math_u128::test_overflowing_add
+[ PASS    ] turbos_clmm::math_u128::test_overflowing_mul
+[ PASS    ] turbos_clmm::math_bit_tests::test_least_significant_bit_revert
+[ PASS    ] turbos_clmm::math_u128::test_wrapping_mul
+[ PASS    ] turbos_clmm::math_u256::test_add
+[ PASS    ] turbos_clmm::math_u256::test_div_round
+[ PASS    ] turbos_clmm::compute_swap_step_tests::compute_swap_max_liquidity_tests
+[ PASS    ] turbos_clmm::math_bit_tests::test_most_significant_bit
+[ PASS    ] turbos_clmm::math_bit_tests::test_most_significant_bit_revert
+[ PASS    ] turbos_clmm::i32::test_add
+[ PASS    ] turbos_clmm::i32::test_add_overflow
+[ PASS    ] turbos_clmm::math_liquidity::test_add_delta_edge_cases
+[ PASS    ] turbos_clmm::i32::test_add_underflow
+[ PASS    ] turbos_clmm::i32::test_castdown
+[ PASS    ] turbos_clmm::math_liquidity::test_get_amount_a_for_liquidity_overflow
+[ PASS    ] turbos_clmm::i32::test_cmp
+[ PASS    ] turbos_clmm::i32::test_div
+[ PASS    ] turbos_clmm::math_liquidity::test_get_amount_b_for_liquidity_extremes
+[ PASS    ] turbos_clmm::i32::test_div_overflow
+[ PASS    ] turbos_clmm::i32::test_from_ok
+[ PASS    ] turbos_clmm::i32::test_from_overflow
+[ PASS    ] turbos_clmm::math_liquidity::test_get_amount_for_liquidity
+[ PASS    ] turbos_clmm::i32::test_mod
+[ PASS    ] turbos_clmm::i32::test_mod_euclidean
+[ PASS    ] turbos_clmm::math_liquidity::test_get_amount_for_liquidity_extremes
+[ PASS    ] turbos_clmm::i32::test_mul
+[ PASS    ] turbos_clmm::i32::test_mul_overflow
+[ PASS    ] turbos_clmm::i32::test_neg_from
+[ PASS    ] turbos_clmm::math_liquidity::test_get_liquidity_for_amounts
+[ PASS    ] turbos_clmm::i32::test_neg_from_overflow
+[ PASS    ] turbos_clmm::i32::test_shl
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_add_role
+[ PASS    ] turbos_clmm::i32::test_shr
+[ PASS    ] turbos_clmm::math_liquidity::test_get_liquidity_for_amounts_edge_cases
+[ PASS    ] turbos_clmm::i32::test_sign
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_acl_basic_functionality
+[ PASS    ] turbos_clmm::i32::test_sub
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_add_liquidity_to_liquidity_gross_above_current
+[ PASS    ] turbos_clmm::i32::test_sub_min_i32
+[ PASS    ] turbos_clmm::i32::test_sub_overflow
+[ PASS    ] turbos_clmm::reward_manager_tests::test_reward_config
+[ PASS    ] turbos_clmm::i32::test_sub_underflow
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_add_delta_overflow_protection
+[ PASS    ] turbos_clmm::i32::test_wrapping_add
+[ PASS    ] turbos_clmm::i32::test_wrapping_sub
+[ PASS    ] turbos_clmm::i64::test_abs
+[ PASS    ] turbos_clmm::i64::test_abs_overflow
+[ PASS    ] turbos_clmm::i64::test_add
+[ PASS    ] turbos_clmm::i64::test_add_overflow
+[ PASS    ] turbos_clmm::i64::test_add_underflow
+[ PASS    ] turbos_clmm::i64::test_castdown
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_add_delta_underflow_protection
+[ PASS    ] turbos_clmm::i64::test_cmp
+[ PASS    ] turbos_clmm::i64::test_div
+[ PASS    ] turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_empty_start_array
+[ PASS    ] turbos_clmm::i64::test_div_overflow
+[ PASS    ] turbos_clmm::i64::test_from_ok
+[ PASS    ] turbos_clmm::i64::test_from_overflow
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_burn_event_emission
+[ PASS    ] turbos_clmm::i64::test_mod
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_add_role_unauthorized
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_extreme_ratio_calculations
+[ PASS    ] turbos_clmm::i64::test_mul
+[ PASS    ] turbos_clmm::i64::test_mul_overflow
+[ PASS    ] turbos_clmm::i64::test_neg_from
+[ PASS    ] turbos_clmm::i64::test_neg_from_overflow
+[ PASS    ] turbos_clmm::i64::test_shl
+[ PASS    ] turbos_clmm::i64::test_shr
+[ PASS    ] turbos_clmm::i64::test_sign
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_full_math_precision_edge_cases
+[ PASS    ] turbos_clmm::i64::test_sub
+[ PASS    ] turbos_clmm::reward_simple_tests::test_acl_permission_checks
+[ PASS    ] turbos_clmm::i64::test_sub_min_i64
+[ PASS    ] turbos_clmm::i64::test_sub_overflow
+[ PASS    ] turbos_clmm::i64::test_sub_underflow
+[ PASS    ] turbos_clmm::i64::test_wrapping_add
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_clear_ticks_above_current
+[ PASS    ] turbos_clmm::i64::test_wrapping_sub
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_integer_type_boundaries
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_acl_invalid_role_rejection
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_claim_protocol_fee_manager_role
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_liquidity_calculation_precision
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_math_u128_overflow_protection
+[ PASS    ] turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_max_boundary
+[ PASS    ] turbos_clmm::reward_simple_tests::test_reward_initialization_success
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_math_u64_precision_boundaries
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_permission_bitmask_precision
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_clear_ticks_only_not_used_above_current
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_collect_event_emission
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_precision_cascading_calculations
+[ PASS    ] turbos_clmm::integration_security_tests::test_cross_module_interaction_security
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_claim_protocol_fee_manager_role_unauthorized
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_signed_integer_overflow_protection
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_sqrt_price_precision_limits
+[ PASS    ] turbos_clmm::reward_simple_tests::test_reward_manager_role_validation
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_wrapping_add_overflow_abort
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_role_permission_isolation
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_clmm_manager_role
+[ PASS    ] turbos_clmm::math_precision_overflow_tests::test_wrapping_mul_u64_overflow_abort
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_initializes_lower_tick_including_current
+[ PASS    ] turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_tick_spacing_220_comprehensive
+[ PASS    ] turbos_clmm::reward_simple_tests::test_reward_role_isolation
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_event_data_consistency
+[ PASS    ] turbos_clmm::math_sqrt_price::test_encode_price_sqrt
+[ PASS    ] turbos_clmm::math_sqrt_price::test_get_amount_b_delta_
+[ PASS    ] turbos_clmm::integration_security_tests::test_deadline_consistency_security
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_role_removal_security
+[ PASS    ] turbos_clmm::math_tick::test_get_min_tick_10
+[ PASS    ] turbos_clmm::math_tick::test_get_min_tick_300
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_clmm_manager_role_unauthorized
+[ PASS    ] turbos_clmm::math_tick::test_get_min_tick_max
+[ PASS    ] turbos_clmm::reward_simple_tests::test_unauthorized_reward_management
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_max_tick_and_max_l_above_current
+[ PASS    ] turbos_clmm::access_control_simple_tests::test_unauthorized_pool_configuration_attack
+[ PASS    ] turbos_clmm::string_tools::test_address_to_hexstring
+[ PASS    ] turbos_clmm::string_tools::test_u64_to_hexstring
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max_add_one
+[ PASS    ] turbos_clmm::integration_security_tests::test_error_handling_consistency
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_pause_pool_manager_role
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_mint_event_emission
+[ PASS    ] turbos_clmm::string_tools::test_u64_to_string
+[ PASS    ] turbos_clmm::acl_tests::test_add_role
+[ PASS    ] turbos_clmm::string_tools::test_zero_string
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max_sub_one
+[ PASS    ] turbos_clmm::acl_tests::test_add_role_invalid_role
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_min
+[ PASS    ] turbos_clmm::acl_tests::test_complex_scenario
+[ PASS    ] turbos_clmm::acl_tests::test_edge_case_role_127
+[ PASS    ] turbos_clmm::integration_security_tests::test_position_nft_security
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_pause_pool_manager_role_unauthorized
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_min_add_one
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_max_tick_and_max_l_below_current
+[ PASS    ] turbos_clmm::acl_tests::test_get_members
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one
+[ PASS    ] turbos_clmm::swap_inner_tests::test_swap_a_b_exact_in
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one_add_one
+[ PASS    ] turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one_sub_one
+[ PASS    ] turbos_clmm::math_tick::test_tick_at_max
+[ PASS    ] turbos_clmm::acl_tests::test_get_permission
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_multiple_operation_events
+[ PASS    ] turbos_clmm::math_tick::test_tick_at_min
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_reward_manager_role
+[ PASS    ] turbos_clmm::math_tick::test_tick_below_min
+[ PASS    ] turbos_clmm::math_tick::test_tick_exceed_max
+[ PASS    ] turbos_clmm::acl_tests::test_has_role
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_remove_liquidity_from_liquidity_gross_above_current
+[ PASS    ] turbos_clmm::acl_tests::test_has_role_invalid_role
+[ PASS    ] turbos_clmm::swap_inner_tests::test_swap_a_b_exact_out
+[ PASS    ] turbos_clmm::integration_security_tests::test_state_isolation_security
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_check_reward_manager_role_unauthorized
+[ PASS    ] turbos_clmm::event_emission_integrity_tests::test_swap_event_emission
+[ PASS    ] turbos_clmm::acl_tests::test_new_acl
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_create_acl_config
+[ PASS    ] turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_tick_spacing_comprehensive
+[ PASS    ] turbos_clmm::acl_tests::test_remove_member
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_removing_works_above_current
+[ PASS    ] turbos_clmm::swap_inner_tests::test_swap_b_a_exact_in
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_price_bounds_protection
+[ PASS    ] turbos_clmm::position_edge_cases_simple_tests::test_liquidity_precision_edge_cases
+[ PASS    ] turbos_clmm::acl_tests::test_remove_role
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_get_members
+[ PASS    ] turbos_clmm::acl_tests::test_remove_role_invalid_role
+[ PASS    ] turbos_clmm::integration_security_tests::test_version_check_consistency
+[ PASS    ] turbos_clmm::swap_inner_tests::test_swap_b_a_exact_out
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_removing_works_below_current
+[ PASS    ] turbos_clmm::flash_loan_security_tests::test_flash_loan_basic_functionality
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_price_direction_protection
+[ PASS    ] turbos_clmm::acl_tests::test_role_bit_operations
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_remove_member
+[ PASS    ] turbos_clmm::position_edge_cases_simple_tests::test_position_math_overflow_protection
+[ PASS    ] turbos_clmm::acl_tests::test_set_roles
+[ PASS    ] turbos_clmm::lp_asset_security_tests::test_lp_asset_mint_burn_balance
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_removing_works_including_current
+[ PASS    ] turbos_clmm::pool_factory_tests::repeated_type_on_deploy_pool
+[ PASS    ] turbos_clmm::flash_loan_security_tests::test_flash_loan_fee_calculation_security
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_remove_role
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_acl_permission_bitmask_verification
+[ PASS    ] turbos_clmm::position_edge_cases_simple_tests::test_price_sqrt_conversion_bounds
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_price_impact_bounds
+[ PASS    ] turbos_clmm::lp_asset_security_tests::test_lp_asset_mint_burn_consistency
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_token_a_only_above_current
+[ PASS    ] turbos_clmm::pool_factory_tests::test_deploy_pool
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_pool_fee_protocol_update_security
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_role_isolation
+[ PASS    ] turbos_clmm::flash_loan_security_tests::test_flash_loan_underpayment_attack
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_token_a_only_below_current
+[ PASS    ] turbos_clmm::lp_asset_security_tests::test_lp_asset_slippage_failure
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_swap_calculation_precision
+[ PASS    ] turbos_clmm::position_edge_cases_simple_tests::test_tick_boundary_math_functions
+[ PASS    ] turbos_clmm::pool_factory_tests::test_deploy_pool_and_mint
+[ PASS    ] turbos_clmm::pool_factory_acl_tests::test_set_roles
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_protocol_fee_boundary_values
+[ PASS    ] turbos_clmm::position_edge_cases_simple_tests::test_tick_spacing_validation
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_swap_fee_application
+[ PASS    ] turbos_clmm::lp_asset_security_tests::test_lp_asset_zero_amount_protection
+[ PASS    ] turbos_clmm::flash_swap_tests::test_flash_swap_a_b_exact_in
+[ PASS    ] turbos_clmm::i128::test_abs
+[ PASS    ] turbos_clmm::i128::test_abs_overflow
+[ PASS    ] turbos_clmm::pool_factory_tests::test_update_nft_metadata
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_token_a_only_including_current
+[ PASS    ] turbos_clmm::i128::test_add
+[ PASS    ] turbos_clmm::i128::test_add_overflow
+[ PASS    ] turbos_clmm::i128::test_add_underflow
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_protocol_fee_collection_authorization
+[ PASS    ] turbos_clmm::i128::test_castdown
+[ PASS    ] turbos_clmm::i128::test_checked_sub
+[ PASS    ] turbos_clmm::i128::test_cmp
+[ PASS    ] turbos_clmm::i128::test_div
+[ PASS    ] turbos_clmm::position_manager_tests::test_mint
+[ PASS    ] turbos_clmm::i128::test_div_overflow
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_b_c_exact_in
+[ PASS    ] turbos_clmm::pool_factory_tests::test_update_pool_fee_protocol
+[ PASS    ] turbos_clmm::i128::test_from_ok
+[ PASS    ] turbos_clmm::swap_state_integrity_tests::test_zero_amount_swap_protection
+[ PASS    ] turbos_clmm::i128::test_from_overflow
+[ PASS    ] turbos_clmm::flash_swap_tests::test_flash_swap_a_b_exact_out
+[ PASS    ] turbos_clmm::i128::test_mul
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_works_for_max_tick_above_current
+[ PASS    ] turbos_clmm::i128::test_mul_overflow
+[ PASS    ] turbos_clmm::i128::test_neg_from
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_protocol_fee_rate_boundary_protection
+[ PASS    ] turbos_clmm::i128::test_neg_from_overflow
+[ PASS    ] turbos_clmm::i128::test_overflowing_add
+[ PASS    ] turbos_clmm::i128::test_shl
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_cross_tick_liquidity_consistency
+[ PASS    ] turbos_clmm::i128::test_shr
+[ PASS    ] turbos_clmm::tickmap_tests::test_flip_tick_for_testing
+[ PASS    ] turbos_clmm::i128::test_sign
+[ PASS    ] turbos_clmm::i128::test_sub
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_b_c_exact_out
+[ PASS    ] turbos_clmm::i128::test_sub_min_i128
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_works_for_min_max_tick_below_current
+[ PASS    ] turbos_clmm::protocol_fee_tests::test_swap_a_b_exact_in
+[ PASS    ] turbos_clmm::flash_swap_tests::test_flash_swap_b_a_exact_in
+[ PASS    ] turbos_clmm::i128::test_sub_overflow
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_protocol_fee_rate_validation
+[ PASS    ] turbos_clmm::i128::test_sub_underflow
+[ PASS    ] turbos_clmm::i128::test_wrapping_add
+[ PASS    ] turbos_clmm::i128::test_wrapping_sub
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_max_liquidity_per_tick_enforcement
+[ PASS    ] turbos_clmm::tickmap_tests::test_next_initialized_tick_within_min_max
+[ PASS    ] turbos_clmm::swap_mint_burn_tests::test_works_for_min_max_tick_including_current
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_add_reward_v2_unauthorized
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_role_separation_security
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_c_b_exact_in
+[ PASS    ] turbos_clmm::flash_swap_tests::test_flash_swap_b_a_exact_out
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_price_boundary_protection_max
+[ PASS    ] turbos_clmm::tickmap_tests::test_next_initialized_tick_within_one_word_for_testing_left
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_add_reward_v2_with_permission
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_unauthorized_pool_fee_update
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_price_boundary_protection_min
+[ PASS    ] turbos_clmm::tickmap_tests::test_next_initialized_tick_within_one_word_for_testing_right
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_c_b_exact_out
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_deprecated_init_reward_function
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_unauthorized_protocol_fee_collection
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_sqrt_price_tick_conversion_consistency
+[ PASS    ] turbos_clmm::tickmap_tests::test_position
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_deprecated_reset_reward_function
+[ PASS    ] turbos_clmm::protocol_fee_security_tests::test_unauthorized_protocol_fee_setting
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_exact_in
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_tick_boundary_validation
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_init_reward_v2_unauthorized
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_init_reward_v2_with_permission
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_tick_crossing_state_consistency
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_a_b_exact_out
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_multiple_reward_managers
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_tick_initialization_security
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_b_a
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_reset_reward_v2_unauthorized
+[ PASS    ] turbos_clmm::tick_manipulation_protection_tests::test_tick_spacing_enforcement
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_reset_reward_v2_with_permission
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_b_a_b_c_exact_in
+[ PASS    ] turbos_clmm::reward_manager_acl_tests::test_role_transition_security
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_b_a_b_c_exact_out
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_b_a_c_b_exact_in
+[ PASS    ] turbos_clmm::swap_router_tests::test_swap_b_a_c_b_exact_out
+
+Test Statistics:
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┬────────────┬───────────────────────────┐
+│                                          Test Name                                           │    Time    │         Gas Used          │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_acl_basic_functionality                       │   0.055    │         998000156         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_acl_invalid_role_rejection                    │   0.053    │         998000143         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_permission_bitmask_precision                  │   0.042    │         998000156         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_role_permission_isolation                     │   0.045    │         998000164         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_role_removal_security                         │   0.042    │         998000170         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::access_control_simple_tests::test_unauthorized_pool_configuration_attack        │   0.035    │         998000145         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_add_role                                                        │   0.011    │         998000033         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_add_role_invalid_role                                           │   0.011    │         998000008         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_complex_scenario                                                │   0.013    │         998000049         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_edge_case_role_127                                              │   0.011    │         998000017         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_get_members                                                     │   0.011    │         998000029         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_get_permission                                                  │   0.031    │         998000028         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_has_role                                                        │   0.016    │         998000027         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_has_role_invalid_role                                           │   0.014    │         998000012         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_new_acl                                                         │   0.014    │         998000010         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_remove_member                                                   │   0.021    │         998000032         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_remove_role                                                     │   0.020    │         998000032         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_remove_role_invalid_role                                        │   0.015    │         998000012         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_role_bit_operations                                             │   0.018    │         998000027         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::acl_tests::test_set_roles                                                       │   0.019    │         998000047         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::compute_swap_step_tests::compute_swap_max_liquidity_tests                       │   0.013    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_burn_event_emission                        │   0.073    │         998007027         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_collect_event_emission                     │   0.071    │         998009755         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_event_data_consistency                     │   0.061    │         998004717         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_mint_event_emission                        │   0.063    │         998004668         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_multiple_operation_events                  │   0.079    │         998022901         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::event_emission_integrity_tests::test_swap_event_emission                        │   0.040    │         998002487         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_empty_start_array                    │   0.082    │         998036774         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_max_boundary                         │   0.059    │         998002820         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_tick_spacing_220_comprehensive       │   0.077    │         998051627         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::fetch_ticks_simple_tests::test_fetch_ticks_tick_spacing_comprehensive           │   0.212    │         998640823         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_loan_security_tests::test_flash_loan_basic_functionality                  │   0.050    │         998002470         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_loan_security_tests::test_flash_loan_fee_calculation_security             │   0.045    │         998002466         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_loan_security_tests::test_flash_loan_underpayment_attack                  │   0.061    │         998002385         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_swap_tests::test_flash_swap_a_b_exact_in                                  │   0.056    │         998067780         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_swap_tests::test_flash_swap_a_b_exact_out                                 │   0.054    │         998067693         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_swap_tests::test_flash_swap_b_a_exact_in                                  │   0.053    │         998066229         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::flash_swap_tests::test_flash_swap_b_a_exact_out                                 │   0.055    │         998066284         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_abs                                                                  │   0.006    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_abs_overflow                                                         │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_add                                                                  │   0.005    │         998000098         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_add_overflow                                                         │   0.007    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_add_underflow                                                        │   0.004    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_castdown                                                             │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_checked_sub                                                          │   0.004    │         998000023         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_cmp                                                                  │   0.004    │         998000008         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_div                                                                  │   0.004    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_div_overflow                                                         │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_from_ok                                                              │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_from_overflow                                                        │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_mul                                                                  │   0.005    │         998000014         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_mul_overflow                                                         │   0.005    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_neg_from                                                             │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_neg_from_overflow                                                    │   0.004    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_overflowing_add                                                      │   0.011    │         998000023         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_shl                                                                  │   0.004    │         998000004         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_shr                                                                  │   0.004    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_sign                                                                 │   0.006    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_sub                                                                  │   0.005    │         998000110         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_sub_min_i128                                                         │   0.004    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_sub_overflow                                                         │   0.005    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_sub_underflow                                                        │   0.004    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_wrapping_add                                                         │   0.006    │         998000107         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i128::test_wrapping_sub                                                         │   0.006    │         998000128         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_abs                                                                   │   0.006    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_abs_overflow                                                          │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_add                                                                   │   0.006    │         998000031         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_add_overflow                                                          │   0.004    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_add_underflow                                                         │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_castdown                                                              │   0.003    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_cmp                                                                   │   0.001    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_div                                                                   │   0.003    │         998000004         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_div_overflow                                                          │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_from_ok                                                               │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_from_overflow                                                         │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_mod                                                                   │   0.001    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_mod_euclidean                                                         │   0.003    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_mul                                                                   │   0.002    │         998000011         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_mul_overflow                                                          │   0.003    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_neg_from                                                              │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_neg_from_overflow                                                     │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_shl                                                                   │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_shr                                                                   │   0.002    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_sign                                                                  │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_sub                                                                   │   0.002    │         998000028         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_sub_min_i32                                                           │   0.003    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_sub_overflow                                                          │   0.001    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_sub_underflow                                                         │   0.003    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_wrapping_add                                                          │   0.002    │         998000026         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i32::test_wrapping_sub                                                          │   0.002    │         998000031         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_abs                                                                   │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_abs_overflow                                                          │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_add                                                                   │   0.002    │         998000045         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_add_overflow                                                          │   0.001    │         998000008         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_add_underflow                                                         │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_castdown                                                              │   0.002    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_cmp                                                                   │   0.004    │         998000007         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_div                                                                   │   0.002    │         998000005         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_div_overflow                                                          │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_from_ok                                                               │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_from_overflow                                                         │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_mod                                                                   │   0.001    │         998000004         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_mul                                                                   │   0.001    │         998000011         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_mul_overflow                                                          │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_neg_from                                                              │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_neg_from_overflow                                                     │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_shl                                                                   │   0.001    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_shr                                                                   │   0.001    │         998000004         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_sign                                                                  │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_sub                                                                   │   0.001    │         998000046         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_sub_min_i64                                                           │   0.001    │         998000008         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_sub_overflow                                                          │   0.001    │         998000008         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_sub_underflow                                                         │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_wrapping_add                                                          │   0.002    │         998000043         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::i64::test_wrapping_sub                                                          │   0.002    │         998000052         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_cross_module_interaction_security              │   0.056    │         998006258         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_deadline_consistency_security                  │   0.073    │         998006327         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_error_handling_consistency                     │   0.044    │         998006326         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_position_nft_security                          │   0.041    │         998004983         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_state_isolation_security                       │   0.071    │         998006125         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::integration_security_tests::test_version_check_consistency                      │   0.071    │         998006326         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::lp_asset_security_tests::test_lp_asset_mint_burn_balance                        │   0.038    │         998001195         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::lp_asset_security_tests::test_lp_asset_mint_burn_consistency                    │   0.040    │         998003376         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::lp_asset_security_tests::test_lp_asset_slippage_failure                         │   0.044    │         998001077         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::lp_asset_security_tests::test_lp_asset_zero_amount_protection                   │   0.048    │         998000607         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_bit_tests::test_least_significant_bit                                      │   0.006    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_bit_tests::test_least_significant_bit_revert                               │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_bit_tests::test_most_significant_bit                                       │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_bit_tests::test_most_significant_bit_revert                                │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_add_delta_edge_cases                                       │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_amount_a_for_liquidity_overflow                        │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_amount_b_for_liquidity_extremes                        │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_amount_for_liquidity                                   │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_amount_for_liquidity_extremes                          │   0.005    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_liquidity_for_amounts                                  │   0.006    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_liquidity::test_get_liquidity_for_amounts_edge_cases                       │   0.007    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_add_delta_overflow_protection               │   0.010    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_add_delta_underflow_protection              │   0.014    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_extreme_ratio_calculations                  │   0.009    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_full_math_precision_edge_cases              │   0.009    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_integer_type_boundaries                     │   0.010    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_liquidity_calculation_precision             │   0.019    │         998000048         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_math_u128_overflow_protection               │   0.014    │         998000003         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_math_u64_precision_boundaries               │   0.011    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_precision_cascading_calculations            │   0.010    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_signed_integer_overflow_protection          │   0.009    │         998000029         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_sqrt_price_precision_limits                 │   0.010    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_wrapping_add_overflow_abort                 │   0.009    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_precision_overflow_tests::test_wrapping_mul_u64_overflow_abort             │   0.015    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_sqrt_price::test_encode_price_sqrt                                         │   0.016    │         998000068         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_sqrt_price::test_get_amount_b_delta_                                       │   0.013    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_get_min_tick_10                                                 │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_get_min_tick_300                                                │   0.007    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_get_min_tick_max                                                │   0.009    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max                               │   0.010    │         998000078         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max_add_one                       │   0.011    │         998000173         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_max_sub_one                       │   0.014    │         998000078         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_min                               │   0.015    │         998000054         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_min_add_one                       │   0.015    │         998000054         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one                               │   0.010    │         998000073         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one_add_one                       │   0.012    │         998000073         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_sqrt_price_from_tick_index_at_one_sub_one                       │   0.007    │         998000059         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_tick_at_max                                                     │   0.006    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_tick_at_min                                                     │   0.005    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_tick_below_min                                                  │   0.005    │         998000013         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_tick::test_tick_exceed_max                                                 │   0.006    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u128::test_full_mul                                                        │   0.006    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u128::test_leading_zeros                                                   │   0.001    │         998000009         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u128::test_overflowing_add                                                 │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u128::test_overflowing_mul                                                 │   0.001    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u128::test_wrapping_mul                                                    │   0.001    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u256::test_add                                                             │   0.000    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::math_u256::test_div_round                                                       │   0.000    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_add_role                                           │   0.038    │         998000040         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_add_role_unauthorized                              │   0.037    │         998000019         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_claim_protocol_fee_manager_role              │   0.034    │         998000033         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_claim_protocol_fee_manager_role_unauthorized │   0.044    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_clmm_manager_role                            │   0.037    │         998000033         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_clmm_manager_role_unauthorized               │   0.045    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_pause_pool_manager_role                      │   0.032    │         998000033         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_pause_pool_manager_role_unauthorized         │   0.042    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_reward_manager_role                          │   0.043    │         998000033         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_check_reward_manager_role_unauthorized             │   0.030    │         998000021         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_create_acl_config                                  │   0.029    │         998000022         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_get_members                                        │   0.030    │         998000051         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_remove_member                                      │   0.030    │         998000044         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_remove_role                                        │   0.037    │         998000042         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_role_isolation                                     │   0.053    │         998000041         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_acl_tests::test_set_roles                                          │   0.035    │         998000035         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_tests::repeated_type_on_deploy_pool                                │   0.047    │         998000176         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_tests::test_deploy_pool                                            │   0.045    │         998001265         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_tests::test_deploy_pool_and_mint                                   │   0.049    │         998007108         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_tests::test_update_nft_metadata                                    │   0.038    │         998001298         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::pool_factory_tests::test_update_pool_fee_protocol                               │   0.038    │         998001296         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_edge_cases_simple_tests::test_liquidity_precision_edge_cases           │   0.038    │         998000526         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_edge_cases_simple_tests::test_position_math_overflow_protection        │   0.056    │         998000583         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_edge_cases_simple_tests::test_price_sqrt_conversion_bounds             │   0.040    │         998001012         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_edge_cases_simple_tests::test_tick_boundary_math_functions             │   0.051    │         998000749         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_edge_cases_simple_tests::test_tick_spacing_validation                  │   0.037    │         998000474         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::position_manager_tests::test_mint                                               │   0.052    │         998053913         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_acl_permission_bitmask_verification           │   0.036    │         998000468         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_pool_fee_protocol_update_security             │   0.035    │         998000471         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_protocol_fee_boundary_values                  │   0.045    │         998000473         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_protocol_fee_collection_authorization         │   0.047    │         998000486         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_protocol_fee_rate_boundary_protection         │   0.042    │         998000467         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_protocol_fee_rate_validation                  │   0.043    │         998000469         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_role_separation_security                      │   0.043    │         998000475         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_unauthorized_pool_fee_update                  │   0.033    │         998000465         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_unauthorized_protocol_fee_collection          │   0.034    │         998000479         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_security_tests::test_unauthorized_protocol_fee_setting             │   0.034    │         998000466         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::protocol_fee_tests::test_swap_a_b_exact_in                                      │   0.061    │         998012078         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_add_reward_v2_unauthorized                       │   0.041    │         998000386         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_add_reward_v2_with_permission                    │   0.034    │         998000396         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_deprecated_init_reward_function                  │   0.035    │         998000349         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_deprecated_reset_reward_function                 │   0.033    │         998000349         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_init_reward_v2_unauthorized                      │   0.031    │         998000351         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_init_reward_v2_with_permission                   │   0.030    │         998000375         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_multiple_reward_managers                         │   0.032    │         998000395         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_reset_reward_v2_unauthorized                     │   0.031    │         998000384         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_reset_reward_v2_with_permission                  │   0.031    │         998000387         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_acl_tests::test_role_transition_security                         │   0.030    │         998000388         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_manager_tests::test_reward_config                                        │   0.062    │         998013741         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_simple_tests::test_acl_permission_checks                                 │   0.036    │         998000156         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_simple_tests::test_reward_initialization_success                         │   0.045    │         998000464         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_simple_tests::test_reward_manager_role_validation                        │   0.039    │         998000156         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_simple_tests::test_reward_role_isolation                                 │   0.036    │         998000168         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::reward_simple_tests::test_unauthorized_reward_management                        │   0.048    │         998000456         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::string_tools::test_address_to_hexstring                                         │   0.007    │         998000006         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::string_tools::test_u64_to_hexstring                                             │   0.003    │         998000002         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::string_tools::test_u64_to_string                                                │   0.006    │         998000041         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::string_tools::test_zero_string                                                  │   0.005    │         998000001         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_inner_tests::test_swap_a_b_exact_in                                        │   0.051    │         998001935         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_inner_tests::test_swap_a_b_exact_out                                       │   0.053    │         998001249         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_inner_tests::test_swap_b_a_exact_in                                        │   0.037    │         998001193         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_inner_tests::test_swap_b_a_exact_out                                       │   0.037    │         998001194         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_add_liquidity_to_liquidity_gross_above_current       │   0.056    │         998005076         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_clear_ticks_above_current                            │   0.047    │         998002503         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_clear_ticks_only_not_used_above_current              │   0.047    │         998004064         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_initializes_lower_tick_including_current             │   0.065    │         998001253         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_max_tick_and_max_l_above_current                     │   0.055    │         998001161         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_max_tick_and_max_l_below_current                     │   0.054    │         998001195         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_remove_liquidity_from_liquidity_gross_above_current  │   0.063    │         998003510         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_removing_works_above_current                         │   0.039    │         998002408         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_removing_works_below_current                         │   0.039    │         998003023         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_removing_works_including_current                     │   0.043    │         998003140         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_token_a_only_above_current                           │   0.038    │         998001188         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_token_a_only_below_current                           │   0.037    │         998001229         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_token_a_only_including_current                       │   0.060    │         998001221         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_works_for_max_tick_above_current                     │   0.051    │         998001178         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_works_for_min_max_tick_below_current                 │   0.045    │         998001177         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_mint_burn_tests::test_works_for_min_max_tick_including_current             │   0.042    │         998000977         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_b_c_exact_in                                   │   0.070    │         998079091         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_b_c_exact_out                                  │   0.059    │         998077480         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_c_b_exact_in                                   │   0.058    │         998077541         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_c_b_exact_out                                  │   0.054    │         998077805         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_exact_in                                       │   0.052    │         998068446         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_a_b_exact_out                                      │   0.049    │         998068358         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_b_a                                                │   0.050    │         998066896         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_b_a_b_c_exact_in                                   │   0.050    │         998077541         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_b_a_b_c_exact_out                                  │   0.047    │         998077338         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_b_a_c_b_exact_in                                   │   0.046    │         998075991         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_router_tests::test_swap_b_a_c_b_exact_out                                  │   0.047    │         998077663         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_price_bounds_protection                        │   0.057    │         998001298         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_price_direction_protection                     │   0.046    │         998001298         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_price_impact_bounds                            │   0.063    │         998002586         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_swap_calculation_precision                     │   0.045    │         998003146         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_swap_fee_application                           │   0.043    │         998002570         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::swap_state_integrity_tests::test_zero_amount_swap_protection                    │   0.055    │         998001297         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_cross_tick_liquidity_consistency       │   0.044    │         998001916         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_max_liquidity_per_tick_enforcement     │   0.044    │         998001303         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_price_boundary_protection_max          │   0.037    │         998001285         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_price_boundary_protection_min          │   0.037    │         998001285         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_sqrt_price_tick_conversion_consistency │   0.038    │         998002208         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_tick_boundary_validation               │   0.034    │         998001285         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_tick_crossing_state_consistency        │   0.037    │         998003060         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_tick_initialization_security           │   0.036    │         998004877         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tick_manipulation_protection_tests::test_tick_spacing_enforcement               │   0.034    │         998001285         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tickmap_tests::test_flip_tick_for_testing                                       │   0.043    │         998003524         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tickmap_tests::test_next_initialized_tick_within_min_max                        │   0.041    │         998001400         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tickmap_tests::test_next_initialized_tick_within_one_word_for_testing_left      │   0.041    │         998002880         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tickmap_tests::test_next_initialized_tick_within_one_word_for_testing_right     │   0.039    │         998003147         │
+├──────────────────────────────────────────────────────────────────────────────────────────────┼────────────┼───────────────────────────┤
+│ turbos_clmm::tickmap_tests::test_position                                                    │   0.033    │         998000008         │
+└──────────────────────────────────────────────────────────────────────────────────────────────┴────────────┴───────────────────────────┘
+
+Test result: OK. Total tests: 282; passed: 282; failed: 0
+[NOTE] Dependencies on Sui, MoveStdlib, Bridge, DeepBook, and SuiSystem are automatically added, but this feature is disabled for your package because you have explicitly included dependencies on MoveStdlib and Sui. Consider removing these dependencies from `Move.toml`.
+[NOTE] Updating dependencies for `mainnet` environment because "./Move.toml" has been changed since the last update.

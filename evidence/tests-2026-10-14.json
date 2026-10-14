@@ -1,0 +1,20 @@
+{
+  "exitCode": 0,
+  "gasLimit": "1000000000",
+  "testResult": {
+    "status": "OK",
+    "total": 282,
+    "passed": 282,
+    "failed": 0
+  },
+  "failedTests": [],
+  "missingDependency": false,
+  "date": "2026-10-14",
+  "sourceCommit": "a02c7a0b78d8a53bb0534835c309b2d115254e01",
+  "toolchain": "sui 1.66.2-a9a6825eaf62 (Darwin arm64)",
+  "testFrameworkCommit": "a9a6825eaf6273cc819ee3bcf65fd4909f7624a9",
+  "sourceAndExistingTestsUnchanged": true,
+  "coverageGenerated": false,
+  "coverageLimitation": "Installed CLI was compiled without tracing; no line or branch coverage measured.",
+  "scope": "Existing tests only; not proof of positive and negative cases for every auth check or invariant."
+}
