@@ -1,0 +1,20 @@
+{
+  "project": "clmm",
+  "reports": [
+    {
+      "file": "audits/movebit-clmm-2024.pdf",
+      "sha256": "c40fb938e783909eec75d643602cf436278bbd0c68ef1ce9975782687e3561d0",
+      "bytes": 419739
+    },
+    {
+      "file": "audits/movebit-math-2025.pdf",
+      "sha256": "3649373469faa44566d46506744139447bf6324b8f19f8c1f3f3dbc267b7a5a8",
+      "bytes": 317284
+    },
+    {
+      "file": "audits/certik-clmm-2023.pdf",
+      "sha256": "6314237668fa515a0b2609f8914918fe5b7e07285d8a43f5de91bc4ae0c56ed4",
+      "bytes": 3365508
+    }
+  ]
+}
