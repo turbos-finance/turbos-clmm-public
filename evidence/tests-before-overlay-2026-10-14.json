@@ -1,0 +1,13 @@
+{
+  "exitCode": 0,
+  "gasLimit": "1000000000",
+  "testResult": {
+    "status": "OK",
+    "total": 282,
+    "passed": 282,
+    "failed": 0
+  },
+  "failedTests": [],
+  "missingDependency": false,
+  "scope": "Before the explicit test overlay"
+}

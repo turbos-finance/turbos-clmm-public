@@ -58,4 +58,11 @@ No line/branch coverage was generated: this installed CLI lacks tracing support.
 Passing existing tests does not establish positive and negative tests for every
 authorization check or invariant. Those remain separate open tasks.
 
+## Additional security test batch
+
+The test mode now runs the explicit test overlay described in
+[AUTH-TEST-MATRIX.md](AUTH-TEST-MATRIX.md): **292 passed, 0 failed**.
+Older baseline statements above describe the earlier run, not the current expanded suite.
+Production build mode remains unchanged and does not apply the test overlay.
+
 Historical GitInfo is deferred while latest-release evidence is prioritized.
