@@ -1,5 +1,8 @@
 # Audit evidence - Turbos CLMM
 
+Audit PDFs retain their original authors' copyright and terms. The repository's MIT
+license applies to Turbos-owned source and documentation; it does not relicense third-party reports.
+
 Original reports are included unchanged:
 [CertiK 2023](certik-clmm-2023.pdf), [MoveBit CLMM 2024](movebit-clmm-2024.pdf),
 and [MoveBit Math 2025](movebit-math-2025.pdf).
