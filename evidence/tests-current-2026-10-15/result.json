@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-10-15T07:56:14.280Z",
+  "completedAt": "2026-10-15T07:56:23.682Z",
+  "project": "clmm",
+  "toolchain": "sui 1.66.2-a9a6825eaf62",
+  "testFrameworkCommit": "a9a6825eaf6273cc819ee3bcf65fd4909f7624a9",
+  "clmmMetadataCommit": null,
+  "command": [
+    "sui",
+    "move",
+    "test",
+    "--path",
+    "DISPOSABLE_DIRECTORY",
+    "--build-env",
+    "mainnet",
+    "--silence-warnings",
+    "--no-lint",
+    "--gas-limit",
+    "1000000000",
+    "--threads",
+    "1"
+  ],
+  "exitCode": 0,
+  "diskStopped": false,
+  "timedOut": false,
+  "testResult": {
+    "status": "OK",
+    "total": 292,
+    "passed": 292,
+    "failed": 0
+  },
+  "currentCheckoutSourcesAndTests": true,
+  "sourceAndTestsUnchanged": true,
+  "sourceTreeSha256": "ef3fecb99afad78a0382a22b390d056cc4f1fe699805e92f73593d7cec05c352",
+  "coverageMeasured": false,
+  "scope": "Current-checkout unit tests only; production bytecode verification is separate",
+  "previousPublicHead": "0d7e490e67ab1ef43a1bd72f9c4777dc8c67ea16",
+  "notes": "The 10 previously published ACL tests are now directly in tests/security_acl_tests.move. All 282 earlier tests are preserved.",
+  "productionBytecodeStillMatches": true,
+  "allAuthorizationAndInvariantCasesCovered": false
+}

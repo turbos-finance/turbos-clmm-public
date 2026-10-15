@@ -1,3 +1,5 @@
+> October 15 update: the tests/corrections described below are now directly tracked in the current source/test tree. The current suite passes 292 tests; use [current-checkout instructions](tests-current-2026-10-15/README.md). The remaining sections describe the October 14 overlay baseline, not a claim of exhaustive coverage.
+
 # First authorization/invariant test batch — Turbos CLMM
 
 Pinned deployed source: `a02c7a0b78d8a53bb0534835c309b2d115254e01`.
