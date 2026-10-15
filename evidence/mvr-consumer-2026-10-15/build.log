@@ -1,0 +1,10 @@
+Output from mvr:
+  │ [mvr] detected supported SUI CLI version
+  │ [mvr] resolving: "@turbos/turbos/22" on network:  mainnet
+
+Downloading from https://github.com/MystenLabs/sui.git
+Downloading from https://github.com/MystenLabs/sui.git
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY TurbosCLMM
+BUILDING PublicConsumerclmm

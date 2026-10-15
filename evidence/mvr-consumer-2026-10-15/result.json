@@ -1,0 +1,81 @@
+{
+  "completedAt": "2026-10-15T07:34:30.953Z",
+  "project": "clmm",
+  "network": "mainnet",
+  "mvrName": "@turbos/turbos",
+  "version": 22,
+  "packageId": "0xa5a0c25c79e428eba04fb98b3fb2a34db45ab26d4c8faf0d7e39d66a63891e64",
+  "sourceCommit": "df4e892dfb970fa6919e589709554fde3fc5fa80",
+  "registryIndexedCorrectCommit": true,
+  "versionedRegistry": {
+    "name": "@turbos/turbos",
+    "metadata": {
+      "icon_url": "https://app.turbos.finance/icon/Turbos-30.svg",
+      "description": "Turbos DEX: Your Portal to the Sui Ecosystem",
+      "homepage_url": "https://app.turbos.finance"
+    },
+    "package_info": {
+      "id": "0xc0641fae32725230f949a7228e65c9ec6a61d7431fed388bb0fcb2749e57af69",
+      "git_table_id": "0x961420b68f2d4baacc353760b476b22476d38450b2b4a32bc72315758cd42c48",
+      "default_name": "@turbos/clmm",
+      "metadata": {
+        "default": "@turbos/clmm"
+      }
+    },
+    "git_info": {
+      "repository_url": "https://github.com/turbos-finance/turbos-clmm-public",
+      "path": "",
+      "tag": "df4e892dfb970fa6919e589709554fde3fc5fa80"
+    },
+    "version": 22,
+    "package_address": "0xa5a0c25c79e428eba04fb98b3fb2a34db45ab26d4c8faf0d7e39d66a63891e64"
+  },
+  "latestRegistryAlsoMatches": true,
+  "metadataUpdate": {
+    "digest": "8d2nzwYgTTizbn1QBAydvj8jnjd4ViqsQWMd9eoBfdcY",
+    "sender": "0x6d92d887ba0858d58979fd88bbe91d4baf5ed473acc30804463608ef5d12697f",
+    "success": true,
+    "proposalCommandsAndInputsMatch": true
+  },
+  "toolchain": "sui 1.66.2-a9a6825eaf62",
+  "resolver": "mvr 0.1.0-d85f8ad92add",
+  "cacheScope": "A new empty MOVE_HOME was created for this five-package run; dependencies downloaded normally and were shared between its consumers. No old Move cache was seeded or edited.",
+  "nonEmptyImport": true,
+  "checks": [
+    {
+      "label": "clmm-mvr-add",
+      "start": "2026-10-15T07:29:11.437Z",
+      "end": "2026-10-15T07:29:20.732Z",
+      "command": [
+        "mvr",
+        "add",
+        "@turbos/turbos/22"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "clmm-build",
+      "start": "2026-10-15T07:29:20.732Z",
+      "end": "2026-10-15T07:31:50.003Z",
+      "command": [
+        "sui",
+        "move",
+        "build",
+        "--build-env",
+        "mainnet",
+        "--silence-warnings",
+        "--no-lint"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "allPassed": true,
+  "noMainnetTransactionByVerifier": true,
+  "limitations": "Consumer compilation proves dependency resolution and public function type checking, not runtime execution, full authorization/invariant testing, audit closure, all historical versions, or all peripheral packages.",
+  "freshlyBuiltDependencyModules": {
+    "allMatch": true,
+    "count": 33,
+    "referenceChainReadAt": "2026-10-15T02:24:54.813Z",
+    "scope": "SHA-256 of freshly MVR-built dependency module BCS versus recorded immutable deployed-package module hashes; no new chain fetch"
+  }
+}

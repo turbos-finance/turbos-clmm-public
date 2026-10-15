@@ -1,0 +1,8 @@
+[package]
+name = "PublicConsumerclmm"
+edition = "2024"
+[addresses]
+consumer = "0x0"
+
+[dependencies]
+turbos_clmm = { r.mvr = "@turbos/turbos/22" }
