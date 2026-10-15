@@ -106,3 +106,6 @@ Turbos CLMM (Concentrated Liquidity Market Maker) is a high-performance, modular
 
 ## License
 MIT © Turbos Finance, Inc.
+## Current-release metadata verification (2026-10-15)
+
+See [verified build configuration and official source-verification evidence](evidence/mvr-source-2026-10-15/README.md). This update does not change production functions. MVR GitInfo update and a fresh-cache registry-consumer run are separate follow-ups.

@@ -1,9 +1,13 @@
 [package]
 name = "TurbosCLMM"
 version = "0.1.8"
-published-at = "0x7a6d1c22f05092c07490003e747fff8db4c78ceffc5cfb84a66d71a3a1417d51"
-
-[dependencies]
+edition = "legacy"
+implicit-dependencies = false
+published-at = "0xa5a0c25c79e428eba04fb98b3fb2a34db45ab26d4c8faf0d7e39d66a63891e64"
 
 [addresses]
 turbos_clmm = "0x91bfbc386a41afcfd9b2533058d7e915a1d3829089cc268ff4333d54d6339ca1"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "25804c243d07dd73c0d199e7794383bd855cd436" }
+MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "25804c243d07dd73c0d199e7794383bd855cd436" }

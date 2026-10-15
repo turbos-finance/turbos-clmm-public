@@ -1,0 +1,9 @@
+# Publication addresses from live mainnet; toolchain preserved from public historical metadata.
+[published.mainnet]
+chain-id = "35834a8a"
+published-at = "0xa5a0c25c79e428eba04fb98b3fb2a34db45ab26d4c8faf0d7e39d66a63891e64"
+original-id = "0x91bfbc386a41afcfd9b2533058d7e915a1d3829089cc268ff4333d54d6339ca1"
+version = 22
+toolchain-version = "1.49.2"
+build-config = { flavor = "sui", edition = "legacy" }
+upgrade-capability = "0x00a8e96385ed222c04fab9a95c9e12307e2a7b4375551338289101e78d193eee"
