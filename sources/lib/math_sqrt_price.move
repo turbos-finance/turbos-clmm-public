@@ -70,7 +70,7 @@ module turbos_clmm::math_sqrt_price {
 
         let amount_b;
         if (round_up) {
-            amount_b = full_math_u128::mul_div_round(liquidity, sqrt_price_b - sqrt_price_a, Q64);
+            amount_b = full_math_u128::mul_div_ceil(liquidity, sqrt_price_b - sqrt_price_a, Q64);
         } else {
             amount_b = full_math_u128::mul_div_floor(liquidity, sqrt_price_b - sqrt_price_a, Q64);
         };
