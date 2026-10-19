@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-10-19T02:25:05.715Z",
+  "project": "clmm",
+  "total": 187,
+  "passed": 187,
+  "failed": 0,
+  "coverage": true,
+  "fullSuiteCovered": false,
+  "fullSuiteTraced": false,
+  "fullSuiteTests": 292,
+  "fullSuitePassed": 292,
+  "perTestTraceCount": 187,
+  "allTracedTestsHaveTrace": true,
+  "allPassingTestsHaveTrace": false,
+  "traceRequested": true,
+  "filter": "security_acl_tests|acl_tests|access_control_simple_tests|math_|i32::|i64::|i128::|string_tools",
+  "sourceAndTestsUnchanged": true,
+  "sourceTreeSha256": "ef3fecb99afad78a0382a22b390d056cc4f1fe699805e92f73593d7cec05c352",
+  "sourceCommit": "3d6b079a693b13df4ff5cc1cc9dbfb8ede13cd4b",
+  "toolchain": "sui 1.66.2-a9a6825eaf62",
+  "platform": "darwin",
+  "threads": 1
+}
