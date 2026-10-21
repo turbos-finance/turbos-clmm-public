@@ -13,6 +13,10 @@ module turbos_clmm::security_version_fixture_tests {
     use turbos_clmm::pool::{Self, Pool, PoolRewardVault};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig, AclConfig};
     use turbos_clmm::position_manager::Positions;
+    use turbos_clmm::partner::Partner;
+    use turbos_clmm::pool_fetcher;
+    use turbos_clmm::swap_router;
+    use turbos_clmm::security_partner_flash_tests;
     use turbos_clmm::reward_manager;
     use turbos_clmm::security_entrypoint_tests::{Self, A, B, R, S};
     const ADMIN: address = @0xA;
@@ -36,6 +40,10 @@ module turbos_clmm::security_version_fixture_tests {
 
     fun future_entry(action: u8) {
         let s = security_entrypoint_tests::setup(15);
+        let partner_id = if (action >= 23) {
+            let (first, _) = security_partner_flash_tests::partners(&mut s);
+            std::option::some(first)
+        } else std::option::none();
         test_scenario::next_tx(&mut s, ADMIN);
         let v = pool::security_version_fixture(19, test_scenario::ctx(&mut s));
         let cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(&s);
@@ -68,6 +76,42 @@ module turbos_clmm::security_version_fixture_tests {
         else if (action == 16) pool_factory::remove_member(&cap, &mut acl, ADMIN, &v)
         else if (action == 17) pool_factory::set_roles(&cap, &mut acl, ADMIN, 0, &v)
         else if (action == 18) pool_factory::deploy_pool<A,B,FEE500BPS>(&mut config, &fee, 18446744073709551616, &clock, &v, test_scenario::ctx(&mut s))
+        else if (action == 19) pool_factory::deploy_pool_and_mint<A,R,FEE500BPS>(
+            &mut config, &fee, 18446744073709551616, &mut positions,
+            vector[], vector[], 1000, true, 1000, false, 1, 1, 0, 0,
+            ADMIN, 1000, &clock, &v, test_scenario::ctx(&mut s))
+        else if (action == 20) {
+            let (nft, a, b, _) = pool_factory::deploy_pool_and_mint_with_return_<A,R,FEE500BPS>(
+                &mut config, &fee, 18446744073709551616, &mut positions,
+                vector[], vector[], 1000, true, 1000, false, 1, 1, 0, 0,
+                1000, &clock, &v, test_scenario::ctx(&mut s));
+            transfer::public_transfer(nft, ADMIN);
+            coin::burn_for_testing(a); coin::burn_for_testing(b);
+        }
+        else if (action == 21) {
+            let _ = pool_fetcher::compute_swap_result(&mut p, true, 1, true,
+                4295048016, &clock, &v, test_scenario::ctx(&mut s));
+        }
+        else if (action == 22) pool_fetcher::fetch_ticks(&mut p, vector[], false, 10, &v)
+        else if (action >= 23 && action <= 25) {
+            let partner = test_scenario::take_shared_by_id<Partner>(&s, std::option::destroy_some(partner_id));
+            let (a, b) = if (action == 23) {
+                let a = coin::zero<A>(test_scenario::ctx(&mut s));
+                let b = coin::zero<B>(test_scenario::ctx(&mut s));
+                swap_router::swap_with_partner(&mut p, &mut partner, a, b,
+                    true, 1, 0, 4295048016, true, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            } else if (action == 24) {
+                let a = coin::zero<A>(test_scenario::ctx(&mut s));
+                swap_router::swap_a_b_with_partner(&mut p, &mut partner, a,
+                    1, 0, 4295048016, true, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            } else {
+                let b = coin::zero<B>(test_scenario::ctx(&mut s));
+                swap_router::swap_b_a_with_partner(&mut p, &mut partner, b,
+                    1, 0, 79226673515401279992447579055, true, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            };
+            coin::burn_for_testing(a); coin::burn_for_testing(b);
+            test_scenario::return_shared(partner);
+        }
         else abort 799;
         transfer::public_transfer(v, ADMIN);
         test_scenario::return_to_sender(&s, cap);
@@ -163,5 +207,20 @@ module turbos_clmm::security_version_fixture_tests {
 
     #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
     fun future_version_blocks_deploy_pool() { future_entry(18); }
+
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_deploy_and_mint() { future_entry(19); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_deploy_and_mint_return() { future_entry(20); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_quote() { future_entry(21); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_fetch_ticks() { future_entry(22); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_generic_partner_router() { future_entry(23); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_a_to_b_partner_router() { future_entry(24); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_b_to_a_partner_router() { future_entry(25); }
 }
 

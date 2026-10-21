@@ -1,0 +1,18 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+   ┌─ ./tests/forge_partner_cap.move:7:9
+   │  
+ 7 │ ╭         turbos_clmm::partner::PartnerCap {
+ 8 │ │             id: sui::object::new(ctx),
+ 9 │ │             name: std::string::utf8(b"forged"),
+10 │ │             partner_id: sui::object::id_from_address(@0xC),
+11 │ │         }
+   │ ╰─────────^ Struct 'turbos_clmm::partner::PartnerCap' can only be instantiated within its defining module 'turbos_clmm::partner'
+   │  
+   ┌─ ./sources/partner.move:32:12
+   │
+32 │     struct PartnerCap has store, key {
+   │            ---------- Struct defined in module 'turbos_clmm::partner'
+

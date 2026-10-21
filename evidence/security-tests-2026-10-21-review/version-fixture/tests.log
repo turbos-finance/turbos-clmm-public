@@ -1,0 +1,41 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+Running Move unit tests
+[ PASS    ] turbos_clmm::security_version_fixture_tests::current_version_cannot_reupgrade
+[ PASS    ] turbos_clmm::security_version_fixture_tests::current_version_passes
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_stored_version_rejected
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_a_to_b_partner_router
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_add_reward
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_add_role
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_b_to_a_partner_router
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee_with_return
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint_return
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_pool
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_fetch_ticks
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_generic_partner_router
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_init_reward
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_quote
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_member
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_reward
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_role
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_reset_reward
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_protocol
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_tier
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_set_roles
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_toggle_pool_status
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_description
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_img_url
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_name
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_update_pool_fee_protocol
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_blocks_update_reward_emissions
+[ PASS    ] turbos_clmm::security_version_fixture_tests::future_version_cannot_downgrade
+[ PASS    ] turbos_clmm::security_version_fixture_tests::max_stored_version_rejected
+[ PASS    ] turbos_clmm::security_version_fixture_tests::max_version_cannot_downgrade
+[ PASS    ] turbos_clmm::security_version_fixture_tests::older_stored_version_passes
+[ PASS    ] turbos_clmm::security_version_fixture_tests::older_version_upgrades_to_current
+[ PASS    ] turbos_clmm::security_version_fixture_tests::zero_stored_version_passes
+[ PASS    ] turbos_clmm::security_version_fixture_tests::zero_version_upgrades_to_current
+Test result: OK. Total tests: 36; passed: 36; failed: 0

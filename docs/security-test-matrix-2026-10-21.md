@@ -4,12 +4,34 @@ Status: work in progress, not an exhaustive authorization/invariant coverage cla
 Target production source is deployed CLMM v22 (`pool::VERSION = 18`). No production source,
 published package addresses or production dependency settings are changed by this batch.
 
-**Latest:** [509-test full-capture evidence](../evidence/security-tests-2026-10-21-full/).
-All 509 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
-on Sui 1.66.2 (33/33 matching). Lines: 84.80%; CFG edges: 80.71%. The 217 new cases include
-the earlier 190 plus 12 Partner flash-repayment and 15 Burn NFT cases. Separate version-state
-fixture: 29 tests; capability/receipt compiler negatives: five. No exclusions apply to
+**Latest:** [592-test gap-review evidence](../evidence/security-tests-2026-10-21-review/).
+All 592 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
+on Sui 1.66.2 (33/33 matching). Lines: 89.88%; CFG edges: 86.56%. The 300 new cases include
+the earlier 217 plus 83 boundary/invariant cases. Separate version-state
+fixture: 36 tests; capability/receipt compiler negatives: five. No exclusions apply to
 the latest full capture. Earlier partial reports below are historical snapshots.
+
+## Coverage-gap review revision
+
+| Added module / fixture | Cases | Observed constraints |
+|---|---:|---|
+| `security_partner_router_tests` | 30 | Exact-in/out in both directions; pool/referral/output/refund conservation; deadline/start/end boundaries; slippage, insufficient funding, partial fill, pause and price rejection |
+| `security_factory_return_tests` | 19 | Returned NFT/pool/registry identity and conservation; absent/reverse lookup; duplicate type/pool, missing tier, empty inputs, slippage, deadlines, invalid ticks, zero liquidity and funding |
+| `security_quote_cross_tests` | 20 | Quote agrees with real execution; initialized-tick crossing and active-liquidity change; dry-run preserves price/reserves/tick state while settling rewards; invalid/empty/equal-price paths |
+| `security_exit_obligation_tests` | 9 | Zero-liquidity NFT cannot burn with either token fee or reward owed; partial collection remains insufficient; full collection/burn succeeds with exact payouts |
+| `security_math_guard_tests` | 5 | Liquidity underflow/overflow, shifted overflow, reversed-bound symmetry and absent-role removal |
+| Explicit version overlay | 7 additional, 36 total | Future stored version rejects deployment/mint/return, quote/fetch and three Partner-router APIs |
+
+The [executed witness file](../evidence/security-tests-2026-10-21-review/security-witnesses.json)
+validates the exact test names against both unfiltered test logs and matches all 14 live
+factory/reward ACL entries to their 56 positive/negative runtime cases. It also lists the
+83 newly executed cases and 26 explicit future-version business-entry rejections. Its
+scope is explicit; it is not a blanket proof of all package invariants.
+
+Two deployed behaviors are recorded accurately rather than silently changed: quoting
+settles reward growth/time (same-time calls are idempotent), and equal tick bounds reject
+in liquidity arithmetic before the pool's custom tick validation. No new production logic
+or production test hook was added to obtain the normal-suite coverage.
 
 ## Final additions and current review status
 
@@ -26,7 +48,7 @@ the latest full capture. Earlier partial reports below are historical snapshots.
   branches are not silently counted as covered. No claim of 100% or final external acceptance.
 
 **Stage-two update:** [482-test regression and selected coverage evidence](../evidence/security-tests-2026-10-21-stage2/).
-The first-batch numbers below remain historical. Current total: 482 unfiltered tests,
+The first-batch numbers below remain historical. Stage-two total was 482 unfiltered tests,
 190 new since the 292-test public baseline; 200 selected security regression tests include
 10 pre-existing ACL cases. Explicit selected tracing covers 196, not the full 482.
 
@@ -44,7 +66,7 @@ The version fixture is not counted among the 482 tests run against unmodified pr
 source. It creates private states unreachable through the public API without altering
 production logic or the repository source. No actual historical package deployment is tested.
 
-Full 200-case security tracing still fails on a collection path; four collection success/
+At that historical stage, 200-case security tracing failed on a collection path; four collection success/
 recovery cases are explicitly excluded in partial mode, including two conservative analogous
 paths. They remain in the 482-case unit suite. Selected coverage: 55.14% lines, 52.36% CFG
 edges; not a full-suite percentage. See the dated report for reproduction and diagnostics.
@@ -109,26 +131,34 @@ numbers of signers. These 14 entries are the live ACL-gated entries in `pool_fac
 
 ## Reproduce
 
-Use the recorded Sui 1.66.2 CLI. At this checkout's root:
+Use the recorded Sui 1.66.2 CLI for unit tests and deployed-bytecode reproduction.
+Use the separately verified official Sui 1.81.1 only for full coverage instrumentation.
+At this checkout's root, with destination directories that do not already exist:
 
 ```sh
-SUI_BINARY=/path/to/sui node tools/test-security.mjs /tmp/clmm-security-new
+SUI_BINARY=/path/to/sui-1.66.2 \
+SUI_TRACE_BINARY=/path/to/sui-1.81.1 \
+node tools/test-security.mjs /tmp/clmm-security-new --trace-full
+
+SUI_BINARY=/path/to/sui-1.66.2 \
+node tools/test-version-gates.mjs /tmp/clmm-security-new /tmp/clmm-version-new
+
+SUI_BINARY=/path/to/sui-1.66.2 \
+node tools/test-capabilities.mjs /tmp/clmm-security-new /tmp/clmm-cap-new
+
+node tools/check-security-witnesses.mjs \
+  /tmp/clmm-security-new /tmp/clmm-version-new /tmp/clmm-witnesses-new.json
 ```
 
 The destination must not already exist. The runner creates disposable test and normal-build
 packages and an empty isolated client configuration; it never signs or submits a transaction.
-It runs the entire current suite, checks that all 80 new test names were actually executed,
+It runs the entire current suite, dynamically checks that every security test name was executed,
 checks exact production-source hashes against the verified baseline, and compares fresh
 normal-build root bytecode against the recorded deployed-module hashes. No fresh chain read
 or independent dependency-bytecode audit is claimed.
 
-To also collect coverage of **only the 80 new tests**, using the official tracing-enabled CLI:
-
-```sh
-SUI_BINARY=/path/to/tracing/sui node tools/test-security.mjs /tmp/clmm-security-trace-new --trace
-```
-
-This is explicitly a selected-subset report, not full CLMM coverage. Missing traces, duplicate
+`--trace` and `--trace-partial` retain their explicitly historical selected-subset scope;
+they are not the current full-capture reproduction command. Missing traces, duplicate
 test names, a failed test, source drift, insufficient disk space or a runtime timeout fail the
 runner. Historical coverage reports remain historical; they are not silently relabelled.
 
@@ -140,19 +170,21 @@ run against the same passing source/test tree. Four cases try to construct
 their defining modules; all reject with `E04001` restricted visibility. A fifth tries to
 return without consuming `FlashSwapReceipt`; it rejects with `E06001` missing drop ability.
 These prove compiler restrictions, not an on-chain custody check or runtime role execution.
-They are counted separately from the 372 runtime tests.
+They are counted separately from the current runtime suite.
 
 Validated first-batch evidence: [results and logs](../evidence/security-tests-2026-10-21/).
 
 ## Remaining work before the 23 October evidence submission
 
-- Complete cap-gated entry inventory and capability ownership/transfer execution paths;
-  construction-restriction fixtures for the four capability types are now validated.
-- Partner flash partner-ID binding and Burn NFT paths are now tested in the latest report;
-  continue reviewing less common mathematical/state combinations and wrapper branches.
-- Review public/friend entry inventory against all positive/negative test mappings. The 21
-  externally public retired factory/reward entries are tested; private/friend retired helpers
-  remain compiler visibility boundaries, not direct runtime cases.
-- Full-suite tracing is now resolved with the isolated newer runtime; retain the original
-  toolchain's failure evidence and keep production bytecode verification on its original compiler.
-- Final source/bytecode consistency checks, sensitive-content review, and public evidence links.
+- Complete package-wide invariant inventory and source-to-witness review, beyond the closed
+  14-entry ACL mapping. Passing tests and full capture do not alone close this wider review.
+- Review rare rounding/wrapping/large-value mathematical combinations and compound-condition
+  alternatives. Coverage retains these branches; no 100% or MC/DC assertion is made.
+- Legacy owner-address position compatibility paths need explicit compatibility fixtures or
+  a documented reachability/support decision; fresh NFT-owned positions do not exercise them.
+- Metadata setter authorization is covered, but persisted defaults/new-NFT metadata readback
+  still needs a dedicated assertion; the positive calls alone do not prove field correctness.
+- Classify initialization-only wrappers, unused getters and private/friend retired helpers
+  individually. A visibility boundary is not silently counted as a runtime rejection test.
+- Source/normal-bytecode consistency, full tracing and version/compiler checks are complete
+  for this evidence revision; obtain the external requirement-level review separately.

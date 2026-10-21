@@ -124,13 +124,16 @@ All **292/292** current public tests passed unfiltered. Coverage remains **parti
 
 ## Latest security testing and full capture (2026-10-21)
 
-**509/509 tests pass and all 509 have individual value traces**, without a test filter or
-exclusions. Production line coverage is **84.80%**, and official CFG-edge coverage is
-**80.71%**. There are 217 additional tests versus the historical 292-test baseline, plus
-29 separately reported version-state fixture tests and five compiler-negative cases.
+**592/592 tests pass and all 592 have individual value traces**, without a test filter or
+exclusions. Production line coverage is **89.88%**, and official CFG-edge coverage is
+**86.56%**. There are 300 additional tests versus the historical 292-test baseline, plus
+36 separately reported version-state fixture tests and five compiler-negative cases.
 
-See the [full report, logs, metric definitions and reproduction](evidence/security-tests-2026-10-21-full/README.md)
+See the [current gap-review report, logs, metric definitions and reproduction](evidence/security-tests-2026-10-21-review/README.md)
 and [guard/test matrix](docs/security-test-matrix-2026-10-21.md).
+The [executed witness mapping](evidence/security-tests-2026-10-21-review/security-witnesses.json)
+checks all 14 live ACL-gated factory/reward entries against 56 named positive/negative
+runtime cases. The earlier 509-test report remains a historical snapshot.
 Sui 1.81.1 is used **only for coverage instrumentation**; deployment bytecode verification
 remains on Sui 1.66.2 and matches all 33 recorded deployed root-module hashes. Production
 source, mainnet state and MVR pointers are unchanged. This supersedes the older partial

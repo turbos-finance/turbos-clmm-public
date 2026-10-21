@@ -21,7 +21,7 @@ module turbos_clmm::security_partner_flash_tests {
     const OWNER: address = @0xB;
     const OTHER: address = @0xC;
 
-    fun partners(s: &mut Scenario): (ID, ID) {
+    public fun partners(s: &mut Scenario): (ID, ID) {
         test_scenario::next_tx(s, ADMIN);
         let cap = test_scenario::take_from_sender<PoolFactoryAdminCap>(s);
         pool_factory::init_partners(&cap, test_scenario::ctx(s));
@@ -48,7 +48,7 @@ module turbos_clmm::security_partner_flash_tests {
         (first, std::option::destroy_some(test_scenario::most_recent_id_shared<Partner>()))
     }
 
-    fun partner_balance<T>(p: &Partner): u64 {
+    public fun partner_balance<T>(p: &Partner): u64 {
         let key = string::from_ascii(type_name::into_string(type_name::get<T>()));
         if (bag::contains<String>(partner::balances(p), key)) {
             balance::value(bag::borrow<String, Balance<T>>(partner::balances(p), key))

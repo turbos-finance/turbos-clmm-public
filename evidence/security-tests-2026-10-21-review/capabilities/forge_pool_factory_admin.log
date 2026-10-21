@@ -1,0 +1,14 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+   ┌─ ./tests/forge_pool_factory_admin.move:7:9
+   │
+ 7 │         turbos_clmm::pool_factory::PoolFactoryAdminCap { id: sui::object::new(ctx) }
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Struct 'turbos_clmm::pool_factory::PoolFactoryAdminCap' can only be instantiated within its defining module 'turbos_clmm::pool_factory'
+   │
+   ┌─ ./sources/pool_factory.move:43:12
+   │
+43 │     struct PoolFactoryAdminCap has key, store { id: UID }
+   │            ------------------- Struct defined in module 'turbos_clmm::pool_factory'
+
