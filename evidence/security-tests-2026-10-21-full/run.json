@@ -1,0 +1,22 @@
+{
+  "sourceCommit": null,
+  "sourceTreeSha256": "18e74098ef0c36833fa22b50f2cac38da236e2f8e5efbe36fbf0bbe8b6f5cccd",
+  "total": 509,
+  "passed": 509,
+  "failed": 0,
+  "filter": null,
+  "fullSuiteTests": 509,
+  "fullSuitePassed": 509,
+  "securityRegressionTests": 227,
+  "traceExclusions": [],
+  "fullSuiteTraced": true,
+  "perTestTraceCount": 509,
+  "allTracedTestsHaveTrace": true,
+  "allPassingTestsHaveTrace": true,
+  "toolchain": "sui 1.81.1-e04cf9aa915c",
+  "productionBuildToolchain": "sui 1.66.2-a9a6825eaf62",
+  "scope": "Full current unit-test suite, no filter or exclusions; original compiler verifies deployed bytecode, newer runtime compiles source for tracing only",
+  "basePublicCommit": "c58d1cfb0080988b9930387c4486e7dd494ea27b",
+  "testedSourceTreeSha256": "18e74098ef0c36833fa22b50f2cac38da236e2f8e5efbe36fbf0bbe8b6f5cccd",
+  "publication": "Base public commit plus exact source/test hashes identifies the tested tree. Evidence-only publication never changes the recorded production source."
+}

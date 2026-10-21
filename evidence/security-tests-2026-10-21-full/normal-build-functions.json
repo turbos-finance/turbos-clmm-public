@@ -1,0 +1,658 @@
+[
+  {
+    "module": "acl",
+    "source": "sources/acl.move",
+    "normalBuildFunctions": [
+      "add_role",
+      "get_members",
+      "get_permission",
+      "has_role",
+      "new",
+      "remove_member",
+      "remove_role",
+      "set_roles"
+    ],
+    "normalSourceSha256": "8de79f034dabd87ab1409ab37f23fb8e1d20c5c556a810d7a2d211fc85aa9bea"
+  },
+  {
+    "module": "fee",
+    "source": "sources/fee.move",
+    "normalBuildFunctions": [
+      "create_fee",
+      "get_fee",
+      "get_tick_spacing",
+      "init"
+    ],
+    "normalSourceSha256": "038051987f51863ed6bd1bb17df15f22ac6435bb6b09e28085524a3e2d15ec1b"
+  },
+  {
+    "module": "fee10000bps",
+    "source": "sources/fee10000bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "ff79cf7092f69e35f41a6ff96251ca2848eba974aebca5ebbdf54a766fbb6659"
+  },
+  {
+    "module": "fee1000bps",
+    "source": "sources/fee1000bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "d67c6ed1988c053c3b743803d0e3aeaff31ff790fd7f70579b19fca1a314d93a"
+  },
+  {
+    "module": "fee100bps",
+    "source": "sources/fee100bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "a3809820cafc9552835eb4b784c04d1d4a98abe66b080cef4efec694a70e12ea"
+  },
+  {
+    "module": "fee20000bps",
+    "source": "sources/fee20000bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "d3eb96d880160634f26fe9a114842d15eb7fc84cc7f18d5892ac083d8f7ca196"
+  },
+  {
+    "module": "fee2000bps",
+    "source": "sources/fee2000bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "e698b6e27a7c5170597d22cd806ef7164af6ae8c35ac467ffcd904740cf87b9f"
+  },
+  {
+    "module": "fee2500bps",
+    "source": "sources/fee2500bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "b0fcec6c59fe37d5787c63fbe07dbb4da4773f7ae73a448a6d695a4baa37c0de"
+  },
+  {
+    "module": "fee3000bps",
+    "source": "sources/fee3000bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "2ce0aafa605bda5ca186220c5d73f7e5f1edbb5c552ee9c423e42c979763a3b2"
+  },
+  {
+    "module": "fee500bps",
+    "source": "sources/fee500bps.move",
+    "normalBuildFunctions": [
+      "init"
+    ],
+    "normalSourceSha256": "cdc3361ec6f8ddb972e62ff4817d26cd3d23cb5513fc3a61ff010307d9e63e81"
+  },
+  {
+    "module": "full_math_u128",
+    "source": "sources/lib/full_math_u128.move",
+    "normalBuildFunctions": [
+      "full_mul",
+      "mul_div_ceil",
+      "mul_div_floor",
+      "mul_div_round",
+      "mul_shl",
+      "mul_shr"
+    ],
+    "normalSourceSha256": "df97d3c97cc19e1e80c6b18d89714283b3d5aa06f872ee94ee5c01e7701586fe"
+  },
+  {
+    "module": "full_math_u32",
+    "source": "sources/lib/full_math_u32.move",
+    "normalBuildFunctions": [
+      "full_mul",
+      "mul_div_ceil",
+      "mul_div_floor",
+      "mul_div_round",
+      "mul_shl",
+      "mul_shr"
+    ],
+    "normalSourceSha256": "df743447b1537b3add45a7d480ead4ee39a0848d767ed7f2f19259d21596c8ab"
+  },
+  {
+    "module": "full_math_u64",
+    "source": "sources/lib/full_math_u64.move",
+    "normalBuildFunctions": [
+      "full_mul",
+      "mul_div_ceil",
+      "mul_div_floor",
+      "mul_div_round",
+      "mul_shl",
+      "mul_shr"
+    ],
+    "normalSourceSha256": "82cc9e62b12d742159044aada4291b2e7a1038bf9ae2619abce04a55b49a7b0f"
+  },
+  {
+    "module": "i128",
+    "source": "sources/lib/i128.move",
+    "normalBuildFunctions": [
+      "abs",
+      "abs_u128",
+      "add",
+      "and",
+      "as_i32",
+      "as_i64",
+      "as_u128",
+      "cmp",
+      "div",
+      "eq",
+      "from",
+      "gt",
+      "gte",
+      "is_neg",
+      "lt",
+      "lte",
+      "mul",
+      "neg",
+      "neg_from",
+      "or",
+      "overflowing_add",
+      "overflowing_sub",
+      "shl",
+      "shr",
+      "sign",
+      "sub",
+      "u128_neg",
+      "u8_neg",
+      "wrapping_add",
+      "wrapping_sub",
+      "zero"
+    ],
+    "normalSourceSha256": "e813e8dd55253cc7a5ecfd843f2cd4eb3fc5b90f4d27583faf8d495d6beebd18"
+  },
+  {
+    "module": "i32",
+    "source": "sources/lib/i32.move",
+    "normalBuildFunctions": [
+      "abs",
+      "abs_u32",
+      "add",
+      "and",
+      "as_u32",
+      "cmp",
+      "div",
+      "eq",
+      "from",
+      "from_u32",
+      "from_u32_neg",
+      "gt",
+      "gte",
+      "is_neg",
+      "lt",
+      "lte",
+      "mod",
+      "mod_euclidean",
+      "mul",
+      "neg_from",
+      "or",
+      "shl",
+      "shr",
+      "sign",
+      "sub",
+      "u32_neg",
+      "u8_neg",
+      "wrapping_add",
+      "wrapping_sub",
+      "zero"
+    ],
+    "normalSourceSha256": "fad9336c4bdb7c494a8d95c8946f79e9fb2f65bd2c6a1cb11ef145fe93fbbad7"
+  },
+  {
+    "module": "i64",
+    "source": "sources/lib/i64.move",
+    "normalBuildFunctions": [
+      "abs",
+      "abs_u64",
+      "add",
+      "and",
+      "as_u64",
+      "cmp",
+      "div",
+      "eq",
+      "from",
+      "from_u64",
+      "gt",
+      "gte",
+      "is_neg",
+      "lt",
+      "lte",
+      "mod",
+      "mul",
+      "neg_from",
+      "or",
+      "shl",
+      "shr",
+      "sign",
+      "sub",
+      "u64_neg",
+      "u8_neg",
+      "wrapping_add",
+      "wrapping_sub",
+      "zero"
+    ],
+    "normalSourceSha256": "789ec500aaaf9f3d46ac1fb1aa49fbe6956503efa798947cf9714fcfb41874ed"
+  },
+  {
+    "module": "math_bit",
+    "source": "sources/lib/math_bit.move",
+    "normalBuildFunctions": [
+      "least_significant_bit",
+      "most_significant_bit"
+    ],
+    "normalSourceSha256": "af209b16de6b0f5a5d62f975c66e22fcbcbb738f3eddd27987b3d039973d21b9"
+  },
+  {
+    "module": "math_liquidity",
+    "source": "sources/lib/math_liquidity.move",
+    "normalBuildFunctions": [
+      "add_delta",
+      "get_amount_a_for_liquidity",
+      "get_amount_b_for_liquidity",
+      "get_amount_for_liquidity",
+      "get_liquidity_for_amount_a",
+      "get_liquidity_for_amount_b",
+      "get_liquidity_for_amounts"
+    ],
+    "normalSourceSha256": "9d0d2b4a217dfbda5a36cebe0ba3eb0227d4204c6a9bd0749cf113eead74f2b2"
+  },
+  {
+    "module": "math_sqrt_price",
+    "source": "sources/lib/math_sqrt_price.move",
+    "normalBuildFunctions": [
+      "get_amount_a_delta",
+      "get_amount_a_delta_",
+      "get_amount_b_delta",
+      "get_amount_b_delta_",
+      "get_next_sqrt_price",
+      "get_next_sqrt_price_from_amount_a_rounding_up",
+      "get_next_sqrt_price_from_amount_b_rounding_down",
+      "mul_div_round_fixed"
+    ],
+    "normalSourceSha256": "dc6941a3e557cfa6b091a5f15f1fa0ee555de6a1fa56da6772f233901b07081e"
+  },
+  {
+    "module": "math_swap",
+    "source": "sources/lib/math_swap.move",
+    "normalBuildFunctions": [
+      "compute_swap",
+      "get_amount_fixed_delta",
+      "get_amount_unfixed_delta"
+    ],
+    "normalSourceSha256": "1f6387ff0f503600a783f33b291835e36b99b323f33d9efc0e3815a0c54db240"
+  },
+  {
+    "module": "math_tick",
+    "source": "sources/lib/math_tick.move",
+    "normalBuildFunctions": [
+      "get_max_tick",
+      "get_min_tick",
+      "get_sqrt_price_negative_tick",
+      "get_sqrt_price_positive_tick",
+      "max_liquidity_per_tick",
+      "sqrt_price_from_tick_index",
+      "tick_index_from_sqrt_price"
+    ],
+    "normalSourceSha256": "0bf9fbf0b0da8e0f3dcede667d0130401afd27d628967650d15b200641ab98a0"
+  },
+  {
+    "module": "math_u128",
+    "source": "sources/lib/math_u128.move",
+    "normalBuildFunctions": [
+      "checked_div_round",
+      "checked_shlw",
+      "from_lo_hi",
+      "full_mul",
+      "hi",
+      "hi_u128",
+      "leading_zeros",
+      "lo",
+      "lo_u128",
+      "max",
+      "min",
+      "overflowing_add",
+      "overflowing_mul",
+      "overflowing_sub",
+      "pow",
+      "wrapping_add",
+      "wrapping_mul",
+      "wrapping_sub"
+    ],
+    "normalSourceSha256": "880fc8beb05220e0ecff7b9f81160d9a8be52e5842553db5e722d3ac885407fd"
+  },
+  {
+    "module": "math_u256",
+    "source": "sources/lib/math_u256.move",
+    "normalBuildFunctions": [
+      "checked_shlw",
+      "div_mod",
+      "div_round",
+      "shlw",
+      "shrw"
+    ],
+    "normalSourceSha256": "63b277b51b0e1878e7ead2fd83954b4736fa9b2677cb1588bf4e73e29c18e4ea"
+  },
+  {
+    "module": "math_u64",
+    "source": "sources/lib/math_u64.move",
+    "normalBuildFunctions": [
+      "carry_add",
+      "overflowing_add",
+      "overflowing_mul",
+      "overflowing_sub",
+      "wrapping_add",
+      "wrapping_mul",
+      "wrapping_sub"
+    ],
+    "normalSourceSha256": "779c42b08edfdecee64c862d1896c9e802b70db19f84ae68ccb7d061c7daa571"
+  },
+  {
+    "module": "partner",
+    "source": "sources/partner.move",
+    "normalBuildFunctions": [
+      "balances",
+      "claim_ref_fee",
+      "create_partner",
+      "current_ref_fee_rate",
+      "end_time",
+      "init",
+      "init_partners",
+      "name",
+      "receive_ref_fee",
+      "ref_fee_rate",
+      "start_time",
+      "update_ref_fee_rate",
+      "update_time_range"
+    ],
+    "normalSourceSha256": "49de5458331869abcd77041e4a526eca3ab8ecae445e75cd179c07e14145f4ce"
+  },
+  {
+    "module": "pool",
+    "source": "sources/pool.move",
+    "normalBuildFunctions": [
+      "add_reward",
+      "burn",
+      "check_position_exists",
+      "check_position_exists_old",
+      "check_ticks",
+      "check_version",
+      "clean_position",
+      "clear_tick",
+      "collect",
+      "collect_protocol_fee",
+      "collect_protocol_fee_with_return_",
+      "collect_reward",
+      "collect_reward_v2",
+      "collect_reward_with_return_",
+      "collect_v2",
+      "compute_swap_result",
+      "convert_state_v2_to_v1",
+      "cross_tick",
+      "deploy_pool",
+      "fetch_ticks",
+      "flash_swap",
+      "flash_swap_partner",
+      "flash_swap_pay_amount",
+      "flip_tick",
+      "get_flash_swap_receipt_info",
+      "get_pool_balance",
+      "get_pool_current_index",
+      "get_pool_fee",
+      "get_pool_fee_growth_global",
+      "get_pool_liquidity",
+      "get_pool_reward_last_updated_time_ms",
+      "get_pool_sqrt_price",
+      "get_pool_tick_spacing",
+      "get_pool_unlocked",
+      "get_position",
+      "get_position_base_info",
+      "get_position_by_key",
+      "get_position_fee_growth_inside_a",
+      "get_position_fee_growth_inside_b",
+      "get_position_key",
+      "get_position_key_fix",
+      "get_position_key_old",
+      "get_position_mut",
+      "get_position_mut_by_key",
+      "get_position_reward_info",
+      "get_position_reward_infos",
+      "get_tick",
+      "get_tick_fee_growth_outside",
+      "get_tick_initialized",
+      "get_tick_liquidity_gross",
+      "get_tick_liquidity_net",
+      "get_tick_reward_growths_outside",
+      "get_tick_word",
+      "get_tick_word_mut",
+      "init",
+      "init_reward",
+      "init_tick",
+      "merge_coin",
+      "migrate_position",
+      "mint",
+      "modify_position",
+      "modify_position_reward_inside",
+      "modify_tick",
+      "modify_tick_reward",
+      "next_fee_growth_inside",
+      "next_initialized_tick_within_one_word",
+      "next_pool_reward_infos",
+      "next_reward_growths_inside",
+      "position_tick",
+      "remove_reward",
+      "repay_flash_swap",
+      "repay_flash_swap_partner",
+      "reset_reward",
+      "save_position",
+      "split_and_return_",
+      "split_and_transfer",
+      "split_out_and_return_",
+      "swap",
+      "swap_coin_a_b",
+      "swap_coin_a_b_b_c",
+      "swap_coin_a_b_b_c_with_return_",
+      "swap_coin_a_b_c_b",
+      "swap_coin_a_b_c_b_with_return_",
+      "swap_coin_a_b_with_return_",
+      "swap_coin_b_a",
+      "swap_coin_b_a_b_c",
+      "swap_coin_b_a_b_c_with_return_",
+      "swap_coin_b_a_c_b",
+      "swap_coin_b_a_c_b_with_return_",
+      "swap_coin_b_a_with_return_",
+      "toggle_pool_status",
+      "transfer_in",
+      "transfer_out",
+      "try_init_position",
+      "try_init_tick_word",
+      "update_pool_fee_protocol",
+      "update_position",
+      "update_position_metadata",
+      "update_reward_emissions",
+      "update_reward_manager",
+      "update_tick",
+      "upgrade",
+      "version"
+    ],
+    "normalSourceSha256": "d60137e51b8a615eca9c939f006fb0a9f8f073039940a5d4889aa82c767d5aa6"
+  },
+  {
+    "module": "pool_factory",
+    "source": "sources/pool_factory.move",
+    "normalBuildFunctions": [
+      "acl",
+      "add_role",
+      "check_claim_protocol_fee_manager_role",
+      "check_clmm_manager_role",
+      "check_pause_pool_manager_role",
+      "check_reward_manager_role",
+      "collect_protocol_fee",
+      "collect_protocol_fee_v2",
+      "collect_protocol_fee_with_return_",
+      "collect_protocol_fee_with_return_v2",
+      "compare_types",
+      "decrease_liquidity_admin",
+      "deploy_pool",
+      "deploy_pool_and_mint",
+      "deploy_pool_and_mint_with_return_",
+      "fake_swap",
+      "get_members",
+      "get_pool_id",
+      "init",
+      "init_",
+      "init_acl_config",
+      "init_partners",
+      "migrate_position",
+      "modify_reward",
+      "modify_tick",
+      "modify_tick_reward",
+      "pool_key",
+      "remove_member",
+      "remove_role",
+      "set_fee_protocol",
+      "set_fee_protocol_v2",
+      "set_fee_tier",
+      "set_fee_tier_v2",
+      "set_roles",
+      "toggle_pool_status",
+      "toggle_pool_status_v2",
+      "update_nft_description",
+      "update_nft_description_v2",
+      "update_nft_img_url",
+      "update_nft_img_url_v2",
+      "update_nft_name",
+      "update_nft_name_v2",
+      "update_pool_fee_protocol",
+      "update_pool_fee_protocol_v2",
+      "upgrade"
+    ],
+    "normalSourceSha256": "8db5150b191195681bb01cbcc244486264b784ab6d9f54930b815564d2365d09"
+  },
+  {
+    "module": "pool_fetcher",
+    "source": "sources/pool_fetcher.move",
+    "normalBuildFunctions": [
+      "compute_swap_result",
+      "fetch_ticks"
+    ],
+    "normalSourceSha256": "60a0e2380e3d9c2fda32f39881af59bbd6091d9ccb1dc793c191e973d72a879c"
+  },
+  {
+    "module": "position_manager",
+    "source": "sources/position_manager.move",
+    "normalBuildFunctions": [
+      "add_liquidity",
+      "add_liquidity_with_return_",
+      "burn",
+      "burn_nft",
+      "burn_nft_collect_fee_with_return_",
+      "burn_nft_collect_reward_with_return_",
+      "burn_nft_directly",
+      "burn_position_nft_with_return_",
+      "clean_position",
+      "collect",
+      "collect_reward",
+      "collect_reward_with_return_",
+      "collect_with_return_",
+      "copy_position",
+      "copy_position_with_address",
+      "copy_reward_info",
+      "decrease_liquidity",
+      "decrease_liquidity_admin",
+      "decrease_liquidity_with_return_",
+      "delete_user_position",
+      "get_mut_position",
+      "get_position_info",
+      "get_position_tick_info",
+      "increase_liquidity",
+      "increase_liquidity_with_return_",
+      "init",
+      "init_",
+      "insert_user_position",
+      "migrate_position",
+      "mint",
+      "mint_nft",
+      "mint_nft_with_return_",
+      "mint_with_return_",
+      "modify_position_reward_inside",
+      "try_init_reward_infos",
+      "update_nft_description",
+      "update_nft_img_url",
+      "update_nft_name"
+    ],
+    "normalSourceSha256": "ac0af25f8afa4bdb2e69d19714893dd0ba9bc9ce015666ddfaa3e0392c355311"
+  },
+  {
+    "module": "position_nft",
+    "source": "sources/position_nft.move",
+    "normalBuildFunctions": [
+      "burn",
+      "init",
+      "mint",
+      "pool_id",
+      "position_id"
+    ],
+    "normalSourceSha256": "e5b7eb15e8c1e6fc8cd099078ee5b4fbce19916a97331721b5e8523d93bd0933"
+  },
+  {
+    "module": "reward_manager",
+    "source": "sources/reward_manager.move",
+    "normalBuildFunctions": [
+      "add_reward",
+      "add_reward_v2",
+      "init",
+      "init_",
+      "init_reward",
+      "init_reward_v2",
+      "remove_reward",
+      "remove_reward_v2",
+      "reset_reward",
+      "reset_reward_v2",
+      "update_reward_emissions",
+      "update_reward_emissions_v2",
+      "update_reward_manager"
+    ],
+    "normalSourceSha256": "2a8169aa9ffaf54a21f6dc61ad48c64f095764c13b6623986f1cb4e61058157b"
+  },
+  {
+    "module": "string_tools",
+    "source": "sources/lib/string_tools.move",
+    "normalBuildFunctions": [
+      "address_to_hexstring",
+      "bytes_to_hexstring",
+      "get_position_key",
+      "get_position_key_old",
+      "u64_to_hexstring",
+      "u64_to_string"
+    ],
+    "normalSourceSha256": "59020f239ba79d54775d8cb938d593526bf89805eeacbc7f54e29cda70e27e16"
+  },
+  {
+    "module": "swap_router",
+    "source": "sources/swap_router.move",
+    "normalBuildFunctions": [
+      "check_amount_threshold",
+      "swap_a_b",
+      "swap_a_b_b_c",
+      "swap_a_b_b_c_with_return_",
+      "swap_a_b_c_b",
+      "swap_a_b_c_b_with_return_",
+      "swap_a_b_with_partner",
+      "swap_a_b_with_return_",
+      "swap_b_a",
+      "swap_b_a_b_c",
+      "swap_b_a_b_c_with_return_",
+      "swap_b_a_c_b",
+      "swap_b_a_c_b_with_return_",
+      "swap_b_a_with_partner",
+      "swap_b_a_with_return_",
+      "swap_with_partner"
+    ],
+    "normalSourceSha256": "afae4de98e042e0dcb7ee29c0a57ccf75e08f52b4767107024b6dfbf8ad67720"
+  }
+]

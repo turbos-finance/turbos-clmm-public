@@ -538,7 +538,7 @@ module turbos_clmm::reward_manager_acl_tests {
     }
 
     #[test] 
-    #[expected_failure]
+    #[expected_failure(abort_code = 0, location = turbos_clmm::reward_manager)]
     public fun test_deprecated_init_reward_function() {
         let scenario_val = test_scenario::begin(ADMIN);
         let scenario = &mut scenario_val;
@@ -570,7 +570,7 @@ module turbos_clmm::reward_manager_acl_tests {
     }
 
     #[test]
-    #[expected_failure] 
+    #[expected_failure(abort_code = 0, location = turbos_clmm::reward_manager)]
     public fun test_deprecated_reset_reward_function() {
         let scenario_val = test_scenario::begin(ADMIN);
         let scenario = &mut scenario_val;

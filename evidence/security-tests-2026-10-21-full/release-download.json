@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-10-21T04:04:31.109Z",
+  "releaseUrl": "https://github.com/MystenLabs/sui/releases/tag/mainnet-v1.81.1",
+  "tag": "mainnet-v1.81.1",
+  "releaseTarget": "0273a8586da6f2632ef2495054f61a705e1b629b",
+  "asset": "sui-mainnet-v1.81.1-macos-arm64.tgz",
+  "assetUrl": "https://github.com/MystenLabs/sui/releases/download/mainnet-v1.81.1/sui-mainnet-v1.81.1-macos-arm64.tgz",
+  "archiveSha256": "ccd02094862484820727c22f1a144e2bdffcc954b776b602e64d40592425cc7c",
+  "bytes": 373196744,
+  "version": "sui 1.81.1-e04cf9aa915c",
+  "downloadMethod": "Verified HTTP ranges reassembled and full archive SHA-256 checked"
+}

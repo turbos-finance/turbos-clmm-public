@@ -1,0 +1,14 @@
+// Copyright (c) Turbos Finance, Inc.
+// SPDX-License-Identifier: MIT
+// Expected compiler rejection, NOT a runtime unit test. Copied into a disposable package only.
+#[test_only]
+module turbos_clmm::security_compile_forge_partner_cap {
+    public fun forge(ctx: &mut sui::tx_context::TxContext): turbos_clmm::partner::PartnerCap {
+        turbos_clmm::partner::PartnerCap {
+            id: sui::object::new(ctx),
+            name: std::string::utf8(b"forged"),
+            partner_id: sui::object::id_from_address(@0xC),
+        }
+    }
+}
+

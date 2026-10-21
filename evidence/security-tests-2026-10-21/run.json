@@ -1,0 +1,17 @@
+{
+  "sourceCommit": null,
+  "sourceTreeSha256": "c82fc30188d2dd17060d38118695b4cfb9a1db7e672b126d816aabdb73d37a57",
+  "total": 80,
+  "passed": 80,
+  "failed": 0,
+  "filter": "security_(entrypoint|boundary)_tests",
+  "fullSuiteTests": 372,
+  "fullSuitePassed": 372,
+  "fullSuiteTraced": false,
+  "perTestTraceCount": 80,
+  "allTracedTestsHaveTrace": true,
+  "scope": "New security tests only; NOT all current CLMM tests",
+  "basePublicCommit": "c58d1cfb0080988b9930387c4486e7dd494ea27b",
+  "testedSourceTreeSha256": "c82fc30188d2dd17060d38118695b4cfb9a1db7e672b126d816aabdb73d37a57",
+  "publication": "Local work in progress, tests not yet committed/published; base public commit plus exact source/test hashes identify the tested tree."
+}

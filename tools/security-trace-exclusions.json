@@ -1,0 +1,9 @@
+{
+  "scope": "Explicit selected-subset tracing only. These unit tests remain in the unfiltered passing suite. No claim of full CLMM tracing.",
+  "excluded": [
+    {"test": "turbos_clmm::security_position_tests::collect_fee_normal_path_succeeds", "reason": "Stock Sui value tracer stack overflow at collect_with_return_ mutable field borrow; reproduced independently in historical event fee-collection test."},
+    {"test": "turbos_clmm::security_position_tests::collect_fee_resumes_after_unpause", "reason": "Same mutable-field-borrow collection path; conservatively excluded from this explicitly partial value trace."},
+    {"test": "turbos_clmm::security_position_tests::collect_reward_normal_path_succeeds", "reason": "Analogous nested mutable-field-borrow collection path; conservatively excluded, not claimed individually diagnosed."},
+    {"test": "turbos_clmm::security_position_tests::collect_reward_resumes_after_unpause", "reason": "Analogous nested mutable-field-borrow collection path; conservatively excluded, not claimed individually diagnosed."}
+  ]
+}

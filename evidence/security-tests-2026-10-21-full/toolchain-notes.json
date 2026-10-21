@@ -1,0 +1,16 @@
+{
+  "productionVerification": {
+    "toolchain": "sui 1.66.2-a9a6825eaf62",
+    "normalModules": 33,
+    "allMatchRecordedDeployedHashes": true
+  },
+  "coverage": {
+    "toolchain": "sui 1.81.1-e04cf9aa915c",
+    "testFramework": "a9a6825eaf6273cc819ee3bcf65fd4909f7624a9",
+    "sourceUnchanged": true,
+    "all509TestsTraced": true,
+    "filter": null,
+    "exclusions": []
+  },
+  "warning": "Coverage CLI emits a newer bytecode format and is NOT the deployed-package build toolchain. Normal-bytecode verification stays on the original Sui 1.66.2. No deployment, chain write or MVR update."
+}

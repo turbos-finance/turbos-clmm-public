@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-10-21T04:17:37.791Z",
+  "scope": "Compiler-negative capability construction and receipt dropping only; not runtime auth execution or on-chain custody verification",
+  "baselineSourceTreeSha256": "18e74098ef0c36833fa22b50f2cac38da236e2f8e5efbe36fbf0bbe8b6f5cccd",
+  "allExpectedRejections": true,
+  "results": [
+    {
+      "case": "forge_pool_factory_admin",
+      "type": "PoolFactoryAdminCap",
+      "fixtureSha256": "7c5676ad921f119ce0c18c73cc0d877be2c673b7a6b2d950cc443eac33d70703",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_reward_admin",
+      "type": "RewardManagerAdminCap",
+      "fixtureSha256": "1c674df01c4368929704e1565689a2a962f803942ede05eae84617a0708ecff8",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_partner_admin",
+      "type": "PartnerAdminCap",
+      "fixtureSha256": "3702b9f5d4858b38bd75fb8d962ec5671275a81bc49dc6a318cd564175d2efad",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_partner_cap",
+      "type": "PartnerCap",
+      "fixtureSha256": "c08691ac70016107850e02f827c63d9fdc138a4bfbd9818e969728d35bd8a3cd",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "drop_flash_receipt",
+      "type": "FlashSwapReceipt",
+      "fixtureSha256": "db7401342c5eb755e99a39567da873658de435ccc34ebe3e2f41b0f1eea0de5b",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    }
+  ]
+}

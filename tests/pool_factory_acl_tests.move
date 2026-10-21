@@ -128,7 +128,8 @@ module turbos_clmm::pool_factory_acl_tests {
     }
 
     #[test]
-    #[expected_failure]
+    // Object ownership rejection, not execution of pool_factory::add_role.
+    #[expected_failure(abort_code = 3, location = sui::test_scenario)]
     public fun test_add_role_unauthorized() {
         let scenario_val = test_scenario::begin(ADMIN);
         let scenario = &mut scenario_val;

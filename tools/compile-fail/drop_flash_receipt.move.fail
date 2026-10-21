@@ -1,0 +1,12 @@
+// Copyright (c) Turbos Finance, Inc.
+// SPDX-License-Identifier: MIT
+// Expected compiler rejection, NOT a runtime unit test. Copied into a disposable package only.
+#[test_only]
+module turbos_clmm::security_compile_drop_flash_receipt {
+    struct A has drop {}
+    struct B has drop {}
+    public fun discard(receipt: turbos_clmm::pool::FlashSwapReceipt<A, B>) {
+        // A receipt has no drop ability; completing without repayment must not compile.
+    }
+}
+

@@ -121,3 +121,18 @@ The reviewed test changes are now directly tracked in the source/tests tree: **2
 ## Current coverage snapshot (2026-10-19)
 
 All **292/292** current public tests passed unfiltered. Coverage remains **partial (187/292 traced tests)** because full tracing still overflows the stock CLI on macOS and Linux. See [current scope, reports, logs and reproduction](evidence/coverage-2026-10-19/README.md). No production code was changed.
+
+## Latest security testing and full capture (2026-10-21)
+
+**509/509 tests pass and all 509 have individual value traces**, without a test filter or
+exclusions. Production line coverage is **84.80%**, and official CFG-edge coverage is
+**80.71%**. There are 217 additional tests versus the historical 292-test baseline, plus
+29 separately reported version-state fixture tests and five compiler-negative cases.
+
+See the [full report, logs, metric definitions and reproduction](evidence/security-tests-2026-10-21-full/README.md)
+and [guard/test matrix](docs/security-test-matrix-2026-10-21.md).
+Sui 1.81.1 is used **only for coverage instrumentation**; deployment bytecode verification
+remains on Sui 1.66.2 and matches all 33 recorded deployed root-module hashes. Production
+source, mainnet state and MVR pointers are unchanged. This supersedes the older partial
+capture status for the current suite, not the historical results themselves. Full capture
+does not imply exhaustive authorization/invariant coverage or automatic compliance closure.

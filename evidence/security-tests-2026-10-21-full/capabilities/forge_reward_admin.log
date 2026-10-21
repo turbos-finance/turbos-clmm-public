@@ -1,0 +1,14 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+   ┌─ ./tests/forge_reward_admin.move:7:9
+   │
+ 7 │         turbos_clmm::reward_manager::RewardManagerAdminCap { id: sui::object::new(ctx) }
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Struct 'turbos_clmm::reward_manager::RewardManagerAdminCap' can only be instantiated within its defining module 'turbos_clmm::reward_manager'
+   │
+   ┌─ ./sources/reward_manager.move:13:12
+   │
+13 │     struct RewardManagerAdminCap has key, store { id: UID }
+   │            --------------------- Struct defined in module 'turbos_clmm::reward_manager'
+

@@ -1,0 +1,10 @@
+// Copyright (c) Turbos Finance, Inc.
+// SPDX-License-Identifier: MIT
+// Expected compiler rejection, NOT a runtime unit test. Copied into a disposable package only.
+#[test_only]
+module turbos_clmm::security_compile_forge_reward_admin {
+    public fun forge(ctx: &mut sui::tx_context::TxContext): turbos_clmm::reward_manager::RewardManagerAdminCap {
+        turbos_clmm::reward_manager::RewardManagerAdminCap { id: sui::object::new(ctx) }
+    }
+}
+

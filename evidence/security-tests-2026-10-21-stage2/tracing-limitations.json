@@ -1,0 +1,38 @@
+{
+  "stockToolchain": "sui 1.66.2-a9a6825eaf62",
+  "securityRegressionCaptureAttempt": {
+    "success": false,
+    "error": "stack overflow",
+    "lastPassingTests": [
+      "turbos_clmm::security_partner_tests::wrong_partner_cap_cannot_claim_another_partner",
+      "turbos_clmm::security_position_tests::cleared_position_can_exit_and_burn_nft",
+      "turbos_clmm::security_position_tests::collect_fee_expired_deadline_rejected"
+    ]
+  },
+  "singleTestReproduction": "Historical event_emission_integrity_tests::test_collect_event_emission overflows even when run alone; safe console diagnostic retained privately.",
+  "exclusions": [
+    {
+      "test": "turbos_clmm::security_position_tests::collect_fee_normal_path_succeeds",
+      "reason": "Stock Sui value tracer stack overflow at collect_with_return_ mutable field borrow; reproduced independently in historical event fee-collection test."
+    },
+    {
+      "test": "turbos_clmm::security_position_tests::collect_fee_resumes_after_unpause",
+      "reason": "Same mutable-field-borrow collection path; conservatively excluded from this explicitly partial value trace."
+    },
+    {
+      "test": "turbos_clmm::security_position_tests::collect_reward_normal_path_succeeds",
+      "reason": "Analogous nested mutable-field-borrow collection path; conservatively excluded, not claimed individually diagnosed."
+    },
+    {
+      "test": "turbos_clmm::security_position_tests::collect_reward_resumes_after_unpause",
+      "reason": "Analogous nested mutable-field-borrow collection path; conservatively excluded, not claimed individually diagnosed."
+    }
+  ],
+  "fullUnfilteredSuite": {
+    "status": "OK",
+    "total": 482,
+    "passed": 482,
+    "failed": 0
+  },
+  "notes": "Four tests remain in full passing unit suite; tracing excludes them explicitly. Two reward paths are conservative exclusions, not individually diagnosed."
+}
