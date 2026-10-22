@@ -1,0 +1,12 @@
+// Expected compiler rejection, not a runtime unit test.
+#[test_only]
+module turbos_clmm::security_compile_forge_partner_flash_receipt {
+    struct A has drop {}
+    struct B has drop {}
+    public fun forge(): turbos_clmm::pool::FlashSwapReceiptPartner<A, B> {
+        turbos_clmm::pool::FlashSwapReceiptPartner<A, B> {
+            pool_id: sui::object::id_from_address(@0xB), a_to_b: true, pay_amount: 0,
+            partner_id: sui::object::id_from_address(@0xC), partner_fee_amount: 0,
+        }
+    }
+}

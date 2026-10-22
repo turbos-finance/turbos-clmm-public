@@ -1,0 +1,22 @@
+{
+  "sourceCommit": null,
+  "sourceTreeSha256": "58a2433ceb5c3dddbd0741b0f20dec80d15a9d3c77ef88c928a4fa3899ad055e",
+  "total": 636,
+  "passed": 636,
+  "failed": 0,
+  "filter": null,
+  "fullSuiteTests": 636,
+  "fullSuitePassed": 636,
+  "securityRegressionTests": 354,
+  "traceExclusions": [],
+  "fullSuiteTraced": true,
+  "perTestTraceCount": 636,
+  "allTracedTestsHaveTrace": true,
+  "allPassingTestsHaveTrace": true,
+  "toolchain": "sui 1.81.1-e04cf9aa915c",
+  "productionBuildToolchain": "sui 1.66.2-a9a6825eaf62",
+  "scope": "Full current unit-test suite, no filter or exclusions; original compiler verifies deployed bytecode, newer runtime compiles source for tracing only",
+  "basePublicCommit": "f286c6d6242ec4caab145d8441d655c5ee288a34",
+  "testedSourceTreeSha256": "58a2433ceb5c3dddbd0741b0f20dec80d15a9d3c77ef88c928a4fa3899ad055e",
+  "publication": "Base commit plus exact source/test hashes identifies the pre-publication tested tree. Use this evidence revision and tracked tests, not the base commit alone."
+}

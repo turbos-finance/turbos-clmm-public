@@ -1,0 +1,17 @@
+// Expected compiler rejection, not a runtime unit test.
+#[test_only]
+module turbos_clmm::security_compile_forge_burn_nft {
+    struct A has drop {}
+    public fun forge(ctx: &mut sui::tx_context::TxContext, image: sui::url::Url,
+        nft: turbos_clmm::position_nft::TurbosPositionNFT): turbos_clmm::position_manager::TurbosPositionBurnNFT {
+        turbos_clmm::position_manager::TurbosPositionBurnNFT {
+            id: sui::object::new(ctx), name: std::string::utf8(b"forged"),
+            description: std::string::utf8(b"forged"), img_url: image,
+            position_nft: nft,
+            pool_id: sui::object::id_from_address(@0xB),
+            position_id: sui::object::id_from_address(@0xC),
+            coin_type_a: std::type_name::get<A>(), coin_type_b: std::type_name::get<A>(),
+            fee_type: std::type_name::get<A>(),
+        }
+    }
+}

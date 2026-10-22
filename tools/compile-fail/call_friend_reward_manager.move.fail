@@ -1,0 +1,10 @@
+// Expected compiler visibility rejection, not a runtime unit test.
+#[test_only]
+module turbos_clmm::security_compile_call_friend_reward_manager {
+    struct A has drop {}
+    struct B has drop {}
+    struct F has drop {}
+    public fun forbidden(pool: &mut turbos_clmm::pool::Pool<A, B, F>, ctx: &mut sui::tx_context::TxContext) {
+        turbos_clmm::pool::update_reward_manager(pool, 0, @0xC, ctx);
+    }
+}

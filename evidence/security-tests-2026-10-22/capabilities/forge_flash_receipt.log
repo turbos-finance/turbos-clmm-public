@@ -1,0 +1,16 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+    ┌─ ./tests/forge_flash_receipt.move:7:9
+    │  
+  7 │ ╭         turbos_clmm::pool::FlashSwapReceipt<A, B> {
+  8 │ │             pool_id: sui::object::id_from_address(@0xB), a_to_b: true, pay_amount: 0,
+  9 │ │         }
+    │ ╰─────────^ Struct 'turbos_clmm::pool::FlashSwapReceipt' can only be instantiated within its defining module 'turbos_clmm::pool'
+    │  
+    ┌─ ./sources/pool.move:180:12
+    │
+180 │     struct FlashSwapReceipt<phantom CoinTypeA, phantom CoinTypeB> {
+    │            ---------------- Struct defined in module 'turbos_clmm::pool'
+

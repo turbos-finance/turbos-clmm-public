@@ -1,0 +1,15 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+    ┌─ ./tests/call_private_clean_position.move:5:9
+    │  
+  5 │ ╭         turbos_clmm::position_manager::clean_position(positions,
+  6 │ │             turbos_clmm::i32::zero(), turbos_clmm::i32::from(10), @0xC);
+    │ ╰───────────────────────────────────────────────────────────────────────^ Invalid call to internal function 'turbos_clmm::position_manager::clean_position'
+    │  
+    ┌─ ./sources/position_manager.move:928:9
+    │
+928 │     fun clean_position(
+    │         -------------- This function is internal to its module. Only 'public' and 'public(friend)' functions can be called outside of their module
+

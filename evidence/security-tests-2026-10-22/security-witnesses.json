@@ -1,0 +1,400 @@
+{
+  "generatedAt": "2026-10-22T00:42:31.228Z",
+  "sourceTreeSha256": "58a2433ceb5c3dddbd0741b0f20dec80d15a9d3c77ef88c928a4fa3899ad055e",
+  "scope": "Executed witness validation for all 14 live ACL-gated factory/reward entries and the explicitly listed boundary/version tests. Not exhaustive package-wide authorization/invariant coverage.",
+  "aclEntryCount": 14,
+  "aclRuntimeCases": 56,
+  "aclWitnesses": [
+    {
+      "entry": "pool_factory::set_fee_tier_v2",
+      "file": "sources/pool_factory.move",
+      "line": 422,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::set_fee_tier_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::set_fee_tier_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::set_fee_tier_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::set_fee_tier_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::set_fee_protocol_v2",
+      "file": "sources/pool_factory.move",
+      "line": 453,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::set_fee_protocol_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::set_fee_protocol_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::set_fee_protocol_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::set_fee_protocol_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::update_pool_fee_protocol_v2",
+      "file": "sources/pool_factory.move",
+      "line": 478,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::update_pool_fee_protocol_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::update_pool_fee_protocol_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::update_pool_fee_protocol_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::update_pool_fee_protocol_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::collect_protocol_fee_v2",
+      "file": "sources/pool_factory.move",
+      "line": 505,
+      "roleCheck": "claim_protocol_fee_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::collect_protocol_fee_with_return_v2",
+      "file": "sources/pool_factory.move",
+      "line": 540,
+      "roleCheck": "claim_protocol_fee_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_with_return_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_with_return_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_with_return_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::collect_protocol_fee_with_return_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::toggle_pool_status_v2",
+      "file": "sources/pool_factory.move",
+      "line": 569,
+      "roleCheck": "pause_pool_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::toggle_pool_status_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::toggle_pool_status_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::toggle_pool_status_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::toggle_pool_status_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::update_nft_name_v2",
+      "file": "sources/pool_factory.move",
+      "line": 590,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::update_nft_name_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_name_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_name_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::update_nft_name_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::update_nft_description_v2",
+      "file": "sources/pool_factory.move",
+      "line": 622,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::update_nft_description_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_description_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_description_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::update_nft_description_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "pool_factory::update_nft_img_url_v2",
+      "file": "sources/pool_factory.move",
+      "line": 647,
+      "roleCheck": "clmm_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::update_nft_img_url_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_img_url_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::update_nft_img_url_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::update_nft_img_url_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "reward_manager::init_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 34,
+      "roleCheck": "reward_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::init_reward_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::init_reward_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::init_reward_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::init_reward_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "reward_manager::reset_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 63,
+      "roleCheck": "reward_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::reset_reward_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::reset_reward_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::reset_reward_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::reset_reward_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "reward_manager::add_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 103,
+      "roleCheck": "reward_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::add_reward_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::add_reward_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::add_reward_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::add_reward_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "reward_manager::remove_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 140,
+      "roleCheck": "reward_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::remove_reward_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::remove_reward_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::remove_reward_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::remove_reward_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    },
+    {
+      "entry": "reward_manager::update_reward_emissions_v2",
+      "file": "sources/reward_manager.move",
+      "line": 177,
+      "roleCheck": "reward_manager",
+      "tests": [
+        "turbos_clmm::security_entrypoint_tests::update_reward_emissions_allows_required_role",
+        "turbos_clmm::security_entrypoint_tests::update_reward_emissions_rejects_missing_role",
+        "turbos_clmm::security_entrypoint_tests::update_reward_emissions_rejects_other_roles",
+        "turbos_clmm::security_entrypoint_tests::update_reward_emissions_rejects_revoked_role"
+      ],
+      "observation": "Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs."
+    }
+  ],
+  "boundaryWitnesses": [
+    {
+      "module": "security_partner_router_tests",
+      "tests": [
+        "turbos_clmm::security_partner_router_tests::a_to_b_deadline_equality_is_accepted",
+        "turbos_clmm::security_partner_router_tests::a_to_b_exact_input_conserves_all_assets",
+        "turbos_clmm::security_partner_router_tests::a_to_b_exact_output_conserves_all_assets",
+        "turbos_clmm::security_partner_router_tests::a_to_b_expired_deadline_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_expired_partner_receives_no_fee",
+        "turbos_clmm::security_partner_router_tests::a_to_b_insufficient_coin_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_maximum_input_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_minimum_output_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_partial_exact_input_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_partial_exact_output_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_partner_start_equality_is_active",
+        "turbos_clmm::security_partner_router_tests::a_to_b_paused_pool_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_price_bounds_reject",
+        "turbos_clmm::security_partner_router_tests::a_to_b_wrong_price_direction_rejects",
+        "turbos_clmm::security_partner_router_tests::a_to_b_zero_amount_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_deadline_equality_is_accepted",
+        "turbos_clmm::security_partner_router_tests::b_to_a_exact_input_conserves_all_assets",
+        "turbos_clmm::security_partner_router_tests::b_to_a_exact_output_conserves_all_assets",
+        "turbos_clmm::security_partner_router_tests::b_to_a_expired_deadline_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_expired_partner_receives_no_fee",
+        "turbos_clmm::security_partner_router_tests::b_to_a_insufficient_coin_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_maximum_input_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_minimum_output_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_partial_exact_input_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_partial_exact_output_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_partner_start_equality_is_active",
+        "turbos_clmm::security_partner_router_tests::b_to_a_paused_pool_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_price_bounds_reject",
+        "turbos_clmm::security_partner_router_tests::b_to_a_wrong_price_direction_rejects",
+        "turbos_clmm::security_partner_router_tests::b_to_a_zero_amount_rejects"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_factory_return_tests",
+      "tests": [
+        "turbos_clmm::security_factory_return_tests::deadline_equality_is_accepted",
+        "turbos_clmm::security_factory_return_tests::empty_a_vector_rejects",
+        "turbos_clmm::security_factory_return_tests::empty_b_vector_rejects",
+        "turbos_clmm::security_factory_return_tests::equal_ticks_reject_in_liquidity_math",
+        "turbos_clmm::security_factory_return_tests::existing_pool_rejects",
+        "turbos_clmm::security_factory_return_tests::existing_pool_reverse_order_rejects",
+        "turbos_clmm::security_factory_return_tests::expired_deadline_rejects",
+        "turbos_clmm::security_factory_return_tests::insufficient_a_funding_rejects",
+        "turbos_clmm::security_factory_return_tests::insufficient_b_funding_rejects",
+        "turbos_clmm::security_factory_return_tests::lookup_absent_pool_is_none",
+        "turbos_clmm::security_factory_return_tests::minimum_a_rejects",
+        "turbos_clmm::security_factory_return_tests::minimum_b_rejects",
+        "turbos_clmm::security_factory_return_tests::misaligned_tick_rejects",
+        "turbos_clmm::security_factory_return_tests::repeated_coin_type_rejects",
+        "turbos_clmm::security_factory_return_tests::returned_nft_registry_and_reserves_are_bound",
+        "turbos_clmm::security_factory_return_tests::reversed_ticks_reject",
+        "turbos_clmm::security_factory_return_tests::tick_outside_bounds_rejects",
+        "turbos_clmm::security_factory_return_tests::unregistered_fee_tier_rejects",
+        "turbos_clmm::security_factory_return_tests::zero_liquidity_rejects"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_quote_cross_tests",
+      "tests": [
+        "turbos_clmm::security_quote_cross_tests::a_to_b_equal_price_quote_has_zero_fill",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_exact_input_crosses_initialized_tick",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_exact_input_quote_matches_execution",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_exact_output_crosses_initialized_tick",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_exact_output_quote_matches_execution",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_invalid_price_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_no_liquidity_quote_has_zero_fill",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_paused_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_wrong_direction_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::a_to_b_zero_amount_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_equal_price_quote_has_zero_fill",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_exact_input_crosses_initialized_tick",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_exact_input_quote_matches_execution",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_exact_output_crosses_initialized_tick",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_exact_output_quote_matches_execution",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_invalid_price_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_no_liquidity_quote_has_zero_fill",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_paused_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_wrong_direction_quote_rejects",
+        "turbos_clmm::security_quote_cross_tests::b_to_a_zero_amount_quote_rejects"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_exit_obligation_tests",
+      "tests": [
+        "turbos_clmm::security_exit_obligation_tests::complete_fee_a_claim_allows_burn",
+        "turbos_clmm::security_exit_obligation_tests::complete_fee_b_claim_allows_burn",
+        "turbos_clmm::security_exit_obligation_tests::complete_reward_claim_allows_burn",
+        "turbos_clmm::security_exit_obligation_tests::fee_a_owed_blocks_zero_liquidity_nft_burn",
+        "turbos_clmm::security_exit_obligation_tests::fee_b_owed_blocks_zero_liquidity_nft_burn",
+        "turbos_clmm::security_exit_obligation_tests::partial_fee_a_claim_does_not_clear_position",
+        "turbos_clmm::security_exit_obligation_tests::partial_fee_b_claim_does_not_clear_position",
+        "turbos_clmm::security_exit_obligation_tests::partial_reward_claim_does_not_clear_position",
+        "turbos_clmm::security_exit_obligation_tests::reward_owed_blocks_zero_liquidity_nft_burn"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_math_guard_tests",
+      "tests": [
+        "turbos_clmm::security_math_guard_tests::negative_liquidity_delta_cannot_underflow",
+        "turbos_clmm::security_math_guard_tests::positive_liquidity_delta_cannot_overflow",
+        "turbos_clmm::security_math_guard_tests::removing_absent_role_does_not_grant_or_create_membership",
+        "turbos_clmm::security_math_guard_tests::reversed_bounds_preserve_liquidity_and_amounts",
+        "turbos_clmm::security_math_guard_tests::shifted_liquidity_overflow_is_rejected"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_metadata_tests",
+      "tests": [
+        "turbos_clmm::security_metadata_tests::all_defaults_change_without_rewriting_old_nft",
+        "turbos_clmm::security_metadata_tests::description_default_persists_and_new_nft_reads_it",
+        "turbos_clmm::security_metadata_tests::empty_metadata_matches_deployed_behavior",
+        "turbos_clmm::security_metadata_tests::image_default_persists_and_new_nft_reads_it",
+        "turbos_clmm::security_metadata_tests::name_default_persists_and_new_nft_reads_it",
+        "turbos_clmm::security_metadata_tests::new_recipient_receives_updated_metadata",
+        "turbos_clmm::security_metadata_tests::unicode_name_and_description_round_trip"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    },
+    {
+      "module": "security_numeric_properties_tests",
+      "tests": [
+        "turbos_clmm::security_numeric_properties_tests::amount_a_rounding_matches_independent_rational_oracle",
+        "turbos_clmm::security_numeric_properties_tests::amount_b_floor_and_deployed_nearest_mode_match_oracle",
+        "turbos_clmm::security_numeric_properties_tests::checked_division_rounding_has_less_than_one_unit_error",
+        "turbos_clmm::security_numeric_properties_tests::checked_round_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::div_mod_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::exact_output_cannot_exhaust_virtual_b_reserve",
+        "turbos_clmm::security_numeric_properties_tests::invalid_carry_rejects",
+        "turbos_clmm::security_numeric_properties_tests::next_price_zero_and_large_amount_boundaries",
+        "turbos_clmm::security_numeric_properties_tests::u128_ceil_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_ceil_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_checked_add_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_checked_mul_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_floor_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_floor_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_full_math_matches_wider_oracle",
+        "turbos_clmm::security_numeric_properties_tests::u128_nearest_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_nearest_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u128_wrapping_subtraction_and_halves_round_trip",
+        "turbos_clmm::security_numeric_properties_tests::u256_division_and_checked_shift_boundaries",
+        "turbos_clmm::security_numeric_properties_tests::u32_ceil_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u32_ceil_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u32_floor_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u32_floor_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u32_full_math_matches_wider_oracle",
+        "turbos_clmm::security_numeric_properties_tests::u32_nearest_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u32_nearest_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_ceil_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_ceil_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_checked_add_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_checked_mul_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_floor_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_floor_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_full_math_matches_wider_oracle",
+        "turbos_clmm::security_numeric_properties_tests::u64_nearest_narrowing_overflow_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_nearest_zero_denominator_rejects",
+        "turbos_clmm::security_numeric_properties_tests::u64_wrapping_subtraction_and_carry_match_wider_oracle",
+        "turbos_clmm::security_numeric_properties_tests::zero_amount_a_price_rejects"
+      ],
+      "scope": "Cases listed by exact executed name; this module is not an exhaustive list of all protocol invariants."
+    }
+  ],
+  "futureVersionWitnesses": [
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_a_to_b_partner_router",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_add_reward",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_add_role",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_b_to_a_partner_router",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee_with_return",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint_return",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_pool",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_fetch_ticks",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_generic_partner_router",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_init_reward",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_quote",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_member",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_reward",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_role",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_reset_reward",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_protocol",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_tier",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_roles",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_toggle_pool_status",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_description",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_img_url",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_name",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_pool_fee_protocol",
+    "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_reward_emissions"
+  ],
+  "versionFixtureTests": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0
+  },
+  "limitations": [
+    "Object capability ownership is a shared Sui input rule; compiler-negative and ownership tests are separate evidence, not arbitrary unauthorized business calls.",
+    "Retired/private helpers, initialization-only wrappers and uncovered mathematical/state branches remain visible in coverage. A branch hit alone is not a positive/negative assertion witness.",
+    "Final acceptance of the requested requirement is not decided by this script."
+  ]
+}

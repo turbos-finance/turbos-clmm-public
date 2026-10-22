@@ -1,0 +1,264 @@
+{
+  "generatedAt": "2026-10-21T06:48:33.336Z",
+  "baselineSourceTreeSha256": "58a2433ceb5c3dddbd0741b0f20dec80d15a9d3c77ef88c928a4fa3899ad055e",
+  "toolchain": "sui 1.66.2-a9a6825eaf62",
+  "tests": {
+    "total": 34,
+    "passed": 34,
+    "failed": 0
+  },
+  "executedTestNames": [
+    "turbos_clmm::legacy_position_fixture_tests::current_key_expired_decrease_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_expired_fee_collection_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_expired_increase_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_expired_reward_collection_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_nft_return_restores_original_owner_access",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_owner_decrease_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_owner_fee_collection_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_owner_increase_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_owner_reward_collection_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_decrease",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_fee_collection",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_increase",
+    "turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_reward_collection",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_decrease_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_expired_decrease_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_expired_fee_collection_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_expired_increase_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_expired_reward_collection_rejects",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_fee_collection_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_increase_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_nft_return_restores_original_owner_access",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_decrease",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_fee_collection",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_increase",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_reward_collection",
+    "turbos_clmm::legacy_position_fixture_tests::old_key_reward_collection_conserves",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_claim_original_fee",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_claim_original_reward",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_decrease_original_record",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_increase_does_not_move_original_record",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_claim_original_fee",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_claim_original_reward",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_decrease_original_record",
+    "turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_increase_does_not_move_original_record"
+  ],
+  "tracing": {
+    "toolchain": "sui 1.81.1-e04cf9aa915c",
+    "tests": 34,
+    "perTestTraceCount": 34,
+    "allTestsTraced": true,
+    "filter": "legacy_position_fixture_tests",
+    "scope": "Synthetic compatibility overlay only; not merged into normal-source production coverage"
+  },
+  "testOnlyOverlay": {
+    "file": "sources/pool.move",
+    "originalSha256": "d60137e51b8a615eca9c939f006fb0a9f8f073039940a5d4889aa82c767d5aa6",
+    "hookSha256": "bc788c18a39bd66f0b9170a89208624ba5a1ef2b54bfb4cbcb57f99fdfc6e306",
+    "instrumentedSha256": "e944ceb7d1ba2454985a9ace75e6ddad473df1191dfb7ccb286a23dbeee42483",
+    "testModuleSha256": "d9e963222ca5c27f80f47080924238fb5336f378e645ef36918dbb88f91ae7b3",
+    "description": "Only an extra #[test_only] helper relocates an actually minted Position to an owner-address dynamic-field key, preserving the Position bytes and pool fields. No production assertion, guard or arithmetic is replaced."
+  },
+  "allNormalModulesStillMatch": true,
+  "modules": [
+    {
+      "module": "acl",
+      "builtSha256": "3c96d9b54ce01516383b498e8bbb55146817d2e98b41fea5aea5d44ad88fdf57",
+      "deployedSha256": "3c96d9b54ce01516383b498e8bbb55146817d2e98b41fea5aea5d44ad88fdf57",
+      "instrumentedNormalSha256": "3c96d9b54ce01516383b498e8bbb55146817d2e98b41fea5aea5d44ad88fdf57"
+    },
+    {
+      "module": "fee",
+      "builtSha256": "0113ca7935faf508e936f6d74dfa6fa62c967f8f414572a9327b44c887a65141",
+      "deployedSha256": "0113ca7935faf508e936f6d74dfa6fa62c967f8f414572a9327b44c887a65141",
+      "instrumentedNormalSha256": "0113ca7935faf508e936f6d74dfa6fa62c967f8f414572a9327b44c887a65141"
+    },
+    {
+      "module": "fee10000bps",
+      "builtSha256": "b944ce3b9a2f54eea0bb23085c7eea076802f1e417e5e36610e4719cc335bb32",
+      "deployedSha256": "b944ce3b9a2f54eea0bb23085c7eea076802f1e417e5e36610e4719cc335bb32",
+      "instrumentedNormalSha256": "b944ce3b9a2f54eea0bb23085c7eea076802f1e417e5e36610e4719cc335bb32"
+    },
+    {
+      "module": "fee1000bps",
+      "builtSha256": "23660b819a9f61b49c9ceabec5a79af8eafd3de9e3b59fa2597cb7d52c306c69",
+      "deployedSha256": "23660b819a9f61b49c9ceabec5a79af8eafd3de9e3b59fa2597cb7d52c306c69",
+      "instrumentedNormalSha256": "23660b819a9f61b49c9ceabec5a79af8eafd3de9e3b59fa2597cb7d52c306c69"
+    },
+    {
+      "module": "fee100bps",
+      "builtSha256": "34edb89bade9c12867e9838e18a1ce2eed1c97126c4bcc7a47565a00fbbe6001",
+      "deployedSha256": "34edb89bade9c12867e9838e18a1ce2eed1c97126c4bcc7a47565a00fbbe6001",
+      "instrumentedNormalSha256": "34edb89bade9c12867e9838e18a1ce2eed1c97126c4bcc7a47565a00fbbe6001"
+    },
+    {
+      "module": "fee20000bps",
+      "builtSha256": "0686a6393b39282950feb58586f410a4cbc052eeb411eb0bb77ad8812d26b5cf",
+      "deployedSha256": "0686a6393b39282950feb58586f410a4cbc052eeb411eb0bb77ad8812d26b5cf",
+      "instrumentedNormalSha256": "0686a6393b39282950feb58586f410a4cbc052eeb411eb0bb77ad8812d26b5cf"
+    },
+    {
+      "module": "fee2000bps",
+      "builtSha256": "022200d33d4a0377693c83082ca438a6ecd5093f7c0345f966011490d760a5eb",
+      "deployedSha256": "022200d33d4a0377693c83082ca438a6ecd5093f7c0345f966011490d760a5eb",
+      "instrumentedNormalSha256": "022200d33d4a0377693c83082ca438a6ecd5093f7c0345f966011490d760a5eb"
+    },
+    {
+      "module": "fee2500bps",
+      "builtSha256": "81e4c7f034a298ad935ae0b0c8d81f177add595ede5a59a863afb03d8cd49355",
+      "deployedSha256": "81e4c7f034a298ad935ae0b0c8d81f177add595ede5a59a863afb03d8cd49355",
+      "instrumentedNormalSha256": "81e4c7f034a298ad935ae0b0c8d81f177add595ede5a59a863afb03d8cd49355"
+    },
+    {
+      "module": "fee3000bps",
+      "builtSha256": "750ba44c868a6377a41dda6fca800c6feaa4643ace3ad33920a6a78a6f74d223",
+      "deployedSha256": "750ba44c868a6377a41dda6fca800c6feaa4643ace3ad33920a6a78a6f74d223",
+      "instrumentedNormalSha256": "750ba44c868a6377a41dda6fca800c6feaa4643ace3ad33920a6a78a6f74d223"
+    },
+    {
+      "module": "fee500bps",
+      "builtSha256": "b5b0382258441fe5a7a71a8bfe642f3a952a54cbc74c55ada18263f23e8ca7a7",
+      "deployedSha256": "b5b0382258441fe5a7a71a8bfe642f3a952a54cbc74c55ada18263f23e8ca7a7",
+      "instrumentedNormalSha256": "b5b0382258441fe5a7a71a8bfe642f3a952a54cbc74c55ada18263f23e8ca7a7"
+    },
+    {
+      "module": "full_math_u128",
+      "builtSha256": "5f236ec0b73e221bf9335488327775a18c4eea86b85bfa2d3315414fdae0b635",
+      "deployedSha256": "5f236ec0b73e221bf9335488327775a18c4eea86b85bfa2d3315414fdae0b635",
+      "instrumentedNormalSha256": "5f236ec0b73e221bf9335488327775a18c4eea86b85bfa2d3315414fdae0b635"
+    },
+    {
+      "module": "full_math_u32",
+      "builtSha256": "8ce7e24e0858b53507a92a083d78759c0fda7ec233b15e9877e09ae5002406c8",
+      "deployedSha256": "8ce7e24e0858b53507a92a083d78759c0fda7ec233b15e9877e09ae5002406c8",
+      "instrumentedNormalSha256": "8ce7e24e0858b53507a92a083d78759c0fda7ec233b15e9877e09ae5002406c8"
+    },
+    {
+      "module": "full_math_u64",
+      "builtSha256": "de93cfe2ff4e45b43364ab268060bf4fcbb72d6a9a0644eb785248b8cce02cd6",
+      "deployedSha256": "de93cfe2ff4e45b43364ab268060bf4fcbb72d6a9a0644eb785248b8cce02cd6",
+      "instrumentedNormalSha256": "de93cfe2ff4e45b43364ab268060bf4fcbb72d6a9a0644eb785248b8cce02cd6"
+    },
+    {
+      "module": "i128",
+      "builtSha256": "556586a688a4a063c7b66a470b658e04f516e44a2a3ccf22852fe478775f3ab0",
+      "deployedSha256": "556586a688a4a063c7b66a470b658e04f516e44a2a3ccf22852fe478775f3ab0",
+      "instrumentedNormalSha256": "556586a688a4a063c7b66a470b658e04f516e44a2a3ccf22852fe478775f3ab0"
+    },
+    {
+      "module": "i32",
+      "builtSha256": "c2b649feed67ef880be3ae6fac1c729d7e65f9bcc03be74e1d2243968d968680",
+      "deployedSha256": "c2b649feed67ef880be3ae6fac1c729d7e65f9bcc03be74e1d2243968d968680",
+      "instrumentedNormalSha256": "c2b649feed67ef880be3ae6fac1c729d7e65f9bcc03be74e1d2243968d968680"
+    },
+    {
+      "module": "i64",
+      "builtSha256": "c1c4aacb99972ede10e0250b2b873fa79be797f663b5aa0d22573db96c8836b2",
+      "deployedSha256": "c1c4aacb99972ede10e0250b2b873fa79be797f663b5aa0d22573db96c8836b2",
+      "instrumentedNormalSha256": "c1c4aacb99972ede10e0250b2b873fa79be797f663b5aa0d22573db96c8836b2"
+    },
+    {
+      "module": "math_bit",
+      "builtSha256": "1e1636c147fe8e5581fbfd7882445029e5d57418e4f53b82a7798aaf29c7a2fc",
+      "deployedSha256": "1e1636c147fe8e5581fbfd7882445029e5d57418e4f53b82a7798aaf29c7a2fc",
+      "instrumentedNormalSha256": "1e1636c147fe8e5581fbfd7882445029e5d57418e4f53b82a7798aaf29c7a2fc"
+    },
+    {
+      "module": "math_liquidity",
+      "builtSha256": "3c3fc0799c8fcb9680de96bdb128269cf676a22069669c8b11f6094532932344",
+      "deployedSha256": "3c3fc0799c8fcb9680de96bdb128269cf676a22069669c8b11f6094532932344",
+      "instrumentedNormalSha256": "3c3fc0799c8fcb9680de96bdb128269cf676a22069669c8b11f6094532932344"
+    },
+    {
+      "module": "math_sqrt_price",
+      "builtSha256": "753c31884dcee8f54df587fe810842ae2c7ed4254773bb7d0b2f290494073e2d",
+      "deployedSha256": "753c31884dcee8f54df587fe810842ae2c7ed4254773bb7d0b2f290494073e2d",
+      "instrumentedNormalSha256": "753c31884dcee8f54df587fe810842ae2c7ed4254773bb7d0b2f290494073e2d"
+    },
+    {
+      "module": "math_swap",
+      "builtSha256": "098994511b97e2a4cf3f7586550d862ad3f253f8482c4bdc8b2d2d6b67f7dfc1",
+      "deployedSha256": "098994511b97e2a4cf3f7586550d862ad3f253f8482c4bdc8b2d2d6b67f7dfc1",
+      "instrumentedNormalSha256": "098994511b97e2a4cf3f7586550d862ad3f253f8482c4bdc8b2d2d6b67f7dfc1"
+    },
+    {
+      "module": "math_tick",
+      "builtSha256": "78a692af161feb4dedc3e0bd281f9fb792b83e022d5a1cc06a92168585263bcb",
+      "deployedSha256": "78a692af161feb4dedc3e0bd281f9fb792b83e022d5a1cc06a92168585263bcb",
+      "instrumentedNormalSha256": "78a692af161feb4dedc3e0bd281f9fb792b83e022d5a1cc06a92168585263bcb"
+    },
+    {
+      "module": "math_u128",
+      "builtSha256": "849c7fc48a39baca28e230385e495ccf8fb943b804ef46054d9d93dd9c6b6494",
+      "deployedSha256": "849c7fc48a39baca28e230385e495ccf8fb943b804ef46054d9d93dd9c6b6494",
+      "instrumentedNormalSha256": "849c7fc48a39baca28e230385e495ccf8fb943b804ef46054d9d93dd9c6b6494"
+    },
+    {
+      "module": "math_u256",
+      "builtSha256": "d1e6f3c4a70e37005bd30bb0e1929745f9b807469b38a349949d91894b7282b4",
+      "deployedSha256": "d1e6f3c4a70e37005bd30bb0e1929745f9b807469b38a349949d91894b7282b4",
+      "instrumentedNormalSha256": "d1e6f3c4a70e37005bd30bb0e1929745f9b807469b38a349949d91894b7282b4"
+    },
+    {
+      "module": "math_u64",
+      "builtSha256": "e4f641ce2012a6f36297b7922823943ea7935acd1c93a6541fbefa650d6809f5",
+      "deployedSha256": "e4f641ce2012a6f36297b7922823943ea7935acd1c93a6541fbefa650d6809f5",
+      "instrumentedNormalSha256": "e4f641ce2012a6f36297b7922823943ea7935acd1c93a6541fbefa650d6809f5"
+    },
+    {
+      "module": "partner",
+      "builtSha256": "1d28939592afa0e40ae99729b179601b8e068a2502bd3bf3930e48368f30923e",
+      "deployedSha256": "1d28939592afa0e40ae99729b179601b8e068a2502bd3bf3930e48368f30923e",
+      "instrumentedNormalSha256": "1d28939592afa0e40ae99729b179601b8e068a2502bd3bf3930e48368f30923e"
+    },
+    {
+      "module": "pool",
+      "builtSha256": "4a44d2dc2f0920d1253a20c5cd1471d5f3a0d03c1812781b816d372789728d36",
+      "deployedSha256": "4a44d2dc2f0920d1253a20c5cd1471d5f3a0d03c1812781b816d372789728d36",
+      "instrumentedNormalSha256": "4a44d2dc2f0920d1253a20c5cd1471d5f3a0d03c1812781b816d372789728d36"
+    },
+    {
+      "module": "pool_factory",
+      "builtSha256": "ea8ef02d0fd0700daa020ba37360ad6a8f8dc8067af3ee99052b530494a53fef",
+      "deployedSha256": "ea8ef02d0fd0700daa020ba37360ad6a8f8dc8067af3ee99052b530494a53fef",
+      "instrumentedNormalSha256": "ea8ef02d0fd0700daa020ba37360ad6a8f8dc8067af3ee99052b530494a53fef"
+    },
+    {
+      "module": "pool_fetcher",
+      "builtSha256": "faccc3aaf5a9ac113394d3cc0240eea97b4129210d567b4ab721b7626fbde270",
+      "deployedSha256": "faccc3aaf5a9ac113394d3cc0240eea97b4129210d567b4ab721b7626fbde270",
+      "instrumentedNormalSha256": "faccc3aaf5a9ac113394d3cc0240eea97b4129210d567b4ab721b7626fbde270"
+    },
+    {
+      "module": "position_manager",
+      "builtSha256": "badc1be2ee1ba12fb56eb8332f412a58ba279b80f85144862656ceea6c0fa5fe",
+      "deployedSha256": "badc1be2ee1ba12fb56eb8332f412a58ba279b80f85144862656ceea6c0fa5fe",
+      "instrumentedNormalSha256": "badc1be2ee1ba12fb56eb8332f412a58ba279b80f85144862656ceea6c0fa5fe"
+    },
+    {
+      "module": "position_nft",
+      "builtSha256": "1c9264b0145915da01c3a072876ffbd753d5697b56d5f2bedb79d92136d3cbea",
+      "deployedSha256": "1c9264b0145915da01c3a072876ffbd753d5697b56d5f2bedb79d92136d3cbea",
+      "instrumentedNormalSha256": "1c9264b0145915da01c3a072876ffbd753d5697b56d5f2bedb79d92136d3cbea"
+    },
+    {
+      "module": "reward_manager",
+      "builtSha256": "5bd6b87fb1fbcc874c127177a635ae2aa717980bf675ff38ca084158914fa85c",
+      "deployedSha256": "5bd6b87fb1fbcc874c127177a635ae2aa717980bf675ff38ca084158914fa85c",
+      "instrumentedNormalSha256": "5bd6b87fb1fbcc874c127177a635ae2aa717980bf675ff38ca084158914fa85c"
+    },
+    {
+      "module": "string_tools",
+      "builtSha256": "053eb0ac5b2a40e95d1bb6d1001329c27e08bfdab4269b097eab6d080f8093a5",
+      "deployedSha256": "053eb0ac5b2a40e95d1bb6d1001329c27e08bfdab4269b097eab6d080f8093a5",
+      "instrumentedNormalSha256": "053eb0ac5b2a40e95d1bb6d1001329c27e08bfdab4269b097eab6d080f8093a5"
+    },
+    {
+      "module": "swap_router",
+      "builtSha256": "0524925af592263212aa007e8ce453d2875a1c6df68dfeb90de548921b0e4967",
+      "deployedSha256": "0524925af592263212aa007e8ce453d2875a1c6df68dfeb90de548921b0e4967",
+      "instrumentedNormalSha256": "0524925af592263212aa007e8ce453d2875a1c6df68dfeb90de548921b0e4967"
+    }
+  ],
+  "scope": "Synthetic compatibility state, reported separately from normal-source unit tests and coverage. Not a mainnet object survey, replay of a historical package, or proof all legacy NFTs transfer their underlying positions."
+}

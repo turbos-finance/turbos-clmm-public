@@ -38,7 +38,7 @@ const aclWitnesses=acl.map(f=>{
   return {entry:f.module+'::'+f.function,file:f.file,line:f.line,roleCheck:f.aclChecks[0],tests,
     observation:'Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs.'};
 });
-const addedModules=['security_partner_router_tests','security_factory_return_tests','security_quote_cross_tests','security_exit_obligation_tests','security_math_guard_tests'];
+const addedModules=['security_partner_router_tests','security_factory_return_tests','security_quote_cross_tests','security_exit_obligation_tests','security_math_guard_tests','security_metadata_tests','security_numeric_properties_tests'];
 const boundaryWitnesses=addedModules.map(module=>{
   const prefix='turbos_clmm::'+module+'::';
   const names=[...baseline].filter(n=>n.startsWith(prefix));

@@ -1,17 +1,37 @@
-# CLMM security test matrix — 21 October 2026
+# CLMM security test matrix — updated 22 October 2026
 
 Status: work in progress, not an exhaustive authorization/invariant coverage claim.
 Target production source is deployed CLMM v22 (`pool::VERSION = 18`). No production source,
 published package addresses or production dependency settings are changed by this batch.
 
-**Latest:** [592-test gap-review evidence](../evidence/security-tests-2026-10-21-review/).
-All 592 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
-on Sui 1.66.2 (33/33 matching). Lines: 89.88%; CFG edges: 86.56%. The 300 new cases include
-the earlier 217 plus 83 boundary/invariant cases. Separate version-state
-fixture: 36 tests; capability/receipt compiler negatives: five. No exclusions apply to
+**Latest:** [636-test metadata/arithmetic/compatibility evidence](../evidence/security-tests-2026-10-22/).
+All 636 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
+on Sui 1.66.2 (33/33 matching). Lines: 91.81%; CFG edges: 88.08%. There are 344 additional
+normal-source cases versus the historical 292-test baseline. Separate version-state
+fixture: 36 tests; owner-address compatibility fixture: 34 tests and 34 traces;
+compiler-negative cases: 12. No exclusions apply to
 the latest full capture. Earlier partial reports below are historical snapshots.
 
-## Coverage-gap review revision
+## Current additions and requirement review
+
+- `security_metadata_tests`: seven persisted-default/new-NFT readback cases, unchanged old
+  NFT, independent setters, UTF-8/empty values, recipient delivery and conservation.
+- `security_numeric_properties_tests`: 37 deterministic wider-integer oracle and rejection
+  cases; floor/nearest/ceil, shifts/carry/wrapping subtraction, zero division, overflow and
+  price-step boundaries. Existing nearest semantics are not renamed as ceiling.
+- Explicit legacy overlay: 34 cases, both zero-tick encodings, original-holder operations,
+  pause/deadline rejection, transfer/return limits; original/newer toolchains both pass,
+  with 34 traces. No normal-production-source hook is committed or deployed.
+- Compiler negatives now cover eight forbidden constructors, two undroppable receipts,
+  one non-friend call and one private call, checking exact compiler error codes.
+- [All-function guard inventory](../evidence/security-tests-2026-10-22/security-guard-inventory.json):
+  425 normal functions, 172 assertions, 67 direct role/version calls, five explicit
+  non-retired aborts. A line hit is not auto-labelled as positive/negative proof.
+- [Requirement-level review](security-requirement-review-2026-10-22.md) documents the three
+  unexecuted assertion anchors in unused private/friend helpers and the compatibility,
+  rounding and remaining semantic-review qualifications.
+
+## Previous 592-test coverage-gap revision
 
 | Added module / fixture | Cases | Observed constraints |
 |---|---:|---|
@@ -94,9 +114,9 @@ failure cannot silently satisfy them. Each test name is the entry's base name pl
 | `pool_factory::collect_protocol_fee_v2` | Fee claim / 4 | `pool_factory::8` | Zero-balance collection creates zero-valued coins at recipient |
 | `pool_factory::collect_protocol_fee_with_return_v2` | Fee claim / 4 | `pool_factory::8` | Zero-balance collection returns zero-valued coins |
 | `pool_factory::toggle_pool_status_v2` | Pause / 8 | `pool_factory::9` | Unlocked → locked → unlocked |
-| `pool_factory::update_nft_name_v2` | CLMM / 1 | `pool_factory::6` | Update call succeeds; NFT metadata readback remains a follow-up |
-| `pool_factory::update_nft_description_v2` | CLMM / 1 | `pool_factory::6` | Update call succeeds; NFT metadata readback remains a follow-up |
-| `pool_factory::update_nft_img_url_v2` | CLMM / 1 | `pool_factory::6` | Update call succeeds; NFT metadata readback remains a follow-up |
+| `pool_factory::update_nft_name_v2` | CLMM / 1 | `pool_factory::6` | Persisted default and newly minted NFT name read back; old NFT unchanged |
+| `pool_factory::update_nft_description_v2` | CLMM / 1 | `pool_factory::6` | Persisted default and newly minted NFT description read back; old NFT unchanged |
+| `pool_factory::update_nft_img_url_v2` | CLMM / 1 | `pool_factory::6` | Persisted default and newly minted NFT image read back; old NFT unchanged |
 | `reward_manager::init_reward_v2` | Reward / 2 | `pool_factory::7` | New reward has requested manager |
 | `reward_manager::reset_reward_v2` | Reward / 2 | `pool_factory::7` | Nonzero emissions reset to zero; growth is zero |
 | `reward_manager::add_reward_v2` | Reward / 2 | `pool_factory::7` | Vault increases by exact deposited amount |
@@ -146,8 +166,15 @@ node tools/test-version-gates.mjs /tmp/clmm-security-new /tmp/clmm-version-new
 SUI_BINARY=/path/to/sui-1.66.2 \
 node tools/test-capabilities.mjs /tmp/clmm-security-new /tmp/clmm-cap-new
 
+SUI_BINARY=/path/to/sui-1.66.2 \
+SUI_TRACE_BINARY=/path/to/sui-1.81.1 \
+node tools/test-legacy-positions.mjs /tmp/clmm-security-new /tmp/clmm-legacy-new
+
 node tools/check-security-witnesses.mjs \
   /tmp/clmm-security-new /tmp/clmm-version-new /tmp/clmm-witnesses-new.json
+
+node tools/security-guard-inventory.mjs \
+  /tmp/clmm-security-new/evidence /tmp/clmm-guards-new.json
 ```
 
 The destination must not already exist. The runner creates disposable test and normal-build
@@ -164,11 +191,12 @@ runner. Historical coverage reports remain historical; they are not silently rel
 
 ## Capability construction and receipt obligations
 
-`tools/compile-fail/` and `tools/test-capabilities.mjs` provide five compiler-negative cases,
-run against the same passing source/test tree. Four cases try to construct
-`PoolFactoryAdminCap`, `RewardManagerAdminCap`, `PartnerAdminCap` and `PartnerCap` outside
-their defining modules; all reject with `E04001` restricted visibility. A fifth tries to
-return without consuming `FlashSwapReceipt`; it rejects with `E06001` missing drop ability.
+`tools/compile-fail/` and `tools/test-capabilities.mjs` provide 12 compiler-negative cases,
+run against the same passing source/test tree. Eight try to forge governance/referral
+caps, NFTs/proofs or the two flash receipt types; they reject with `E04001`. Two try to
+finish without consuming either receipt type and reject with `E06001`. Two call a
+friend-only/private helper from another module and reject with `E04001`. The runner
+requires the exact expected diagnostic and no unrelated compiler error codes.
 These prove compiler restrictions, not an on-chain custody check or runtime role execution.
 They are counted separately from the current runtime suite.
 
@@ -180,10 +208,10 @@ Validated first-batch evidence: [results and logs](../evidence/security-tests-20
   14-entry ACL mapping. Passing tests and full capture do not alone close this wider review.
 - Review rare rounding/wrapping/large-value mathematical combinations and compound-condition
   alternatives. Coverage retains these branches; no 100% or MC/DC assertion is made.
-- Legacy owner-address position compatibility paths need explicit compatibility fixtures or
-  a documented reachability/support decision; fresh NFT-owned positions do not exercise them.
-- Metadata setter authorization is covered, but persisted defaults/new-NFT metadata readback
-  still needs a dedicated assertion; the positive calls alone do not prove field correctness.
+- The 34 synthetic compatibility fixtures and seven metadata readback tests are now complete.
+  Legacy mainnet-object population and migration/support decisions are not inferred from
+  synthetic tests. Account-keyed positions must not be advertised as automatically following
+  a transferred NFT; the requirement-level review records the observed limitation.
 - Classify initialization-only wrappers, unused getters and private/friend retired helpers
   individually. A visibility boundary is not silently counted as a runtime rejection test.
 - Source/normal-bytecode consistency, full tracing and version/compiler checks are complete

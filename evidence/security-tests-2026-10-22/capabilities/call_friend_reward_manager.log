@@ -1,0 +1,14 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+     ┌─ ./tests/call_friend_reward_manager.move:8:9
+     │
+   8 │         turbos_clmm::pool::update_reward_manager(pool, 0, @0xC, ctx);
+     │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Invalid call to 'public(friend)' visible function 'turbos_clmm::pool::update_reward_manager'
+     │
+     ┌─ ./sources/pool.move:1014:5
+     │
+1014 │     public(friend) fun update_reward_manager<CoinTypeA, CoinTypeB, FeeType>(
+     │     -------------- This function can only be called from a 'friend' of module 'turbos_clmm::pool'
+

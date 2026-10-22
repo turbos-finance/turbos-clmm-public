@@ -1,0 +1,20 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E04001]: restricted visibility
+   ┌─ ./tests/forge_burn_nft.move:7:9
+   │  
+ 7 │ ╭         turbos_clmm::position_manager::TurbosPositionBurnNFT {
+ 8 │ │             id: sui::object::new(ctx), name: std::string::utf8(b"forged"),
+ 9 │ │             description: std::string::utf8(b"forged"), img_url: image,
+10 │ │             position_nft: nft,
+   · │
+14 │ │             fee_type: std::type_name::get<A>(),
+15 │ │         }
+   │ ╰─────────^ Struct 'turbos_clmm::position_manager::TurbosPositionBurnNFT' can only be instantiated within its defining module 'turbos_clmm::position_manager'
+   │  
+   ┌─ ./sources/position_manager.move:41:12
+   │
+41 │     struct TurbosPositionBurnNFT has store, key {
+   │            --------------------- Struct defined in module 'turbos_clmm::position_manager'
+

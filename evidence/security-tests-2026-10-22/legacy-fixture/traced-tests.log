@@ -1,0 +1,39 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+Running Move unit tests
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_expired_decrease_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_expired_fee_collection_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_expired_increase_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_expired_reward_collection_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_nft_return_restores_original_owner_access
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_owner_decrease_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_owner_fee_collection_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_owner_increase_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_owner_reward_collection_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_decrease
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_fee_collection
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_increase
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::current_key_pause_blocks_reward_collection
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_decrease_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_expired_decrease_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_expired_fee_collection_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_expired_increase_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_expired_reward_collection_rejects
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_fee_collection_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_increase_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_nft_return_restores_original_owner_access
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_decrease
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_fee_collection
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_increase
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_pause_blocks_reward_collection
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::old_key_reward_collection_conserves
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_claim_original_fee
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_claim_original_reward
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_cannot_decrease_original_record
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_current_key_nft_increase_does_not_move_original_record
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_claim_original_fee
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_claim_original_reward
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_cannot_decrease_original_record
+[ PASS    ] turbos_clmm::legacy_position_fixture_tests::transferred_old_nft_increase_does_not_move_original_record
+Test result: OK. Total tests: 34; passed: 34; failed: 0

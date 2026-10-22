@@ -1,0 +1,8 @@
+// Expected compiler visibility rejection, not a runtime unit test.
+#[test_only]
+module turbos_clmm::security_compile_call_private_clean_position {
+    public fun forbidden(positions: &mut turbos_clmm::position_manager::Positions) {
+        turbos_clmm::position_manager::clean_position(positions,
+            turbos_clmm::i32::zero(), turbos_clmm::i32::from(10), @0xC);
+    }
+}
