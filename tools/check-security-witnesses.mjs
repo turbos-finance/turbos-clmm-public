@@ -38,7 +38,7 @@ const aclWitnesses=acl.map(f=>{
   return {entry:f.module+'::'+f.function,file:f.file,line:f.line,roleCheck:f.aclChecks[0],tests,
     observation:'Reviewed test mapping: one positive and three exact-module/abort-code negative execution cases. Names checked against both unfiltered runs.'};
 });
-const addedModules=['security_partner_router_tests','security_factory_return_tests','security_quote_cross_tests','security_exit_obligation_tests','security_math_guard_tests','security_metadata_tests','security_numeric_properties_tests'];
+const addedModules=['security_partner_router_tests','security_factory_return_tests','security_quote_cross_tests','security_exit_obligation_tests','security_math_guard_tests','security_metadata_tests','security_numeric_properties_tests','security_fee_tier_tests'];
 const boundaryWitnesses=addedModules.map(module=>{
   const prefix='turbos_clmm::'+module+'::';
   const names=[...baseline].filter(n=>n.startsWith(prefix));
@@ -47,10 +47,36 @@ const boundaryWitnesses=addedModules.map(module=>{
 });
 const futureVersionWitnesses=[...versionPassed].filter(n=>n.includes('::future_version_blocks_'));
 if(futureVersionWitnesses.length<26)throw new Error('Future-version boundary witnesses missing');
+const feeTests=fs.readFileSync(path.join(repo,'tests/security_fee_tier_tests.move'),'utf8');
+const feePositive=['zero_fee_is_allowed_and_deployable','highest_fee_is_allowed_and_deployable',
+ 'smallest_spacing_is_allowed_and_deployable','highest_spacing_is_allowed_and_deployable',
+ 'both_highest_values_are_allowed_and_deployable'];
+function feeCase(name,abort){
+ const full='turbos_clmm::security_fee_tier_tests::'+name;
+ if(!baseline.has(full)||!traced.has(full))throw new Error('Missing fee witness '+full);
+ if(abort&&!new RegExp('#\\[test, expected_failure\\(abort_code = '+abort.code+', location = turbos_clmm::'+abort.module+'\\)\\]\\s*fun '+name+'\\(').test(feeTests))throw new Error('Incorrect fee rejection annotation '+full);
+ return full;
+}
+const feeGuardWitnesses=[
+ {entry:'fee::create_fee',file:'sources/fee.move',guard:'assert!(sui::types::is_one_time_witness(&witness), EBadWitness)',
+  negatives:['ordinary_drop_type_is_not_a_one_time_witness'],abort:{module:'fee',code:0}},
+ {entry:'pool_factory::set_fee_tier_v2',file:'sources/pool_factory.move',guard:'assert!(!vec_map::contains(&pool_config.fee_map, &type), EFeeAlreadyExists)',
+  negatives:['duplicate_tier_type_is_rejected'],abort:{module:'pool_factory',code:3}},
+ {entry:'pool_factory::set_fee_tier_v2',file:'sources/pool_factory.move',guard:'assert!(fee < 1000000, EInvalidFee)',
+  negatives:['fee_equal_to_denominator_is_rejected','maximum_u32_fee_is_rejected'],abort:{module:'pool_factory',code:1}},
+ {entry:'pool_factory::set_fee_tier_v2',file:'sources/pool_factory.move',guard:'assert!(tick_spacing > 0 && tick_spacing < 16384, EInvalidTicKSpacing)',
+  negatives:['zero_spacing_is_rejected','spacing_at_exclusive_upper_bound_is_rejected'],abort:{module:'pool_factory',code:2}},
+].map(f=>{
+ const source=fs.readFileSync(path.join(repo,f.file),'utf8'),offset=source.indexOf(f.guard);
+ if(offset<0||source.indexOf(f.guard,offset+1)>=0)throw new Error('Review fee guard source binding');
+ return {...f,line:source.slice(0,offset).split('\n').length,
+  positiveTests:feePositive.map(n=>feeCase(n)),negativeTests:f.negatives.map(n=>feeCase(n,f.abort)),
+  observation:'Named tests executed on both toolchains. Both arms of the tick-spacing compound bound have independent exact-abort negatives. Accepted tiers also deploy and read back a real pool.'};
+});
 const data={generatedAt:new Date().toISOString(),sourceTreeSha256:result.sourceTreeSha256,
-  scope:'Executed witness validation for all 14 live ACL-gated factory/reward entries and the explicitly listed boundary/version tests. Not exhaustive package-wide authorization/invariant coverage.',
+  scope:'Executed witness validation for all 14 live ACL-gated factory/reward entries, four fee-tier/witness assertions and the explicitly listed boundary/version tests. Not exhaustive package-wide authorization/invariant coverage.',
   aclEntryCount:acl.length,aclRuntimeCases:aclWitnesses.length*4,aclWitnesses,boundaryWitnesses,
-  futureVersionWitnesses,versionFixtureTests:version.tests,
+  futureVersionWitnesses,versionFixtureTests:version.tests,feeGuardWitnesses,
   limitations:['Object capability ownership is a shared Sui input rule; compiler-negative and ownership tests are separate evidence, not arbitrary unauthorized business calls.',
     'Retired/private helpers, initialization-only wrappers and uncovered mathematical/state branches remain visible in coverage. A branch hit alone is not a positive/negative assertion witness.',
     'Final acceptance of the requested requirement is not decided by this script.']};

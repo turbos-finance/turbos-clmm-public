@@ -10,16 +10,192 @@ module turbos_clmm::security_version_fixture_tests {
     use sui::transfer;
     use turbos_clmm::fee::Fee;
     use turbos_clmm::fee500bps::FEE500BPS;
+    use turbos_clmm::fee1000bps::FEE1000BPS;
     use turbos_clmm::pool::{Self, Pool, PoolRewardVault};
     use turbos_clmm::pool_factory::{Self, PoolFactoryAdminCap, PoolConfig, AclConfig};
-    use turbos_clmm::position_manager::Positions;
+    use turbos_clmm::position_manager::{Self, Positions, TurbosPositionBurnNFT};
+    use turbos_clmm::position_nft::TurbosPositionNFT;
     use turbos_clmm::partner::Partner;
     use turbos_clmm::pool_fetcher;
     use turbos_clmm::swap_router;
     use turbos_clmm::security_partner_flash_tests;
+    use turbos_clmm::security_position_tests;
+    use turbos_clmm::security_burn_nft_tests;
     use turbos_clmm::reward_manager;
     use turbos_clmm::security_entrypoint_tests::{Self, A, B, R, S};
     const ADMIN: address = @0xA;
+
+    // Ordinary owner-held NFTs and real Burn NFTs are prepared on the current
+    // version before supplying the synthetic future version to the target call.
+    fun future_position(action: u8) {
+        let s = if (action >= 12) security_burn_nft_tests::proof() else security_position_tests::liquid();
+        let p = test_scenario::take_shared<Pool<A, B, FEE500BPS>>(&s);
+        let positions = test_scenario::take_shared<Positions>(&s);
+        let vault = test_scenario::take_shared<PoolRewardVault<R>>(&s);
+        let clock = test_scenario::take_shared<Clock>(&s);
+        let v = pool::security_version_fixture(19, test_scenario::ctx(&mut s));
+        if (action >= 12) {
+            let proof = test_scenario::take_from_sender<TurbosPositionBurnNFT>(&s);
+            if (action == 12) {
+                let r = position_manager::burn_nft_collect_reward_with_return_(&mut p, &mut positions,
+                    &mut proof, &mut vault, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(r);
+            } else {
+                let (a,b) = position_manager::burn_nft_collect_fee_with_return_(&mut p, &mut positions,
+                    &mut proof, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(a); coin::burn_for_testing(b);
+            };
+            test_scenario::return_to_sender(&s, proof);
+        } else {
+            let nft = test_scenario::take_from_sender<TurbosPositionNFT>(&s);
+            if (action == 2) position_manager::burn<A,B,FEE500BPS>(&mut positions, nft, &v, test_scenario::ctx(&mut s))
+            else if (action == 11) {
+                let proof = position_manager::burn_position_nft_with_return_(&mut p, &mut positions, nft, &v, test_scenario::ctx(&mut s));
+                transfer::public_transfer(proof, @0xB);
+            } else {
+                if (action == 0) position_manager::mint<A,B,FEE500BPS>(&mut p, &mut positions,
+                    vector[], vector[], 1000, true, 1000, false, 1, 1, 0, 0, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+                else if (action == 1) {
+                    let (new_nft,a,b) = position_manager::mint_with_return_<A,B,FEE500BPS>(&mut p, &mut positions,
+                        vector[], vector[], 1000, true, 1000, false, 1, 1, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                    transfer::public_transfer(new_nft, @0xB); coin::burn_for_testing(a); coin::burn_for_testing(b);
+                }
+                else if (action == 3) position_manager::increase_liquidity(&mut p, &mut positions,
+                    vector[], vector[], &mut nft, 1, 1, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s))
+                else if (action == 4) {
+                    let (a,b) = position_manager::increase_liquidity_with_return_(&mut p, &mut positions,
+                        vector[], vector[], &mut nft, 1, 1, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                    coin::burn_for_testing(a); coin::burn_for_testing(b);
+                }
+                else if (action == 5) position_manager::decrease_liquidity(&mut p, &mut positions,
+                    &mut nft, 1, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s))
+                else if (action == 6) {
+                    let (a,b) = position_manager::decrease_liquidity_with_return_(&mut p, &mut positions,
+                        &mut nft, 1, 0, 0, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                    coin::burn_for_testing(a); coin::burn_for_testing(b);
+                }
+                else if (action == 7) position_manager::collect(&mut p, &mut positions,
+                    &mut nft, 0, 0, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+                else if (action == 8) {
+                    let (a,b) = position_manager::collect_with_return_(&mut p, &mut positions,
+                        &mut nft, 0, 0, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                    coin::burn_for_testing(a); coin::burn_for_testing(b);
+                }
+                else if (action == 9) position_manager::collect_reward(&mut p, &mut positions,
+                    &mut nft, &mut vault, 0, 0, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+                else if (action == 10) {
+                    let r = position_manager::collect_reward_with_return_(&mut p, &mut positions,
+                        &mut nft, &mut vault, 0, 0, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                    coin::burn_for_testing(r);
+                } else abort 799;
+                test_scenario::return_to_sender(&s, nft);
+            };
+        };
+        transfer::public_transfer(v, @0xB);
+        test_scenario::return_shared(p); test_scenario::return_shared(positions);
+        test_scenario::return_shared(vault); test_scenario::return_shared(clock); test_scenario::end(s);
+    }
+
+    fun future_flash(action: u8) {
+        let s = security_position_tests::liquid();
+        let id = if (action == 1 || action == 3) {
+            let (first,_) = security_partner_flash_tests::partners(&mut s); std::option::some(first)
+        } else std::option::none();
+        let p = test_scenario::take_shared<Pool<A,B,FEE500BPS>>(&s);
+        let current = test_scenario::take_shared<pool::Versioned>(&s);
+        let future = pool::security_version_fixture(19, test_scenario::ctx(&mut s));
+        let clock = test_scenario::take_shared<Clock>(&s);
+        if (action == 0 || action == 2) {
+            let (a,b,receipt) = pool::flash_swap(&mut p, @0xB, true, 1000, false, 4295048016,
+                &clock, if (action == 0) &future else &current, test_scenario::ctx(&mut s));
+            let (_,_,pay) = pool::get_flash_swap_receipt_info(&receipt);
+            let payment = coin::mint_for_testing<A>(pay, test_scenario::ctx(&mut s));
+            let zero = coin::zero<B>(test_scenario::ctx(&mut s));
+            pool::repay_flash_swap(&mut p, payment, zero, receipt, if (action == 2) &future else &current);
+            coin::burn_for_testing(a); coin::burn_for_testing(b);
+        } else {
+            let partner = test_scenario::take_shared_by_id<Partner>(&s, std::option::destroy_some(id));
+            let (a,b,receipt) = pool::flash_swap_partner(&mut p, &partner, true, 1000, false, 4295048016,
+                &clock, if (action == 1) &future else &current, test_scenario::ctx(&mut s));
+            let pay = pool::flash_swap_pay_amount(&receipt);
+            let payment = coin::mint_for_testing<A>(pay, test_scenario::ctx(&mut s));
+            let zero = coin::zero<B>(test_scenario::ctx(&mut s));
+            pool::repay_flash_swap_partner(&mut p, &mut partner, payment, zero, receipt,
+                if (action == 3) &future else &current);
+            coin::burn_for_testing(a); coin::burn_for_testing(b);
+            test_scenario::return_shared(partner);
+        };
+        transfer::public_transfer(future, @0xB); test_scenario::return_shared(current);
+        test_scenario::return_shared(p); test_scenario::return_shared(clock); test_scenario::end(s);
+    }
+
+    fun future_router(action: u8) {
+        let s = security_position_tests::liquid();
+        if (action >= 4) {
+            let acl = test_scenario::take_shared<AclConfig>(&s);
+            let config = test_scenario::take_shared<PoolConfig>(&s);
+            let fee = test_scenario::take_immutable<Fee<FEE1000BPS>>(&s);
+            let clock = test_scenario::take_shared<Clock>(&s);
+            let current = test_scenario::take_shared<pool::Versioned>(&s);
+            pool_factory::set_fee_tier_v2(&acl, &mut config, &fee, &current, test_scenario::ctx(&mut s));
+            if (action == 4 || action == 5 || action >= 10)
+                pool_factory::deploy_pool<B,A,FEE1000BPS>(&mut config, &fee, 18446744073709551616, &clock, &current, test_scenario::ctx(&mut s))
+            else pool_factory::deploy_pool<A,B,FEE1000BPS>(&mut config, &fee, 18446744073709551616, &clock, &current, test_scenario::ctx(&mut s));
+            test_scenario::return_shared(acl); test_scenario::return_shared(config);
+            test_scenario::return_immutable(fee); test_scenario::return_shared(clock);
+            test_scenario::return_shared(current); test_scenario::next_tx(&mut s, @0xB);
+        };
+        let p = test_scenario::take_shared<Pool<A,B,FEE500BPS>>(&s);
+        let clock = test_scenario::take_shared<Clock>(&s);
+        let v = pool::security_version_fixture(19, test_scenario::ctx(&mut s));
+        if (action == 0) swap_router::swap_a_b(&mut p, vector[], 1, 0, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+        else if (action == 1) {
+            let (out,refund) = swap_router::swap_a_b_with_return_(&mut p, vector[], 1, 0, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+            coin::burn_for_testing(out); coin::burn_for_testing(refund);
+        }
+        else if (action == 2) swap_router::swap_b_a(&mut p, vector[], 1, 0, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+        else if (action == 3) {
+            let (out,refund) = swap_router::swap_b_a_with_return_(&mut p, vector[], 1, 0, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+            coin::burn_for_testing(out); coin::burn_for_testing(refund);
+        }
+        else if (action == 4 || action == 5 || action >= 10) {
+            let second = test_scenario::take_shared<Pool<B,A,FEE1000BPS>>(&s);
+            if (action == 4) swap_router::swap_a_b_b_c(&mut p, &mut second, vector[], 1, 0,
+                4295048016, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            else if (action == 5) {
+                let (out,refund) = swap_router::swap_a_b_b_c_with_return_(&mut p, &mut second, vector[], 1, 0,
+                    4295048016, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(out); coin::burn_for_testing(refund);
+            }
+            else if (action == 10) swap_router::swap_b_a_c_b(&mut p, &mut second, vector[], 1, 0,
+                79226673515401279992447579055, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            else {
+                let (out,refund) = swap_router::swap_b_a_c_b_with_return_(&mut p, &mut second, vector[], 1, 0,
+                    79226673515401279992447579055, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(out); coin::burn_for_testing(refund);
+            };
+            test_scenario::return_shared(second);
+        } else {
+            let second = test_scenario::take_shared<Pool<A,B,FEE1000BPS>>(&s);
+            if (action == 6) swap_router::swap_a_b_c_b(&mut p, &mut second, vector[], 1, 0,
+                4295048016, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            else if (action == 7) {
+                let (out,refund) = swap_router::swap_a_b_c_b_with_return_(&mut p, &mut second, vector[], 1, 0,
+                    4295048016, 79226673515401279992447579055, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(out); coin::burn_for_testing(refund);
+            }
+            else if (action == 8) swap_router::swap_b_a_b_c(&mut p, &mut second, vector[], 1, 0,
+                79226673515401279992447579055, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s))
+            else {
+                let (out,refund) = swap_router::swap_b_a_b_c_with_return_(&mut p, &mut second, vector[], 1, 0,
+                    79226673515401279992447579055, 4295048016, true, @0xB, 1000, &clock, &v, test_scenario::ctx(&mut s));
+                coin::burn_for_testing(out); coin::burn_for_testing(refund);
+            };
+            test_scenario::return_shared(second);
+        };
+        transfer::public_transfer(v, @0xB); test_scenario::return_shared(p);
+        test_scenario::return_shared(clock); test_scenario::end(s);
+    }
 
     fun direct(stored: u64, upgrade: bool) {
         let s = security_entrypoint_tests::setup(15);
@@ -222,5 +398,66 @@ module turbos_clmm::security_version_fixture_tests {
     fun future_version_blocks_a_to_b_partner_router() { future_entry(24); }
     #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
     fun future_version_blocks_b_to_a_partner_router() { future_entry(25); }
+
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_mint() { future_position(0); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_mint_return() { future_position(1); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_burn() { future_position(2); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_increase() { future_position(3); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_increase_return() { future_position(4); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_decrease() { future_position(5); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_decrease_return() { future_position(6); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_collect() { future_position(7); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_collect_return() { future_position(8); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_reward() { future_position(9); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_position_reward_return() { future_position(10); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_burn_proof_conversion() { future_position(11); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_burn_proof_reward() { future_position(12); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_burn_proof_fee_delegation() { future_position(13); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_flash_swap() { future_flash(0); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_flash_swap_partner() { future_flash(1); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_repay_flash_swap() { future_flash(2); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_repay_flash_swap_partner() { future_flash(3); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b() { future_router(0); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b_return() { future_router(1); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a() { future_router(2); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a_return() { future_router(3); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b_b_c() { future_router(4); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b_b_c_return() { future_router(5); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b_c_b() { future_router(6); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_a_b_c_b_return() { future_router(7); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a_b_c() { future_router(8); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a_b_c_return() { future_router(9); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a_c_b() { future_router(10); }
+    #[test, expected_failure(abort_code = 23, location = turbos_clmm::pool)]
+    fun future_version_blocks_router_b_a_c_b_return() { future_router(11); }
 }
 

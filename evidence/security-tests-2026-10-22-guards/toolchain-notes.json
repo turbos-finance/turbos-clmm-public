@@ -1,0 +1,26 @@
+{
+  "productionVerification": {
+    "toolchain": "sui 1.66.2-a9a6825eaf62",
+    "normalModules": 33,
+    "allMatchRecordedDeployedHashes": true
+  },
+  "coverage": {
+    "toolchain": "sui 1.81.1-e04cf9aa915c",
+    "testFramework": "a9a6825eaf6273cc819ee3bcf65fd4909f7624a9",
+    "sourceUnchanged": true,
+    "tracedTests": 647,
+    "filter": null,
+    "exclusions": []
+  },
+  "supplemental": {
+    "versionTests": 66,
+    "directVersionCalls": 53,
+    "delegatedWrappers": 3,
+    "versionStateCases": 10,
+    "legacyTests": 34,
+    "legacyTraces": 34,
+    "compilerNegatives": 12,
+    "mergedIntoNormalCoverage": false
+  },
+  "warning": "The newer tracing compiler is not a deployment build. Synthetic overlays do not change repository production sources or normal bytecode. No chain writes or MVR updates."
+}

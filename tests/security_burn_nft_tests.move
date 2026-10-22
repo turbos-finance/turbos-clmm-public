@@ -17,7 +17,7 @@ module turbos_clmm::security_burn_nft_tests {
     const OWNER: address = @0xB;
     const OTHER: address = @0xC;
 
-    fun proof(): Scenario {
+    public fun proof(): Scenario {
         let s = security_entrypoint_tests::setup(15);
         let p = test_scenario::take_shared<Pool<A, B, FEE500BPS>>(&s);
         let positions = test_scenario::take_shared<Positions>(&s);

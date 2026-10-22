@@ -1,0 +1,163 @@
+{
+  "exportedAt": "2026-10-22T02:16:34.176Z",
+  "sourceTreeSha256": "840504273e62d119b23d1c77e890a49d97e7004ad635972e4ae5c5833e58e770",
+  "normalSuite": 647,
+  "separateVersion": 66,
+  "separateLegacy": 34,
+  "separateLegacyTraces": 34,
+  "separateCompiler": 12,
+  "files": [
+    {
+      "file": "result.json",
+      "sha256": "137b8ff1aa7d4fc04589ef77efeafc865fba99f172b3832131b308e020190b2b"
+    },
+    {
+      "file": "run.json",
+      "sha256": "cb1b8ff18efb9dd4eb21728315ccac465885fa8160fc16a4346d4064eac213ea"
+    },
+    {
+      "file": "full-tests.log",
+      "sha256": "1d722e55fa5f759561932c63f734af6fa79708942a0fb27333d37067225124ac"
+    },
+    {
+      "file": "traced-tests.log",
+      "sha256": "9195684db9c1437da8aae5873cae710c97f84a4286b9dac738a15f13de6cddcc"
+    },
+    {
+      "file": "normal-bytecode.json",
+      "sha256": "f9788cc7a2f3a889e73fdaa5882844a6336e42d4242004ec19509ca56404ba85"
+    },
+    {
+      "file": "source-hashes.json",
+      "sha256": "607f8cdd5b0e321422aef849b2ab64f7d54a8e3af8901ac55280894317f0f4b2"
+    },
+    {
+      "file": "production-coverage.json",
+      "sha256": "6c5d7c10051387ec07205c6ff4a36fad1cf56d72556a0f298b53a47055f67d8b"
+    },
+    {
+      "file": "production-lcov.info",
+      "sha256": "e344ce51316e2028418eecbad3a824203e1ce851a35664ce9cd792cc757adfd5"
+    },
+    {
+      "file": "raw-lcov.info",
+      "sha256": "520be183783a01d2c9f068c97fcd6ab3bdf67ca8883de6280391358d982235fd"
+    },
+    {
+      "file": "normal-build-functions.json",
+      "sha256": "43da1349f34ae5c2d42189f38309958e9ee7523ae7dec2f9e3370839709a25ac"
+    },
+    {
+      "file": "lcov-generation.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "production-summary.log",
+      "sha256": "ed30da04d57141648efc79b647923b2d9a08f027527ef04c809412bedec9cb47"
+    },
+    {
+      "file": "release-download.json",
+      "sha256": "c8c9294a244cf32913ba6e98256339dac181da9d7c3dbf7037a538466c6018e7"
+    },
+    {
+      "file": "capabilities/result.json",
+      "sha256": "06b890bec73b1d5c38ea96c4cb5b3f6add77c8c5cb29af9f51f1b87aebd1e315"
+    },
+    {
+      "file": "capabilities/forge_pool_factory_admin.log",
+      "sha256": "9cf87a2743a969694df18f57fadbbb6b714217563df614fe65e5f93aa31e5dd8"
+    },
+    {
+      "file": "capabilities/forge_reward_admin.log",
+      "sha256": "4f63b5c1974c4d352f814b0ae0159f94c341122ad1ac7ff4840685917dae2dcd"
+    },
+    {
+      "file": "capabilities/forge_partner_admin.log",
+      "sha256": "9bcfdff3301357f1adf97eec751434dbcb92f5bdef9d5c4373512b5c783b8e60"
+    },
+    {
+      "file": "capabilities/forge_partner_cap.log",
+      "sha256": "f6dc0c7bdf715f9a5c162b2924c640129539e728926814eaf3e319c0ca3c4079"
+    },
+    {
+      "file": "capabilities/drop_flash_receipt.log",
+      "sha256": "d6e47d588f13e49fda6b9f20bae5ad2b8df92886126540eac19318fe2f412e08"
+    },
+    {
+      "file": "capabilities/forge_position_nft.log",
+      "sha256": "09dcc32a61aab3d5586082140259bf490b4ccf69214415a7f737ab0cf106e725"
+    },
+    {
+      "file": "capabilities/forge_burn_nft.log",
+      "sha256": "04a30cf5fad10299ed8618e4ffb42f4fa4d9e7d4233630b9ec6bf65a2664afb0"
+    },
+    {
+      "file": "capabilities/drop_partner_flash_receipt.log",
+      "sha256": "ec36de800121db4397746ebda35fc30e46278406c043208aac186d24f7d78ea1"
+    },
+    {
+      "file": "capabilities/forge_flash_receipt.log",
+      "sha256": "0658157ec0f26b601d54484a67c673c4cb519b1de35d2d4076936cb7d21cc64f"
+    },
+    {
+      "file": "capabilities/forge_partner_flash_receipt.log",
+      "sha256": "f06044ff4830616207f6ddee4be30203b0114383d62301e804516e08d5995568"
+    },
+    {
+      "file": "capabilities/call_friend_reward_manager.log",
+      "sha256": "3b786ea3fde2b38f30f3672781c6c4d7fafa3f8c83d25de54bd82a2e9e282c2d"
+    },
+    {
+      "file": "capabilities/call_private_clean_position.log",
+      "sha256": "a4e33c7390a5a4b805355369f69e4b4f47b9679b1830cb72265c6994b4340b80"
+    },
+    {
+      "file": "version-fixture/result.json",
+      "sha256": "f017e177949e3ea0504c656518fc97fc71c44b877cd95a5811d2ebf5d38e1d77"
+    },
+    {
+      "file": "version-fixture/tests.log",
+      "sha256": "400314b4e5de8c1d7c868aed4229490d0e338eed3631a25032c7b6d054436c42"
+    },
+    {
+      "file": "version-fixture/normal-build-with-hook.log",
+      "sha256": "14ada5f532ad6bef8a71753b82311c571a661c7eaa4e19b5278243961eef13e1"
+    },
+    {
+      "file": "legacy-fixture/result.json",
+      "sha256": "e933e672f0be7d8659c395bc90e82258c48843feb81e905ce9cc21d92371278b"
+    },
+    {
+      "file": "legacy-fixture/tests.log",
+      "sha256": "5267e7f185b624c7c6a21087752d8a03d37177ff4263b5cf87308315958f7c9b"
+    },
+    {
+      "file": "legacy-fixture/traced-tests.log",
+      "sha256": "5267e7f185b624c7c6a21087752d8a03d37177ff4263b5cf87308315958f7c9b"
+    },
+    {
+      "file": "legacy-fixture/normal-build-with-hook.log",
+      "sha256": "14ada5f532ad6bef8a71753b82311c571a661c7eaa4e19b5278243961eef13e1"
+    },
+    {
+      "file": "security-witnesses.json",
+      "sha256": "91264e3e69cb49449429b40b62f33b4b9ea73c8ccd7ebf931ab0fc4f57988099"
+    },
+    {
+      "file": "security-guard-inventory.json",
+      "sha256": "8353a67e8e9f722ce54596a112255c0893221d56d0a10c8b1a70a79b7c1956f0"
+    },
+    {
+      "file": "version-surface-witnesses.json",
+      "sha256": "ec5f5d1ca5de379b1c3f40f1ade21a24479d2ab7b6b98cf0022e0efe117751b2"
+    },
+    {
+      "file": "security-entry-inventory.json",
+      "sha256": "851664f908612c5239db70f685b1eab4a7b8b0edc5f109e961ab97fc3d36f9bc"
+    },
+    {
+      "file": "toolchain-notes.json",
+      "sha256": "446add3131ab7685514c809634a5c30d764a2d829f52b5e66934feec656f9353"
+    }
+  ]
+}

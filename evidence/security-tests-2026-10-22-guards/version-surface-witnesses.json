@@ -1,0 +1,991 @@
+{
+  "generatedAt": "2026-10-22T02:15:49.735Z",
+  "sourceTreeSha256": "840504273e62d119b23d1c77e890a49d97e7004ad635972e4ae5c5833e58e770",
+  "scope": "All direct check_version calls in normal production functions, plus three delegated public wrappers. Explicit current/future guard witnesses, not exhaustive authorization/invariant closure.",
+  "summary": {
+    "directVersionCalls": 53,
+    "currentVersionGuardPasses": 53,
+    "exactFutureRejections": 53,
+    "delegatedWrapperRejections": 3,
+    "separateStateCases": 10,
+    "versionFixtureTotal": 66
+  },
+  "rows": [
+    {
+      "entry": "pool::flash_swap",
+      "file": "sources/pool.move",
+      "line": 528,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_flash_swap",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool::flash_swap_partner",
+      "file": "sources/pool.move",
+      "line": 573,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_flash_swap_partner",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool::repay_flash_swap",
+      "file": "sources/pool.move",
+      "line": 616,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_repay_flash_swap",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool::repay_flash_swap_partner",
+      "file": "sources/pool.move",
+      "line": 641,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_repay_flash_swap_partner",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::deploy_pool_and_mint",
+      "file": "sources/pool_factory.move",
+      "line": 145,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::deploy_pool_and_mint_with_return_",
+      "file": "sources/pool_factory.move",
+      "line": 232,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_and_mint_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::deploy_pool",
+      "file": "sources/pool_factory.move",
+      "line": 308,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_deploy_pool",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::set_fee_tier_v2",
+      "file": "sources/pool_factory.move",
+      "line": 429,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_tier",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::set_fee_protocol_v2",
+      "file": "sources/pool_factory.move",
+      "line": 460,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_fee_protocol",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::update_pool_fee_protocol_v2",
+      "file": "sources/pool_factory.move",
+      "line": 485,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_pool_fee_protocol",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::collect_protocol_fee_v2",
+      "file": "sources/pool_factory.move",
+      "line": 514,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::collect_protocol_fee_with_return_v2",
+      "file": "sources/pool_factory.move",
+      "line": 549,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_collect_protocol_fee_with_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::toggle_pool_status_v2",
+      "file": "sources/pool_factory.move",
+      "line": 575,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_toggle_pool_status",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::update_nft_name_v2",
+      "file": "sources/pool_factory.move",
+      "line": 597,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_name",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::update_nft_description_v2",
+      "file": "sources/pool_factory.move",
+      "line": 629,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_description",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::update_nft_img_url_v2",
+      "file": "sources/pool_factory.move",
+      "line": 654,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_nft_img_url",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::add_role",
+      "file": "sources/pool_factory.move",
+      "line": 784,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_add_role",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::remove_member",
+      "file": "sources/pool_factory.move",
+      "line": 803,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_member",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::remove_role",
+      "file": "sources/pool_factory.move",
+      "line": 816,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_role",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_factory::set_roles",
+      "file": "sources/pool_factory.move",
+      "line": 832,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_set_roles",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_fetcher::compute_swap_result",
+      "file": "sources/pool_fetcher.move",
+      "line": 28,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_quote",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "pool_fetcher::fetch_ticks",
+      "file": "sources/pool_fetcher.move",
+      "line": 51,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_fetch_ticks",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::mint",
+      "file": "sources/position_manager.move",
+      "line": 162,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_mint",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::mint_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 219,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_mint_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::burn",
+      "file": "sources/position_manager.move",
+      "line": 282,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_burn",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::increase_liquidity",
+      "file": "sources/position_manager.move",
+      "line": 382,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_increase",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::increase_liquidity_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 432,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_increase_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::decrease_liquidity",
+      "file": "sources/position_manager.move",
+      "line": 489,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_decrease",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::decrease_liquidity_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 520,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_decrease_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::collect",
+      "file": "sources/position_manager.move",
+      "line": 579,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_collect",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::collect_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 609,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_collect_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::collect_reward",
+      "file": "sources/position_manager.move",
+      "line": 686,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::collect_reward_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 717,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_position_reward_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::burn_position_nft_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 780,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_burn_proof_conversion",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "position_manager::burn_nft_collect_reward_with_return_",
+      "file": "sources/position_manager.move",
+      "line": 827,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_burn_proof_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "reward_manager::init_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 42,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_init_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "reward_manager::reset_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 70,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_reset_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "reward_manager::add_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 114,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_add_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "reward_manager::remove_reward_v2",
+      "file": "sources/reward_manager.move",
+      "line": 151,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_remove_reward",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "reward_manager::update_reward_emissions_v2",
+      "file": "sources/reward_manager.move",
+      "line": 186,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_update_reward_emissions",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b",
+      "file": "sources/swap_router.move",
+      "line": 31,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 70,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_with_partner",
+      "file": "sources/swap_router.move",
+      "line": 116,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_generic_partner_router",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a",
+      "file": "sources/swap_router.move",
+      "line": 234,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 273,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b_b_c",
+      "file": "sources/swap_router.move",
+      "line": 345,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b_b_c",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b_b_c_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 388,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b_b_c_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b_c_b",
+      "file": "sources/swap_router.move",
+      "line": 490,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b_c_b",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_a_b_c_b_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 533,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_a_b_c_b_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a_b_c",
+      "file": "sources/swap_router.move",
+      "line": 636,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a_b_c",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a_b_c_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 679,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a_b_c_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a_c_b",
+      "file": "sources/swap_router.move",
+      "line": 780,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a_c_b",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    },
+    {
+      "entry": "swap_router::swap_b_a_c_b_with_return_",
+      "file": "sources/swap_router.move",
+      "line": 823,
+      "currentVersion": {
+        "value": 18,
+        "guardPassedInUnmodifiedSuite": true,
+        "qualification": "Guard-line execution with the only normal Versioned constructor fixed at 18; not a claim that every enclosing operation completed successfully."
+      },
+      "futureVersion": {
+        "value": 19,
+        "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_router_b_a_c_b_return",
+        "expectedAbort": {
+          "module": "pool",
+          "code": 23
+        }
+      }
+    }
+  ],
+  "delegates": [
+    {
+      "entry": "swap_router::swap_a_b_with_partner",
+      "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_a_to_b_partner_router",
+      "scope": "Wrapper delegates to a version-checked function; not an additional direct version call."
+    },
+    {
+      "entry": "swap_router::swap_b_a_with_partner",
+      "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_b_to_a_partner_router",
+      "scope": "Wrapper delegates to a version-checked function; not an additional direct version call."
+    },
+    {
+      "entry": "position_manager::burn_nft_collect_fee_with_return_",
+      "test": "turbos_clmm::security_version_fixture_tests::future_version_blocks_burn_proof_fee_delegation",
+      "scope": "Wrapper delegates to a version-checked function; not an additional direct version call."
+    }
+  ],
+  "limitations": [
+    "Future states use a disclosed test-only constructor in a disposable copy and are excluded from normal-source coverage.",
+    "This is a source-local v18 versus stored-version-19 test, not a deployment or historical package replay.",
+    "No version setter custody or mainnet rollout is verified by these tests. Other guard families require their own semantic review."
+  ]
+}

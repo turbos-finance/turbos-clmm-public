@@ -1,0 +1,20 @@
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING TurbosCLMM
+error[E06001]: unused value without 'drop'
+    ┌─ ./tests/drop_partner_flash_receipt.move:6:83
+    │  
+  6 │       public fun discard(receipt: turbos_clmm::pool::FlashSwapReceiptPartner<A, B>) {
+    │                          -------  ------------------------------------------------ The type 'turbos_clmm::pool::FlashSwapReceiptPartner<turbos_clmm::security_compile_drop_partner_flash_receipt::A, turbos_clmm::security_compile_drop_partner_flash_receipt::B>' does not have the ability 'drop'
+    │                          │         
+    │                          The parameter 'receipt' still contains a value. The value does not have the 'drop' ability and must be consumed before the function returns
+    │ ╭───────────────────────────────────────────────────────────────────────────────────^
+  7 │ │         // No drop ability: completing without consuming the repayment receipt is forbidden.
+  8 │ │     }
+    │ ╰─────^ Invalid return
+    │  
+    ┌─ ./sources/pool.move:186:12
+    │
+186 │     struct FlashSwapReceiptPartner<phantom CoinTypeA, phantom CoinTypeB> {
+    │            ----------------------- To satisfy the constraint, the 'drop' ability would need to be added here
+

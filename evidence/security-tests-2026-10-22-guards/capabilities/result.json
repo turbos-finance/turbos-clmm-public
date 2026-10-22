@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-10-22T02:14:03.220Z",
+  "scope": "Compiler-negative capability/NFT/receipt construction, receipt linearity and friend/private function visibility; not runtime auth execution or on-chain custody verification",
+  "baselineSourceTreeSha256": "840504273e62d119b23d1c77e890a49d97e7004ad635972e4ae5c5833e58e770",
+  "allExpectedRejections": true,
+  "results": [
+    {
+      "case": "forge_pool_factory_admin",
+      "type": "PoolFactoryAdminCap",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "7c5676ad921f119ce0c18c73cc0d877be2c673b7a6b2d950cc443eac33d70703",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_reward_admin",
+      "type": "RewardManagerAdminCap",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "1c674df01c4368929704e1565689a2a962f803942ede05eae84617a0708ecff8",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_partner_admin",
+      "type": "PartnerAdminCap",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "3702b9f5d4858b38bd75fb8d962ec5671275a81bc49dc6a318cd564175d2efad",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_partner_cap",
+      "type": "PartnerCap",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "c08691ac70016107850e02f827c63d9fdc138a4bfbd9818e969728d35bd8a3cd",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "drop_flash_receipt",
+      "type": "FlashSwapReceipt",
+      "restriction": "no drop ability",
+      "fixtureSha256": "db7401342c5eb755e99a39567da873658de435ccc34ebe3e2f41b0f1eea0de5b",
+      "diagnosticCodes": [
+        "E06001"
+      ],
+      "expectedCode": "E06001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_position_nft",
+      "type": "TurbosPositionNFT",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "d560b517b5cec6d0a65dc13c34a4ecba20d7710ba48cccb1bdcc6f970ff4c12a",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_burn_nft",
+      "type": "TurbosPositionBurnNFT",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "6bec34e544a90a5d7bd5471a3a98e4f91de8a4e4e704848551823a5e59b2158e",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "drop_partner_flash_receipt",
+      "type": "FlashSwapReceiptPartner",
+      "restriction": "no drop ability",
+      "fixtureSha256": "6006ed7a391cbc455fc083b28ff1f867576b54833084f1d248cd42835b4fa33a",
+      "diagnosticCodes": [
+        "E06001"
+      ],
+      "expectedCode": "E06001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_flash_receipt",
+      "type": "FlashSwapReceipt",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "60ea0ef93c7a1669cbe081679de4a6801945913ab95f916a706ade45d777fd40",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "forge_partner_flash_receipt",
+      "type": "FlashSwapReceiptPartner",
+      "restriction": "defining-module construction",
+      "fixtureSha256": "15b50eed7d44e49a73ec9709235bac7930c921c2ee5fcf71e4dcd43d83ec01a3",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "call_friend_reward_manager",
+      "target": "pool::update_reward_manager",
+      "restriction": "function visibility",
+      "fixtureSha256": "a6336a2d651f0526eea720aee52ce2345a178917b17330210ddd6e2cf339301a",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    },
+    {
+      "case": "call_private_clean_position",
+      "target": "position_manager::clean_position",
+      "restriction": "function visibility",
+      "fixtureSha256": "636f2e421d9becc91fb4069a12553e5950e1e17e14eb7ff363039fb239e2d726",
+      "diagnosticCodes": [
+        "E04001"
+      ],
+      "expectedCode": "E04001",
+      "exitCode": 1,
+      "expectedCompilerRejection": true
+    }
+  ]
+}

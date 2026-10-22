@@ -4,16 +4,25 @@ Status: work in progress, not an exhaustive authorization/invariant coverage cla
 Target production source is deployed CLMM v22 (`pool::VERSION = 18`). No production source,
 published package addresses or production dependency settings are changed by this batch.
 
-**Latest:** [636-test metadata/arithmetic/compatibility evidence](../evidence/security-tests-2026-10-22/).
-All 636 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
-on Sui 1.66.2 (33/33 matching). Lines: 91.81%; CFG edges: 88.08%. There are 344 additional
+**Latest:** [647-test version-surface/fee-tier evidence](../evidence/security-tests-2026-10-22-guards/).
+All 647 tests pass and have traces with Sui 1.81.1; deployed-bytecode verification stays
+on Sui 1.66.2 (33/33 matching). Lines: 91.86%; CFG edges: 88.41%. There are 355 additional
 normal-source cases versus the historical 292-test baseline. Separate version-state
-fixture: 36 tests; owner-address compatibility fixture: 34 tests and 34 traces;
+fixture: 66 tests; owner-address compatibility fixture: 34 tests and 34 traces;
 compiler-negative cases: 12. No exclusions apply to
 the latest full capture. Earlier partial reports below are historical snapshots.
 
 ## Current additions and requirement review
 
+- `security_fee_tier_tests`: 11 cases, four source assertions, including each arm of
+  the compound spacing bound, fee/witness/uniqueness rejection and real accepted-tier
+  pool deployment/readback.
+- [Version-surface witnesses](../evidence/security-tests-2026-10-22-guards/version-surface-witnesses.json):
+  all 53 direct version calls pass under the normal current-version suite and reject
+  a synthetic future stored version. Three delegated public wrappers also reject.
+  These 56 entry cases plus 10 state cases form the separate 66-test fixture; they
+  are not added to normal-source coverage. Current guard passes do not claim full
+  enclosing-operation success or on-chain rollout verification.
 - `security_metadata_tests`: seven persisted-default/new-NFT readback cases, unchanged old
   NFT, independent setters, UTF-8/empty values, recipient delivery and conservation.
 - `security_numeric_properties_tests`: 37 deterministic wider-integer oracle and rejection
@@ -24,7 +33,7 @@ the latest full capture. Earlier partial reports below are historical snapshots.
   with 34 traces. No normal-production-source hook is committed or deployed.
 - Compiler negatives now cover eight forbidden constructors, two undroppable receipts,
   one non-friend call and one private call, checking exact compiler error codes.
-- [All-function guard inventory](../evidence/security-tests-2026-10-22/security-guard-inventory.json):
+- [All-function guard inventory](../evidence/security-tests-2026-10-22-guards/security-guard-inventory.json):
   425 normal functions, 172 assertions, 67 direct role/version calls, five explicit
   non-retired aborts. A line hit is not auto-labelled as positive/negative proof.
 - [Requirement-level review](security-requirement-review-2026-10-22.md) documents the three
@@ -175,6 +184,10 @@ node tools/check-security-witnesses.mjs \
 
 node tools/security-guard-inventory.mjs \
   /tmp/clmm-security-new/evidence /tmp/clmm-guards-new.json
+
+node tools/check-version-surface.mjs \
+  /tmp/clmm-security-new /tmp/clmm-version-new \
+  /tmp/clmm-guards-new.json /tmp/clmm-version-witnesses-new.json
 ```
 
 The destination must not already exist. The runner creates disposable test and normal-build

@@ -15,15 +15,39 @@ language/input restrictions and explicit exclusions; it does not declare externa
 | Fee collection versus LP principal; flash repayment pool/partner/amount binding | Fee/flash, Partner-flash and Partner-router tests | Both swap directions; exact/under/over/repeated operations; two receipt types also cannot be forged or dropped |
 | Pause, deadlines, prices, slippage and partial fills | Position, router, Partner-router and quote/cross tests | Real execution paths and exact defining-module rejections; not all compound-condition alternatives are inferred from a line hit |
 | Position exit obligations | `security_exit_obligation_tests`: nine cases | Zero liquidity alone cannot clear outstanding token fees/rewards; partial collection still rejects burn; complete collection allows it |
-| Version acceptance and retirement state | 36 separate version fixture cases | Explicit test-only private-state constructor in a disposable copy; not a historical package deployment/rollout test |
+| Version acceptance and retirement state | 66 separate version fixture cases; all 53 direct version calls mapped | Current-version guard passes in normal execution; exact future-version rejection at each direct check and three delegated wrappers. Explicit test-only private-state constructor in a disposable copy; not a historical package deployment/rollout test |
+| Fee-tier witness, uniqueness, rate and spacing | `security_fee_tier_tests`: 11 cases, mapped to four assertions | Real OTW versus ordinary drop type; duplicate type; fee 0/999999/1000000/u32-max; spacing 0/1/16383/16384. Both compound-bound rejection arms tested. Accepted tiers deploy a real pool with exact readback |
 | NFT metadata persistence | `security_metadata_tests`: seven cases | Stored defaults, next-transaction persistence, actual newly minted NFT fields, unchanged old NFT, recipient delivery and reserves/refunds |
 | Integer/rounding boundaries | `security_numeric_properties_tests`: 37 cases, plus existing math tests | Wider-integer quotient/remainder oracle, representative deterministic grids, zero division and overflow negatives. Not exhaustive proof for every possible input |
 | Owner-address position compatibility | 34 separate compatibility fixture cases, on both toolchains with 34 traces | Actually minted record rekeyed in a disclosed test-only overlay, preserving its bytes and pool fields; not a mainnet legacy-object survey |
 | Retired externally public management entries | 21 exact abort-stub cases | The wider source inventory also contains friend/private retired helpers; these are not falsely counted as externally callable runtime cases |
 
-See the [636-test report and artifacts](../evidence/security-tests-2026-10-22/README.md),
-[executed witness mapping](../evidence/security-tests-2026-10-22/security-witnesses.json)
-and [guard inventory](../evidence/security-tests-2026-10-22/security-guard-inventory.json).
+See the [647-test report and artifacts](../evidence/security-tests-2026-10-22-guards/README.md),
+[executed witness mapping](../evidence/security-tests-2026-10-22-guards/security-witnesses.json),
+[version-surface mapping](../evidence/security-tests-2026-10-22-guards/version-surface-witnesses.json)
+and [guard inventory](../evidence/security-tests-2026-10-22-guards/security-guard-inventory.json).
+
+## Version-check witness review
+
+The normal-build inventory contains **53 direct calls to `check_version`**. Each call
+has a normal-suite execution hit. In the unmodified source/test tree, `Versioned` is
+only constructed at the current constant 18, and the version setter writes that same
+constant. Thus these hits demonstrate current-version guard passes, not unknown
+assertion outcomes. This does not mean every enclosing business operation succeeds.
+
+The separate fixture supplies stored version 19 to each of those 53 functions and
+requires the exact `pool::23` rejection. It also tests three public delegating wrappers:
+the two Partner-router direction wrappers and Burn NFT fee collection. Together with
+10 direct acceptance/upgrade/no-downgrade state cases, this is **66 fixture tests**.
+Repayment cases first borrow under a valid current version and construct real exact
+repayment coins/receipts, then attempt repayment under the future version. Position
+and Burn NFT paths use real created objects, not forged inputs.
+
+`check-version-surface.mjs` checks the 53-function inventory, matching source/test
+hashes, guard-line execution, all 56 named future-entry rejections and their exact
+expected module/code annotations. It does not prove governance custody, deployed
+rollout behavior, or historical package compatibility. Fixture runs remain separate
+from normal-source line/edge coverage.
 
 ## Source inventory and exclusions
 
@@ -84,9 +108,10 @@ specification, reachability analysis and audit review before any contract change
 
 ## Remaining acceptance work
 
-The previously listed metadata readback, synthetic owner-address compatibility and
-additional arithmetic-boundary test batches are implemented and verified. Remaining work
-is the **guard-by-guard semantic witness review**, particularly compound-condition arms,
+The previously listed metadata readback, synthetic owner-address compatibility,
+additional arithmetic boundaries, all direct version-call witnesses and fee-tier guard
+batches are implemented and verified. Remaining work is the **semantic witness review
+for the other source guards and invariants**, particularly compound-condition arms,
 rounding specifications and reachability/exclusion decisions. The source inventory and
 named test mapping make that review concrete; neither a percentage nor this static list
 automatically establishes “every auth check / invariant.” External acceptance remains a

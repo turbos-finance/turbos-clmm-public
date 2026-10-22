@@ -124,20 +124,23 @@ All **292/292** current public tests passed unfiltered. Coverage remains **parti
 
 ## Latest security testing and full capture (2026-10-22)
 
-**636/636 tests pass and all 636 have individual value traces**, without a test filter or
-exclusions. Production line coverage is **91.81%**, and official CFG-edge coverage is
-**88.08%**. There are 344 additional tests versus the historical 292-test baseline, plus
-36 separately reported version-state tests, 34 compatibility-state tests (with separate
+**647/647 tests pass and all 647 have individual value traces**, without a test filter or
+exclusions. Production line coverage is **91.86%** and CFG-edge coverage is **88.41%**.
+There are 355 additional tests versus the historical 292-test baseline, plus
+66 separately reported version-state tests, 34 compatibility-state tests (with separate
 traces) and 12 compiler-negative cases.
 
-See the [current report, logs, metric definitions and reproduction](evidence/security-tests-2026-10-22/README.md)
+See the [current report, logs, metric definitions and reproduction](evidence/security-tests-2026-10-22-guards/README.md)
 and [guard/test matrix](docs/security-test-matrix-2026-10-21.md).
-The [executed witness mapping](evidence/security-tests-2026-10-22/security-witnesses.json)
+The [executed witness mapping](evidence/security-tests-2026-10-22-guards/security-witnesses.json)
 checks all 14 live ACL-gated factory/reward entries against 56 named positive/negative
-runtime cases. Metadata persistence/readback, additional arithmetic boundaries and
+runtime cases, plus four fee-tier/witness assertions. The
+[version-surface mapping](evidence/security-tests-2026-10-22-guards/version-surface-witnesses.json)
+covers all 53 direct version checks and three delegated wrappers, with the stated
+normal-current versus synthetic-future scope. Metadata persistence/readback, additional arithmetic boundaries and
 synthetic account-keyed legacy positions are now tested. See the
 [requirement-level review and compatibility/rounding limits](docs/security-requirement-review-2026-10-22.md).
-The earlier 509/592-test reports remain historical snapshots.
+The earlier 509/592/636-test reports remain historical snapshots.
 Sui 1.81.1 is used **only for coverage instrumentation**; deployment bytecode verification
 remains on Sui 1.66.2 and matches all 33 recorded deployed root-module hashes. Production
 source, mainnet state and MVR pointers are unchanged. This supersedes the older partial
