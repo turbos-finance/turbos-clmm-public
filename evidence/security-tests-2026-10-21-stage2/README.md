@@ -1,6 +1,6 @@
 # CLMM security testing — stage two, 21 October 2026
 
-Historical partial-capture snapshot, not a declaration of exhaustive compliance. The
+Historical partial-capture snapshot, not a claim of exhaustive test coverage. The
 [latest 509-test full-capture report](../security-tests-2026-10-21-full/README.md) supersedes
 this result for the current suite. Commands below refer to the source/test file set
 identified by this snapshot's hashes; current tooling runs the expanded suite.

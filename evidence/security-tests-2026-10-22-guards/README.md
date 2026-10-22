@@ -65,13 +65,13 @@ to named tests passing on both toolchains. It also retains all 14 live ACL entri
 
 ## Scope and remaining work
 
-John specified no numerical minimum. These percentages and passing tests do not
-automatically close “every auth check / invariant.” The remaining work is semantic
+Coverage percentages and passing tests do not by themselves demonstrate exhaustive
+authorization or invariant testing. The remaining work is semantic
 witness review for the other guards/invariants, compound-condition alternatives,
 rounding specifications and reachability decisions. The static inventory still
 retains all 425 normal functions and uncovered code in its denominator.
 
-The [requirement review](../../docs/security-requirement-review-2026-10-22.md) preserves
+The [test-scope review](../../docs/security-requirement-review-2026-10-22.md) preserves
 the observed legacy-position transfer and nearest-versus-ceiling rounding limits.
 Synthetic compatibility tests are not a mainnet old-object survey. No legacy rights
 migration or arithmetic production fix is claimed. Earlier reports remain historical.

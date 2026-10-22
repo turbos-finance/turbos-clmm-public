@@ -12,7 +12,7 @@ fixture: 66 tests; owner-address compatibility fixture: 34 tests and 34 traces;
 compiler-negative cases: 12. No exclusions apply to
 the latest full capture. Earlier partial reports below are historical snapshots.
 
-## Current additions and requirement review
+## Current additions and scope review
 
 - `security_fee_tier_tests`: 11 cases, four source assertions, including each arm of
   the compound spacing bound, fee/witness/uniqueness rejection and real accepted-tier
@@ -36,7 +36,7 @@ the latest full capture. Earlier partial reports below are historical snapshots.
 - [All-function guard inventory](../evidence/security-tests-2026-10-22-guards/security-guard-inventory.json):
   425 normal functions, 172 assertions, 67 direct role/version calls, five explicit
   non-retired aborts. A line hit is not auto-labelled as positive/negative proof.
-- [Requirement-level review](security-requirement-review-2026-10-22.md) documents the three
+- [Test-scope review](security-requirement-review-2026-10-22.md) documents the three
   unexecuted assertion anchors in unused private/friend helpers and the compatibility,
   rounding and remaining semantic-review qualifications.
 
@@ -74,7 +74,7 @@ or production test hook was added to obtain the normal-suite coverage.
   validated. This is not an upgrade to the on-chain contract or its production build.
 - Remaining review: audit uncovered line/branch lists and the public/friend inventory for
   further authorization/invariant gaps. Mathematical/rare-state and untested wrapper
-  branches are not silently counted as covered. No claim of 100% or final external acceptance.
+  branches are not silently counted as covered. No claim of 100% or exhaustive coverage.
 
 **Stage-two update:** [482-test regression and selected coverage evidence](../evidence/security-tests-2026-10-21-stage2/).
 The first-batch numbers below remain historical. Stage-two total was 482 unfiltered tests,
@@ -215,7 +215,7 @@ They are counted separately from the current runtime suite.
 
 Validated first-batch evidence: [results and logs](../evidence/security-tests-2026-10-21/).
 
-## Remaining work before the 23 October evidence submission
+## Remaining test and review work
 
 - Complete package-wide invariant inventory and source-to-witness review, beyond the closed
   14-entry ACL mapping. Passing tests and full capture do not alone close this wider review.
@@ -224,8 +224,8 @@ Validated first-batch evidence: [results and logs](../evidence/security-tests-20
 - The 34 synthetic compatibility fixtures and seven metadata readback tests are now complete.
   Legacy mainnet-object population and migration/support decisions are not inferred from
   synthetic tests. Account-keyed positions must not be advertised as automatically following
-  a transferred NFT; the requirement-level review records the observed limitation.
+  a transferred NFT; the test-scope review records the observed limitation.
 - Classify initialization-only wrappers, unused getters and private/friend retired helpers
   individually. A visibility boundary is not silently counted as a runtime rejection test.
 - Source/normal-bytecode consistency, full tracing and version/compiler checks are complete
-  for this evidence revision; obtain the external requirement-level review separately.
+  for this evidence revision; semantic review of the remaining guards and invariants continues.

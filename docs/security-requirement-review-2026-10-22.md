@@ -1,8 +1,8 @@
-# CLMM requirement-level review — 22 October 2026
+# CLMM security test scope and residual review — 22 October 2026
 
 Target: deployed CLMM package v22, with `pool::VERSION = 18`. Production source and
 deployment metadata are unchanged. This document distinguishes observed test results,
-language/input restrictions and explicit exclusions; it does not declare external acceptance.
+language/input restrictions and explicit exclusions; it does not claim exhaustive testing.
 
 ## Evidence map
 
@@ -106,7 +106,7 @@ invariant or an unreviewed claim of an exploitable vulnerability. Production for
 have not been changed. A stronger conservative-rounding requirement needs explicit
 specification, reachability analysis and audit review before any contract change.
 
-## Remaining acceptance work
+## Remaining test review
 
 The previously listed metadata readback, synthetic owner-address compatibility,
 additional arithmetic boundaries, all direct version-call witnesses and fee-tier guard
@@ -114,5 +114,5 @@ batches are implemented and verified. Remaining work is the **semantic witness r
 for the other source guards and invariants**, particularly compound-condition arms,
 rounding specifications and reachability/exclusion decisions. The source inventory and
 named test mapping make that review concrete; neither a percentage nor this static list
-automatically establishes “every auth check / invariant.” External acceptance remains a
-separate decision. No production upgrade, MVR update or mainnet transaction was performed.
+demonstrates exhaustive authorization or invariant testing. No production upgrade,
+MVR update or mainnet transaction was performed.

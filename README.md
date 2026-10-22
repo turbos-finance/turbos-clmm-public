@@ -139,10 +139,10 @@ runtime cases, plus four fee-tier/witness assertions. The
 covers all 53 direct version checks and three delegated wrappers, with the stated
 normal-current versus synthetic-future scope. Metadata persistence/readback, additional arithmetic boundaries and
 synthetic account-keyed legacy positions are now tested. See the
-[requirement-level review and compatibility/rounding limits](docs/security-requirement-review-2026-10-22.md).
+[test-scope review and compatibility/rounding limits](docs/security-requirement-review-2026-10-22.md).
 The earlier 509/592/636-test reports remain historical snapshots.
 Sui 1.81.1 is used **only for coverage instrumentation**; deployment bytecode verification
 remains on Sui 1.66.2 and matches all 33 recorded deployed root-module hashes. Production
 source, mainnet state and MVR pointers are unchanged. This supersedes the older partial
 capture status for the current suite, not the historical results themselves. Full capture
-does not imply exhaustive authorization/invariant coverage or automatic compliance closure.
+does not imply exhaustive authorization or invariant coverage.

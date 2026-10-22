@@ -1,9 +1,8 @@
 # CLMM coverage gap review — 21 October 2026, revision 2
 
-This revision adds 83 tests to the earlier 509-test report. It is the current evidence
-for the tracked test tree; earlier reports remain historical. No numerical minimum
-was stated in the requested requirement. These percentages are measurements, not an
-automatic declaration that every authorization condition/invariant is exhaustively tested.
+This revision adds 83 tests to the earlier 509-test report and records the tested
+source tree at that time. Coverage percentages are measurements, not proof of
+exhaustive authorization or invariant testing. Earlier reports retain their original scope.
 
 ## Verified results
 
@@ -47,7 +46,7 @@ liquidity, token reserves and crossed-tick state remain unchanged by the quote. 
 tick range rejects earlier with an arithmetic error in full_math_u128; the test records
 the exact existing behavior, not a claimed custom pool abort. Production logic is unchanged.
 
-## Requirement-level evidence and remaining qualification
+## Executed witnesses and remaining scope
 
 [Executed witness mapping](security-witnesses.json) checks all **14 live ACL-gated
 factory/reward entries**, each with required-only success and missing/other-only/revoked
@@ -63,8 +62,8 @@ All 21 externally public retired factory/reward entries have exact abort-stub te
 The report still includes all zero-hit normal-build functions/lines. Remaining review
 includes rare mathematical/rounding states, legacy owner-address compatibility paths,
 compound-condition alternatives and initialization/private helper exclusions. Do not
-equate full capture, all live ACL entries tested, or a percentage with external acceptance
-of the broader “every auth check / invariant” requirement. See the
+equate full capture, all live ACL entries tested, or a percentage with exhaustive
+authorization or invariant testing. See the
 [current matrix and residual review list](../../docs/security-test-matrix-2026-10-21.md).
 
 ## Evidence

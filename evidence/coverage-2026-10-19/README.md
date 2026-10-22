@@ -71,4 +71,4 @@ Without `--documented-partial`, the tool attempts full tracing and **fails rathe
 
 ## Remaining work
 
-Full-suite line/branch capture is still unresolved. Passing all tests does not prove exhaustive authorization/invariant testing; uncovered production functions/lines are listed in the JSON. These are real gaps/tool limitations, not a declaration of compliance closure. Historical snapshots are retained.
+Full-suite line/branch capture was unresolved in this snapshot. Passing all tests does not prove exhaustive authorization/invariant testing; uncovered production functions/lines are listed in the JSON. The gaps and tool limitations describe this historical run; later reports document subsequent results.

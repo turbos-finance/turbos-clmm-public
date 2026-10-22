@@ -58,10 +58,10 @@ documented, not described as successful transfer of all legacy position rights.
 
 Likewise, the deployed nearest-rounding helper is not relabelled as ceiling. Testing
 its existing formula is not an endorsement of all conservative-rounding invariants.
-See the [requirement-level review and explicit limits](../../docs/security-requirement-review-2026-10-22.md).
+See the [test-scope review and explicit limits](../../docs/security-requirement-review-2026-10-22.md).
 
-No numerical minimum was specified by John. Full capture and these percentages do not
-automatically close the broader “every auth check / invariant” requirement. The remaining
+Full capture and coverage percentages do not by themselves demonstrate exhaustive
+authorization or invariant testing. The remaining
 task is source-guard-by-guard semantic witness review and explicit reachability/rounding
 decisions, not relabelling all uncovered code as safe or removing it from the denominator.
 
